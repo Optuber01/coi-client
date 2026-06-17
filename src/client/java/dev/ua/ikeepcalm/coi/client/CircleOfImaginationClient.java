@@ -1,28 +1,37 @@
 package dev.ua.ikeepcalm.coi.client;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ua.ikeepcalm.coi.client.config.AbilityConfig;
 import dev.ua.ikeepcalm.coi.client.config.AbilityInfo;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
+import dev.ua.ikeepcalm.coi.client.config.PathColors;
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
 import dev.ua.ikeepcalm.coi.client.hud.AbilityHudOverlay;
 import dev.ua.ikeepcalm.coi.client.hud.MadnessHudOverlay;
 import dev.ua.ikeepcalm.coi.client.network.*;
+import dev.ua.ikeepcalm.coi.client.resources.ResourceReLoader;
 import dev.ua.ikeepcalm.coi.client.screen.AbilityBindingScreen;
 import dev.ua.ikeepcalm.coi.client.screen.AbilityWheelScreen;
 import dev.ua.ikeepcalm.coi.client.screen.EffectDebugScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -38,6 +47,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
     private static final List<String> availableAbilities = new ArrayList<>();
     private static final Map<String, AbilityInfo> abilityInfoMap = new HashMap<>();
+    private static final ResourceReLoader CLIENT_DATA_LOADER = new ResourceReLoader();
 
     private static String[] boundAbilities = new String[MAX_ABILITIES];
     private static String[] wheelAbilities = new String[MAX_WHEEL_SIZE];
@@ -68,6 +78,27 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             ClientBeyonderState.reset();
             EffectManager.stopAll();
         });
+
+        ResourceLoader.get(PackType.CLIENT_RESOURCES)
+                .registerReloadListener(Identifier.fromNamespaceAndPath("coi-client", "client_json_loader"),CLIENT_DATA_LOADER);
+
+        ItemTooltipCallback.EVENT.register((stack, _, _, lines) -> {
+            JsonObject ings = CLIENT_DATA_LOADER.getJson();
+            if (ings != null) {
+                if (stack.getCustomName() != null) {
+                    JsonElement ing = ings.get(stack.getCustomName().getString().replaceAll("Shard of ", ""));
+                    if (ing != null) {
+                        String path = ing.getAsJsonObject().get("path").getAsString();
+                        String Seq = Integer.toString(ing.getAsJsonObject().get("seq").getAsInt());
+                        boolean isMain = ing.getAsJsonObject().get("main").getAsBoolean();
+                        ChatFormatting format = PathColors.valueOf(path.replaceAll(" ", "_")).toFormat();
+                        lines.add(Component.literal(((isMain) ? "Main" : "Supplementary") + " ingredient").withStyle(format));
+                        lines.add(Component.literal("Sequence "+Seq+" of "+path+" pathway").withStyle(format));
+                    }
+                }
+            }
+        });
+
     }
 
     private void registerPayloads() {
