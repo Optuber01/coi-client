@@ -1,18 +1,16 @@
 package dev.ua.ikeepcalm.coi.client;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ua.ikeepcalm.coi.client.config.AbilityConfig;
 import dev.ua.ikeepcalm.coi.client.config.AbilityInfo;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
-import dev.ua.ikeepcalm.coi.client.config.PathColors;
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
-import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
 import dev.ua.ikeepcalm.coi.client.hud.AbilityHudOverlay;
 import dev.ua.ikeepcalm.coi.client.hud.MadnessHudOverlay;
+import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
 import dev.ua.ikeepcalm.coi.client.network.*;
-import dev.ua.ikeepcalm.coi.client.resources.ResourceReLoader;
+import dev.ua.ikeepcalm.coi.client.resources.IngredientInfo;
+import dev.ua.ikeepcalm.coi.client.resources.ResourceLoader;
 import dev.ua.ikeepcalm.coi.client.screen.AbilityBindingScreen;
 import dev.ua.ikeepcalm.coi.client.screen.AbilityWheelScreen;
 import dev.ua.ikeepcalm.coi.client.screen.EffectDebugScreen;
@@ -23,21 +21,20 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.world.item.component.CustomData;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CircleOfImaginationClient implements ClientModInitializer {
 
@@ -47,7 +44,36 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
     private static final List<String> availableAbilities = new ArrayList<>();
     private static final Map<String, AbilityInfo> abilityInfoMap = new HashMap<>();
-    private static final ResourceReLoader CLIENT_DATA_LOADER = new ResourceReLoader();
+    private static final ResourceLoader CLIENT_DATA_LOADER = new ResourceLoader();
+
+    private static final Identifier PATHWAY_ICONS_FONT = Identifier.fromNamespaceAndPath("coi-client", "pathway_icons");
+    private static final Map<String, String> PATHWAY_ICONS = Map.ofEntries(
+            Map.entry("abyss", ""),
+            Map.entry("aeon", ""),
+            Map.entry("chained", ""),
+            Map.entry("darkness", ""),
+            Map.entry("death", ""),
+            Map.entry("demoness", ""),
+            Map.entry("door", ""),
+            Map.entry("emperor", ""),
+            Map.entry("error", ""),
+            Map.entry("fool", ""),
+            Map.entry("fortune", ""),
+            Map.entry("giant", ""),
+            Map.entry("hanged", ""),
+            Map.entry("hermit", ""),
+            Map.entry("justiciar", ""),
+            Map.entry("moon", ""),
+            Map.entry("mother", ""),
+            Map.entry("paragon", ""),
+            Map.entry("patriarch", ""),
+            Map.entry("priest", ""),
+            Map.entry("sublunary", ""),
+            Map.entry("sun", ""),
+            Map.entry("tower", ""),
+            Map.entry("tyrant", ""),
+            Map.entry("visionary", "")
+    );
 
     private static String[] boundAbilities = new String[MAX_ABILITIES];
     private static String[] wheelAbilities = new String[MAX_WHEEL_SIZE];
@@ -79,24 +105,37 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             EffectManager.stopAll();
         });
 
-        ResourceLoader.get(PackType.CLIENT_RESOURCES)
-                .registerReloadListener(Identifier.fromNamespaceAndPath("coi-client", "client_json_loader"),CLIENT_DATA_LOADER);
+        net.fabricmc.fabric.api.resource.v1.ResourceLoader.get(PackType.CLIENT_RESOURCES)
+                .registerReloadListener(Identifier.fromNamespaceAndPath("coi-client", "client_json_loader"), CLIENT_DATA_LOADER);
 
         ItemTooltipCallback.EVENT.register((stack, _, _, lines) -> {
-            JsonObject ings = CLIENT_DATA_LOADER.getJson();
-            if (ings != null) {
-                if (stack.getCustomName() != null) {
-                    JsonElement ing = ings.get(stack.getCustomName().getString().replaceAll("Shard of ", ""));
-                    if (ing != null) {
-                        String path = ing.getAsJsonObject().get("path").getAsString();
-                        String Seq = Integer.toString(ing.getAsJsonObject().get("seq").getAsInt());
-                        boolean isMain = ing.getAsJsonObject().get("main").getAsBoolean();
-                        ChatFormatting format = PathColors.valueOf(path.replaceAll(" ", "_")).toFormat();
-                        lines.add(Component.literal(((isMain) ? "Main" : "Supplementary") + " ingredient").withStyle(format));
-                        lines.add(Component.literal("Sequence "+Seq+" of "+path+" pathway").withStyle(format));
-                    }
-                }
+            CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+            if (customData == null) return;
+
+            CompoundTag tag = customData.copyTag();
+            if (!tag.contains("PublicBukkitValues")) return;
+
+            Optional<CompoundTag> values = tag.getCompound("PublicBukkitValues");
+            if (values.isEmpty()) return;
+            if (!values.get().contains("circleofimagination:ingredient")) return;
+
+            Optional<String> ingredientId = values.get().getString("circleofimagination:ingredient");
+            if (ingredientId.isEmpty()) return;
+
+            IngredientInfo info = CLIENT_DATA_LOADER.getIngredient(ingredientId.get());
+            if (info == null) return;
+
+            String icon = PATHWAY_ICONS.get(info.pathway());
+            if (icon != null && !lines.isEmpty()) {
+                Component name = lines.getFirst();
+                lines.set(0, Component.empty()
+                        .append(Component.literal(icon).withStyle(Style.EMPTY.withFont(new FontDescription.Resource(PATHWAY_ICONS_FONT))))
+                        .append(Component.literal(" "))
+                        .append(name));
             }
+
+            lines.add(Component.literal(info.isMain() ? "Main ingredient" : "Supplementary ingredient").withStyle(info.color()));
+            lines.add(Component.literal("Sequence " + info.sequence() + " of the " + formatPathwayName(info.pathway()) + " pathway").withStyle(info.color()));
         });
 
     }
@@ -364,7 +403,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
         Minecraft client = Minecraft.getInstance();
         if (client.getWindow() == null) return false;
-        
+
         long window = client.getWindow().handle();
         InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(keyBinding);
 
@@ -383,6 +422,10 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
     public static int getMaxAbilities() {
         return MAX_ABILITIES;
+    }
+
+    private static String formatPathwayName(String pathway) {
+        return Character.toUpperCase(pathway.charAt(0)) + pathway.substring(1);
     }
 
     public static void requestAbilitiesFromServer() {

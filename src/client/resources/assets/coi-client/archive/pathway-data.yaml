@@ -1,0 +1,4373 @@
+pathways:
+  justiciar:
+    name: justiciar
+    color: gold
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: arbiter-badge
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: scale-of-justice
+          supplementary:
+          - material: GOLD_ORE
+            amount: 1
+            id: order-crystal
+          - material: RABBIT_FOOT
+            amount: 1
+            id: law-scripture
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: terror-demon-worm-eyes
+          - material: SLIME_BALL
+            amount: 1
+            id: silver-war-bear-palm
+          supplementary:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: sheriff-star
+          - material: DIAMOND_ORE
+            amount: 1
+            id: vigilance-gem
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: flash-patterned-black-snake-horn
+          - material: INK_SAC
+            amount: 1
+            id: lake-spirit-dust
+          supplementary:
+          - material: ENDER_PEARL
+            amount: 1
+            id: truth-serum
+          - material: AMETHYST_CLUSTER
+            amount: 1
+            id: mind-piercing-shard
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: judge-gavel-fragment
+          - material: SHULKER_SHELL
+            amount: 1
+            id: code-of-law-tablet
+          supplementary:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: judgment-seal
+          - material: DEEPSLATE_GOLD_ORE
+            amount: 1
+            id: authority-stone
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: STRING
+            amount: 1
+            id: paladin-sanctified-armor
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: holy-law-codex
+          supplementary:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: discipline-essence
+          - material: SPIDER_EYE
+            amount: 1
+            id: righteousness-crystal
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SPIDER_EYE
+            amount: 1
+            id: imperative-mage-staff-core
+          - material: GHAST_TEAR
+            amount: 1
+            id: absolute-law-scroll
+          supplementary:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: law-incarnation-essence
+          - material: STRING
+            amount: 1
+            id: reality-anchor
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: REDSTONE
+            amount: 1
+            id: chaos-hunter-mark
+          - material: SHULKER_SHELL
+            amount: 1
+            id: balance-scale-fragment
+          supplementary:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: disorder-essence
+          - material: AMETHYST_CLUSTER
+            amount: 1
+            id: judgment-crystal
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: balancer-emblem
+          - material: FEATHER
+            amount: 1
+            id: cosmic-scale-fragment
+          supplementary:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: authority-essence
+          - material: AMETHYST_CLUSTER
+            amount: 1
+            id: equilibrium-crystal
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.justiciar.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: hand-of-order-seal
+          - material: LEATHER
+            amount: 1
+            id: absolute-order-fragment
+          supplementary:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: divine-law-essence
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: sovereign-law-tablet
+  door:
+    name: door
+    color: aqua
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.door.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: LEATHER
+            amount: 1
+            id: dimensional-wanderer-eye
+          supplementary:
+          - material: BLUE_ORCHID
+            amount: 1
+            id: ever-shifting-lotus
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.door.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: spirit-eater-pouch
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: deep-sea-marlin-blood
+          supplementary:
+          - material: GRASS_BLOCK
+            amount: 1
+            id: string-grass-powder
+          - material: POPPY
+            amount: 1
+            id: red-chestnut-flower
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.door.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: NETHER_QUARTZ_ORE
+            amount: 1
+            id: meteorite-crystal
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: lavos-squid-blood
+          supplementary:
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: starfaced-stone
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.door.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: asmann-complete-brain
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: cursed-wraith-artifact
+          supplementary:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: imbued-ink-sac
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.door.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BONE
+            amount: 1
+            id: void-drifter-heart
+          - material: NETHER_QUARTZ_ORE
+            amount: 1
+            id: astral-mist-essence
+          supplementary:
+          - material: MANGROVE_ROOTS
+            amount: 1
+            id: wayfinder-tree-root
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.door.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FEATHER
+            amount: 1
+            id: echo-specter-veil
+          - material: LEATHER
+            amount: 1
+            id: abyssal-cuttlefish-ink
+          supplementary:
+          - material: LEATHER
+            amount: 1
+            id: echo-specter-fingertip
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.door.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: REDSTONE
+            amount: 1
+            id: veil-of-dimensional-rifts
+          - material: BONE
+            amount: 1
+            id: boundary-shard-of-reality
+          supplementary:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: doorway-between-worlds
+          - material: STRING
+            amount: 1
+            id: echo-of-crossed-thresholds
+  death:
+    name: death
+    color: dark_gray
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: black-spotted-frog
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: persons-crystal
+          supplementary:
+          - material: GHAST_TEAR
+            amount: 1
+            id: burial-shroud
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: black-lily-hydrosol
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: death-calling-crow-eyeball
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: cemetery-blood-rose
+          supplementary:
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: death-calling-crow-feather
+          - material: BLAZE_POWDER
+            amount: 1
+            id: corpse-scented-oil
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: phantom-cat-forepaw
+          - material: SHULKER_SHELL
+            amount: 1
+            id: spirit-world-crystal
+          supplementary:
+          - material: REDSTONE
+            amount: 1
+            id: phantom-cat-blood
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: blessed-leaf
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: shadow-of-death
+          - material: SLIME_BALL
+            amount: 1
+            id: pale-lich-soul
+          supplementary:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: pale-lich-bone
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: lingering-wraith
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: underworld-wanderer-skull
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: thousand-armed-wraith-core
+          supplementary:
+          - material: FEATHER
+            amount: 1
+            id: death-tainted-water
+          - material: GHAST_TEAR
+            amount: 1
+            id: red-spider-lily-oil
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GHAST_TEAR
+            amount: 1
+            id: decaying-feathered-serpent-gallbladder
+          - material: REDSTONE
+            amount: 1
+            id: immortal-cicada-molt
+          supplementary:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: eternal-darkness-stone
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: pale-red-spider-lily
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FEATHER
+            amount: 1
+            id: pus-core-of-a-styx-servant
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: brain-of-an-adult-deathered-serpent
+          supplementary:
+          - material: SPIDER_EYE
+            amount: 1
+            id: 90-milliliteres-of-one-owns-blood
+          - material: LEATHER
+            amount: 1
+            id: 9-drops-of-pus-from-a-styx-servant
+          - material: EGG
+            amount: 1
+            id: flower-blooming-from-one-owns-decayed-flesh
+          - material: FEATHER
+            amount: 1
+            id: one-undead-being-from-the-depths-of-the-underworld
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GHAST_TEAR
+            amount: 1
+            id: skull-of-an-ancient-feathered-serpent
+          supplementary:
+          - material: STRING
+            amount: 1
+            id: 90-milliliteres-of-fluid-from-an-ancient-feathered-serpent
+          - material: SPIDER_EYE
+            amount: 1
+            id: a-coffin-that-once-held-your-own-body
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: a-crown-that-once-symbolized-royal-authority
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: a-pale-object-from-the-depths-of-the-underworld
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.death.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: the-left-claw-of-gregrace
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: the-right-eye-of-salinger
+          supplementary:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: 9-drops-of-underworld-river-water
+          - material: BLAZE_POWDER
+            amount: 1
+            id: angel-corpse-without-characteristic
+          - material: EGG
+            amount: 1
+            id: an-inverted-mausoleum
+  error:
+    name: error
+    color: white
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: phantom-mirage-pearl
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: distorted-raven-feather
+          supplementary:
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: broken-time-fragment
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: echo-lost-thought
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ENDER_PEARL
+            amount: 1
+            id: cheshire-fox-grin
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: mirage-trickster-veil
+          supplementary:
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: coin-deceptive-fortune
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: echo-false-promise
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: ciphered-mind-core
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: scroll-forgotten-runes
+          supplementary:
+          - material: GUNPOWDER
+            amount: 1
+            id: enigma-dust
+          - material: INK_SAC
+            amount: 1
+            id: ink-reversed-truths
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: crystal-threadworm
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: cloaked-specter-attachment
+          supplementary:
+          - material: RABBIT_FOOT
+            amount: 1
+            id: freshly-stored-wine
+          - material: SHULKER_SHELL
+            amount: 1
+            id: cloaked-specter-residue
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: dream-eating-rat-heart
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: spirit-of-decaying-breath
+          supplementary:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: dream-eating-rat-blood
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: despiritualized-decaying-breath
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: soul-snatcher-postmortem-crystal
+          - material: BONE
+            amount: 1
+            id: puppet-parasitic-worm
+          supplementary:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: puppet-parasitic-worm-secretions
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: imprisoned-soul
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: shattered-spirit-mirror
+          - material: SLIME_BALL
+            amount: 1
+            id: veil-of-false-reality
+          supplementary:
+          - material: RABBIT_FOOT
+            amount: 1
+            id: inverted-truth-crystal
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: echo-of-unspoken-lies
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SPIDER_EYE
+            amount: 1
+            id: thread-of-reversed-fate
+          - material: SLIME_BALL
+            amount: 1
+            id: destiny-anchor-shard
+          supplementary:
+          - material: BONE
+            amount: 1
+            id: woven-paradox-silk
+          - material: FEATHER
+            amount: 1
+            id: echo-of-unchosen-path
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.error.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: hourglass-of-stolen-eons
+          - material: EGG
+            amount: 1
+            id: crystallized-time-marrow
+          supplementary:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: withered-moment-shard
+          - material: ENDER_PEARL
+            amount: 1
+            id: echo-of-stolen-years
+  sun:
+    name: sun
+    color: yellow
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SUNFLOWER
+            amount: 1
+            id: crystal-sunflower
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: siren-rock
+          supplementary:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: golden-sap
+          - material: TALL_GRASS
+            amount: 1
+            id: blade-of-midsummer-grass
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: brilliance-rock
+          - material: HONEYCOMB
+            amount: 1
+            id: mirror-hedgehog-blood
+          supplementary:
+          - material: SUNFLOWER
+            amount: 1
+            id: golden-rimmed-sunflower
+          - material: BONE
+            amount: 1
+            id: aconite-juice
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: dawn-rooster-comb
+          - material: DRAGON_BREATH
+            amount: 1
+            id: radiance-spirit-fruit
+          supplementary:
+          - material: INK_SAC
+            amount: 1
+            id: dawn-rooster-blood
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: sun-essential-oil
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: STRING
+            amount: 1
+            id: tree-of-elders-roots
+          - material: REDSTONE
+            amount: 1
+            id: spirit-pact-bird-feather
+          supplementary:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: radiance-spirit-fruit
+          - material: SUNFLOWER
+            amount: 1
+            id: golden-rimmed-sunflower
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BONE
+            amount: 1
+            id: king-dawn-rooster-comb
+          - material: LEATHER
+            amount: 1
+            id: pure-white-brilliant-rock
+          supplementary:
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: rosemary
+          - material: SLIME_BALL
+            amount: 1
+            id: rock-water
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: sun-divine-bird-feather
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: holy-brilliance-rock
+          supplementary:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: sun-divine-bird-blood
+          - material: MAGMA_CREAM
+            amount: 1
+            id: holy-brillilliance-rock-liquid
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SLIME_BALL
+            amount: 1
+            id: justice-mentor-relic
+          - material: SHULKER_SHELL
+            amount: 1
+            id: ancient-sun-covenant
+          supplementary:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: sun-essence-crystal
+          - material: DRAGON_BREATH
+            amount: 1
+            id: radiant-contract-seal
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: solar-envoy-relic
+          - material: HONEYCOMB
+            amount: 1
+            id: blazing-sun-core
+          supplementary:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: sun-essence-crystal
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: radiant-solar-seal
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.sun.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: lightseeker-relic
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: pillar-of-sun
+          supplementary:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: sun-essence-crystal
+          - material: STRING
+            amount: 1
+            id: divine-light-fragment
+  visionary:
+    name: visionary
+    color: gold
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ENDER_PEARL
+            amount: 1
+            id: manhal-fish-eyeball
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: goat-horned-blackfish-blood
+          supplementary:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: autumn-crocus-essence
+          - material: LEATHER
+            amount: 1
+            id: elf-flower-petals
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: crystalline-moon-orchid
+          - material: STRING
+            amount: 1
+            id: thought-essence
+          supplementary:
+          - material: GUNPOWDER
+            amount: 1
+            id: iridescent-pearl-dust
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: tree-of-elders-fruit
+          - material: GUNPOWDER
+            amount: 1
+            id: mirror-dragon-eyes
+          supplementary:
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: mirror-dragon-blood
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: black-hunting-lizard-spinal-fluid
+          - material: BONE
+            amount: 1
+            id: illusory-chime-tree-fruit
+          supplementary:
+          - material: AMETHYST_CLUSTER
+            amount: 1
+            id: mind-crystal-powder
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: split-personality-essence
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: dream-catcher-heart
+          - material: AMETHYST_BLOCK
+            amount: 1
+            id: mind-illusion-crystal
+          supplementary:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: adult-mind-dragon-blood
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: elderly-mind-dragon-brain
+          - material: SHULKER_SHELL
+            amount: 1
+            id: tree-mentor-crystalline-heart
+          supplementary:
+          - material: FEATHER
+            amount: 1
+            id: elderly-mind-dragon-blood
+          - material: BONE
+            amount: 1
+            id: tree-mentor-golden-leaf
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: mind-dragon-dream-core
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: dream-weaver-silk
+          supplementary:
+          - material: EGG
+            amount: 1
+            id: elder-mind-dragon-eye
+          - material: AMETHYST_BLOCK
+            amount: 1
+            id: dream-crystal
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: sea-of-subconscious-essence
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: ancient-dream-weaver-eye
+          supplementary:
+          - material: HONEYCOMB
+            amount: 1
+            id: primordial-mind-crystal
+          - material: AMETHYST_BLOCK
+            amount: 1
+            id: void-dream-shard
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.visionary.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: reality-dream-crystal
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: authors-quill
+          supplementary:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: word-of-creation-essence
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: eden-flower-pollen
+  mother:
+    name: mother
+    color: green
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SLIME_BALL
+            amount: 1
+            id: golden-gorilla-brain
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: rainbird-eyeball
+          supplementary:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: golden-gorilla-blood
+          - material: LEATHER
+            amount: 1
+            id: rainbird-feather
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: OAK_LOG
+            amount: 1
+            id: blessed-poplar-bark
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: water-of-life-core
+          supplementary:
+          - material: GHAST_TEAR
+            amount: 1
+            id: blessed-poplar-leaf
+          - material: SLIME_BALL
+            amount: 1
+            id: healing-herbs
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: harvest-giant-kidney
+          - material: OAK_SAPLING
+            amount: 1
+            id: oak-of-life-crystal
+          supplementary:
+          - material: SLIME_BALL
+            amount: 1
+            id: harvest-giant-organ
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: oak-of-life-fruit
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: RABBIT_FOOT
+            amount: 1
+            id: harvest-giant-scholar-brain
+          - material: FEATHER
+            amount: 1
+            id: poison-bat-stomach
+          supplementary:
+          - material: ENDER_PEARL
+            amount: 1
+            id: poison-bat-blood
+          - material: SPIDER_EYE
+            amount: 1
+            id: biological-embryo
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: harvest-giant-guardian-head
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: tree-blessed-spine
+          supplementary:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: harvest-giant-guardian-blood
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: tree-blessed-pelt
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: desolate-servant-crystal
+          - material: BONE
+            amount: 1
+            id: harvest-giant-priest-heart
+          supplementary:
+          - material: INK_SAC
+            amount: 1
+            id: harvest-giant-priest-blood
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: desolate-servant-hair
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: heart-of-the-dark-treant
+          - material: INK_SAC
+            amount: 1
+            id: skin-of-the-harvest-giant-elder
+          supplementary:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: 200-milliliters-blood-of-the-harvest-giant-elder
+          - material: BLAZE_POWDER
+            amount: 1
+            id: fruit-of-the-dark-treant
+          - material: BLAZE_POWDER
+            amount: 1
+            id: a-piece-of-rotten-plank-from-a-coffin
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: sacrificial-food-already-used
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: reporductive-organs-of-a-child-of-harvest
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: heart-of-a-daughter-of-desolation
+          supplementary:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: 300-milliliters-blood-of-a-child-of-harvest-or-daughter-of-desolation
+          - material: GUNPOWDER
+            amount: 1
+            id: 10000-souls-of-creatures-that-died-of-starvation
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: remnant-of-a-desertified-oasis
+          - material: SPIDER_EYE
+            amount: 1
+            id: a-creatures-limb-with-vigorous-vitality-and-strong-self-healing-ability
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.mother.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: hundred-grams-of-soil-blessed-by-one-owns-mother
+          - material: LEATHER
+            amount: 1
+            id: a-spark-of-fire-from-the-earths-core
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: branch-from-a-thousand-year-old-oak-tree
+          - material: SPIDER_EYE
+            amount: 1
+            id: ten-drops-of-ichor
+          - material: BLAZE_POWDER
+            amount: 1
+            id: hundred-grams-of-newly-born-gold
+  paragon:
+    name: paragon
+    color: gray
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.paragon.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: mechanical-gear
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: knowledge-fragment
+          supplementary:
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: precision-oil
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.paragon.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: ancient-pen
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: ritual-candle
+          supplementary:
+          - material: SLIME_BALL
+            amount: 1
+            id: history-dust
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.paragon.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GHAST_TEAR
+            amount: 1
+            id: appraiser-monocle
+          - material: AMETHYST_CLUSTER
+            amount: 1
+            id: evaluation-crystal
+          supplementary:
+          - material: GHAST_TEAR
+            amount: 1
+            id: knowledge-shard
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.paragon.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: master-craftsman-blueprint
+          - material: NETHER_GOLD_ORE
+            amount: 1
+            id: ancient-forge-ember
+          supplementary:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: precision-crystal-dust
+          - material: SHULKER_SHELL
+            amount: 1
+            id: runic-engraver-eye
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.paragon.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DIAMOND_ORE
+            amount: 1
+            id: crystallized-starlight
+          - material: BLAZE_POWDER
+            amount: 1
+            id: celestial-navigator-astrolabe
+          supplementary:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: observatory-lens-fragment
+          - material: RABBIT_FOOT
+            amount: 1
+            id: star-chart-parchment
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.paragon.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: philosophers-stone-fragment
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: ancient-mechanism-core
+          supplementary:
+          - material: DEEPSLATE_IRON_ORE
+            amount: 1
+            id: alchemical-mercury
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: essence-of-transmutation
+  hanged:
+    name: hanged
+    color: dark_gray
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: whispered-scroll
+          - material: BONE
+            amount: 1
+            id: echoing-conch
+          supplementary:
+          - material: ENDER_PEARL
+            amount: 1
+            id: supplicant-teardrop
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BONE
+            amount: 1
+            id: echoing-conch
+          - material: REDSTONE
+            amount: 1
+            id: lunatic-essence
+          supplementary:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: whispered-scroll
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: shadow-ink-vial
+          - material: SPIDER_EYE
+            amount: 1
+            id: ascetics-blood
+          supplementary:
+          - material: REDSTONE
+            amount: 1
+            id: lunatic-essence
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: corrupted-rose-root
+          - material: STRING
+            amount: 1
+            id: blood-infused-flesh
+          supplementary:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: pulsating-flesh-sac
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: refined-blood-crystal
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BONE
+            amount: 1
+            id: shepherd-soul
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: soul-essence
+          supplementary:
+          - material: ENDER_PEARL
+            amount: 1
+            id: characteristic-extract
+          - material: DRAGON_BREATH
+            amount: 1
+            id: ethereal-bone
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: remnant-curtain-shadow-knight
+          - material: REDSTONE
+            amount: 1
+            id: flesh-blood-condensation-griegel
+          supplementary:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: shadow-traces-griegel
+          - material: SHULKER_SHELL
+            amount: 1
+            id: black-liquid-shadow-knight
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: trinity-templar-soul-remnant
+          - material: BONE
+            amount: 1
+            id: condensed-depravation-crystal
+          supplementary:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: flesh-blood-essence-trinity
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: shadow-knight-core
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GUNPOWDER
+            amount: 1
+            id: profane-presbyter-soul-remnant
+          - material: STRING
+            amount: 1
+            id: condensed-corruption-crystal
+          supplementary:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: spiritual-corruption-essence
+          - material: DRAGON_BREATH
+            amount: 1
+            id: profane-scripture-fragment
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.hanged.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: dark-angel-soul-remnant
+          - material: FEATHER
+            amount: 1
+            id: condensed-shadow-essence
+          supplementary:
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: shadow-world-fragment
+          - material: GUNPOWDER
+            amount: 1
+            id: profane-presbyter-soul-remnant
+  fool:
+    name: fool
+    color: dark_purple
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.fool.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: lavos-squid-blood
+          - material: BLAZE_POWDER
+            amount: 1
+            id: stellar-aqua-crystal
+          supplementary:
+          - material: GOLD_ORE
+            amount: 1
+            id: gold-mint-leaves
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.fool.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ROSE_BUSH
+            amount: 1
+            id: human-faced-rose
+          - material: REDSTONE
+            amount: 1
+            id: hornacis-goat-horn
+          supplementary:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: poison-hemlock
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.fool.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: MANGROVE_ROOTS
+            amount: 1
+            id: mist-treant-root
+          supplementary:
+          - material: MANGROVE_LOG
+            amount: 1
+            id: mist-treant-juice
+          - material: LEATHER
+            amount: 1
+            id: droplet-gem-powder
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.fool.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: LEATHER
+            amount: 1
+            id: thousand-faced-hunter-pituitary-gland
+          - material: ENDER_PEARL
+            amount: 1
+            id: human-skined-shadow-characteristic
+          supplementary:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: thousand-faced-hunter-blood
+          - material: REDSTONE
+            amount: 1
+            id: black-jimsonweed-juice
+          - material: SLIME_BALL
+            amount: 1
+            id: dragon-tooth-grass-powder
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.fool.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: RABBIT_FOOT
+            amount: 1
+            id: ancient-wraith-dust
+          - material: GUNPOWDER
+            amount: 1
+            id: six-winged-gargoyle-crystal
+          supplementary:
+          - material: GUNPOWDER
+            amount: 1
+            id: golden-spring-water
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: drago-bark
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.fool.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: bizarro-bane-main-eye
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: true-soul-body-of-spirit-world-plunderer
+          supplementary:
+          - material: BONE
+            amount: 1
+            id: bizarro-bane-blood
+          - material: FEATHER
+            amount: 1
+            id: spirit-world-plunderer-dust
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.fool.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: hound-of-fulgrim-eyes
+          - material: DRAGON_BREATH
+            amount: 1
+            id: demonic-wolf-of-fog-heart
+          supplementary:
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: real-ancient-historical-records
+  giant:
+    name: giant
+    color: gold
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: warrior-blood
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: divine-essence
+          supplementary:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: ancient-combat-manual
+          - material: IRON_ORE
+            amount: 1
+            id: strength-crystal
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: INK_SAC
+            amount: 1
+            id: gladiator-spirit
+          - material: LEATHER
+            amount: 1
+            id: champion-soul
+          supplementary:
+          - material: EGG
+            amount: 1
+            id: arena-trophy
+          - material: DIAMOND_ORE
+            amount: 1
+            id: resilience-stone
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: master-weapon-fragment
+          - material: SHULKER_SHELL
+            amount: 1
+            id: blade-wraith-essence
+          supplementary:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: legendary-smithing-hammer
+          - material: NETHERITE_SCRAP
+            amount: 1
+            id: weapon-shard
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ENDER_PEARL
+            amount: 1
+            id: dawn-crystal
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: corrupted-paladin-heart
+          supplementary:
+          - material: INK_SAC
+            amount: 1
+            id: holy-scripture
+          - material: GLOWSTONE
+            amount: 1
+            id: light-essence
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: RABBIT_FOOT
+            amount: 1
+            id: guardian-core
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: fallen-guardian-shell
+          supplementary:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: shield-of-ancients
+          - material: OBSIDIAN
+            amount: 1
+            id: protection-rune
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: demon-eye
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: ancient-demon-horn
+          supplementary:
+          - material: GUNPOWDER
+            amount: 1
+            id: alchemy-tome
+          - material: ANCIENT_DEBRIS
+            amount: 1
+            id: twilight-ore
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: EGG
+            amount: 1
+            id: essence-of-aurmirs-blood
+          - material: MAGMA_CREAM
+            amount: 1
+            id: heart-of-a-kings-court-chaser
+          - material: HONEYCOMB
+            amount: 1
+            id: heart-of-a-kings-court-watchman
+          supplementary:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: waters-contaminted-by-death
+          - material: ANCIENT_DEBRIS
+            amount: 1
+            id: armor-plate-from-high-sequence-twilight-giant
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: insect-trapped-in-amber
+          - material: DRAGON_BREATH
+            amount: 1
+            id: paper-recording-of-100-inner-deaths
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SPIDER_EYE
+            amount: 1
+            id: the-crystallization-of-a-glorious-giant
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: the-crown-of-aurmir
+          supplementary:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: blood-from-the-glorious-giant
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: item-corrupted-by-dark-power
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: corpse-buried-for-over-a-thousand-years
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: poem-of-praise-oneself
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.giant.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: EGG
+            amount: 1
+            id: essence-of-aurmirs-blood
+          - material: MAGMA_CREAM
+            amount: 1
+            id: heart-of-a-kings-court-chaser
+          - material: HONEYCOMB
+            amount: 1
+            id: heart-of-a-kings-court-watchman
+          supplementary:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: waters-contaminted-by-death
+          - material: ANCIENT_DEBRIS
+            amount: 1
+            id: armor-plate-from-high-sequence-twilight-giant
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: insect-trapped-in-amber
+          - material: DRAGON_BREATH
+            amount: 1
+            id: paper-recording-of-100-inner-deaths
+  condenser:
+    name: condenser
+    color: aqua
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.condenser.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.condenser.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.condenser.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.condenser.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.condenser.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  darkness:
+    name: darkness
+    color: dark_gray
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.darkness.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: insomnia-essence
+          supplementary:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: nightshade-leaf
+          - material: COAL_ORE
+            amount: 1
+            id: shadow-essence
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.darkness.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: EGG
+            amount: 1
+            id: poets-ink
+          supplementary:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: black-feather
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: dark-gem
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.darkness.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: REDSTONE
+            amount: 1
+            id: nightmare-crystal
+          supplementary:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: dream-fragment
+          - material: COAL_ORE
+            amount: 1
+            id: shadow-essence
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.darkness.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: STRING
+            amount: 1
+            id: soul-binding-chain
+          supplementary:
+          - material: REDSTONE
+            amount: 1
+            id: soul-shard
+          - material: LEATHER
+            amount: 1
+            id: void-essence
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.darkness.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ENDER_PEARL
+            amount: 1
+            id: spirit-binding-rune
+          supplementary:
+          - material: LEATHER
+            amount: 1
+            id: void-essence
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: shadow-remnant
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.darkness.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: REDSTONE
+            amount: 1
+            id: dark-brain
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: malignant-moon-guardian-heart
+          supplementary:
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: malignant-moon-guardian-blood
+          - material: GUNPOWDER
+            amount: 1
+            id: dark-brain-contaminant
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.darkness.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: STRING
+            amount: 1
+            id: tide-core
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: darkness-realm-shard
+          supplementary:
+          - material: LEATHER
+            amount: 1
+            id: void-essence
+          - material: BONE
+            amount: 1
+            id: ancient-corruption-core
+  abyss:
+    name: abyss
+    color: dark_red
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: criminal-mark
+          - material: GUNPOWDER
+            amount: 1
+            id: tainted-soul
+          supplementary:
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: blood-stained-coin
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: fallen-feather
+          - material: SPIDER_EYE
+            amount: 1
+            id: demon-blood
+          supplementary:
+          - material: SPIDER_EYE
+            amount: 1
+            id: cursed-ash
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GHAST_TEAR
+            amount: 1
+            id: ritual-blade
+          - material: SPIDER_EYE
+            amount: 1
+            id: victims-essence
+          supplementary:
+          - material: EGG
+            amount: 1
+            id: devil-parchment
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GUNPOWDER
+            amount: 1
+            id: devil-horn
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: abyss-shard
+          supplementary:
+          - material: GLOWSTONE
+            amount: 1
+            id: sulfur-crystal
+          - material: RABBIT_FOOT
+            amount: 1
+            id: shadow-essence
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: desire-crystal
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: corrupted-heart
+          supplementary:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: apostle-mark
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: desire-essence
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GHAST_TEAR
+            amount: 1
+            id: demon-core
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: abyss-heart
+          supplementary:
+          - material: CRYING_OBSIDIAN
+            amount: 1
+            id: cursed-obsidian
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: malice-essence
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ENDER_PEARL
+            amount: 1
+            id: blatherer-tome
+          - material: ENDER_PEARL
+            amount: 1
+            id: corruption-essence
+          supplementary:
+          - material: STRING
+            amount: 1
+            id: whisper-crystal
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: the-head-of-a-demon-prince
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: the-heart-of-a-twin-serpent-lord
+          supplementary:
+          - material: GUNPOWDER
+            amount: 1
+            id: drops-of-blood-of-a-bloody-archduke
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: true-gods-blood
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.abyss.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: the-flesh-of-a-filthy-monarch
+          - material: SPIDER_EYE
+            amount: 1
+            id: the-blood-of-a-filthy-monarch
+          supplementary:
+          - material: EGG
+            amount: 1
+            id: blood-of-a-angel-that-lost-control
+          - material: EGG
+            amount: 1
+            id: corrupted-divine-creature
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: 100-souls-drowning-in-desire
+  hermit:
+    name: hermit
+    color: light_purple
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.hermit.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: third-eye-crystal
+          - material: FEATHER
+            amount: 1
+            id: stargazer-essence
+          supplementary:
+          - material: BONE
+            amount: 1
+            id: mystic-tome-fragment
+          - material: SPIDER_EYE
+            amount: 1
+            id: orchid-petal
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.hermit.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ENDER_PEARL
+            amount: 1
+            id: scholar-inkwell
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: combat-manuscript
+          supplementary:
+          - material: ENDER_PEARL
+            amount: 1
+            id: ancient-scroll-fragment
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.hermit.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: warlock-catalyst
+          - material: LAPIS_ORE
+            amount: 1
+            id: spell-weaver-core
+          supplementary:
+          - material: GUNPOWDER
+            amount: 1
+            id: ethereal-dust
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.hermit.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: scroll-master-quill
+          - material: DRAGON_BREATH
+            amount: 1
+            id: binding-thread
+          supplementary:
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: enchanted-parchment
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.hermit.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BONE
+            amount: 1
+            id: constellation-fragment
+          - material: DIAMOND_ORE
+            amount: 1
+            id: stellar-core
+          supplementary:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: nebula-essence
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.hermit.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: LEATHER
+            amount: 1
+            id: mythical-creature-blood
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: tree-of-knowledge-sap
+          supplementary:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: reality-fragment
+          - material: SHULKER_SHELL
+            amount: 1
+            id: story-essence
+  tower:
+    name: tower
+    color: aqua
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: ancient-manuscript-fragment
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: crystal-of-clarity
+          supplementary:
+          - material: LAPIS_ORE
+            amount: 1
+            id: scholars-ink
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GHAST_TEAR
+            amount: 1
+            id: sages-quill
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: tome-of-ratiocination
+          supplementary:
+          - material: SLIME_BALL
+            amount: 1
+            id: logical-essence
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: detectives-lens
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: truth-seekers-eye
+          supplementary:
+          - material: DEEPSLATE
+            amount: 1
+            id: investigators-notes
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: polymathic-core
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: knowledge-crystal
+          supplementary:
+          - material: SPIDER_EYE
+            amount: 1
+            id: universal-cipher
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: RABBIT_FOOT
+            amount: 1
+            id: mystical-codex
+          - material: RABBIT_FOOT
+            amount: 1
+            id: arcane-catalyst
+          supplementary:
+          - material: AMETHYST_CLUSTER
+            amount: 1
+            id: spellweavers-gem
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: prophets-third-eye
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: fate-thread
+          supplementary:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: oracle-stone
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: destiny-shard
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GUNPOWDER
+            amount: 1
+            id: omniscience-lens
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: crystallized-insight
+          supplementary:
+          - material: DIAMOND_ORE
+            amount: 1
+            id: cognizers-dust
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: omniscience-core
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: angels-insight
+          supplementary:
+          - material: AMETHYST_CLUSTER
+            amount: 1
+            id: wisdom-dust
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.tower.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: omniscients-core
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: eye-of-providence
+          supplementary:
+          - material: DIAMOND_ORE
+            amount: 1
+            id: crystallized-wisdom
+  demoness:
+    name: demoness
+    color: light_purple
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: LEATHER
+            amount: 1
+            id: crimson-rose-thorn
+          supplementary:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: nightshade-leaf
+          - material: STRING
+            amount: 1
+            id: whispering-ghost-mist
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: honeyguide-heart
+          - material: SLIME_BALL
+            amount: 1
+            id: dark-prowler-poison-sac
+          supplementary:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: honeyguide-syrinx
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: EGG
+            amount: 1
+            id: abyss-fish-blood
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: agate-peacock-egg
+          supplementary:
+          - material: HONEYCOMB
+            amount: 1
+            id: shadow-lizard-scales
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: succubus-eyes
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: black-widow-silk-gland
+          supplementary:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: purified-water
+          - material: REDSTONE
+            amount: 1
+            id: black-jimsonweed-juice
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ENDER_PEARL
+            amount: 1
+            id: flower-faced-bat-head
+          - material: BONE
+            amount: 1
+            id: two-tailed-black-snake-gallbladder
+          supplementary:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: flower-faced-bat-blood
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: ill-human-blood
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FEATHER
+            amount: 1
+            id: plague-mother-serpent-venom-sac
+          - material: BLAZE_POWDER
+            amount: 1
+            id: silver-hunter-crystal
+          supplementary:
+          - material: FEATHER
+            amount: 1
+            id: silver-hunter-fragment
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: mistletoe-branch
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: ageless-mirror-shard
+          - material: EGG
+            amount: 1
+            id: undying-witch-soul-remnant
+          supplementary:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: mirror-essence-crystal
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: condensed-glamour-fragment
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: STRING
+            amount: 1
+            id: catastrophe-demoness-hair
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: ancient-storm-essence
+          supplementary:
+          - material: HONEYCOMB
+            amount: 1
+            id: tempest-feather
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: volcanic-ash
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.demoness.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: apocalypse-demoness-soul
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: primordial-chaos-crystal
+          supplementary:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: world-ending-resonance
+          - material: LEATHER
+            amount: 1
+            id: eternal-charm-fragment
+  chaosmist:
+    name: chaosmist
+    color: dark_gray
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.chaosmist.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.chaosmist.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.chaosmist.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.chaosmist.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.chaosmist.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  everlasting:
+    name: everlasting
+    color: light_purple
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.everlasting.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.everlasting.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.everlasting.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.everlasting.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.everlasting.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  fortune:
+    name: fortune
+    color: white
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: fortune-clover
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: diviners-crystal
+          supplementary:
+          - material: SPIDER_EYE
+            amount: 1
+            id: prophetic-ink-dust
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BONE
+            amount: 1
+            id: clockwork-gear
+          - material: HONEYCOMB
+            amount: 1
+            id: precision-crystal
+          supplementary:
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: mechanical-oil
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: fate-thread
+          - material: SHULKER_SHELL
+            amount: 1
+            id: gamblers-dice
+          supplementary:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: lucky-coins
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: calamity-nexus-crystal
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: distorted-misfortune-essence
+          supplementary:
+          - material: NETHER_QUARTZ_ORE
+            amount: 1
+            id: storm-quartz-needle
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: fortune-tear
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: destiny-thread
+          supplementary:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: twisted-dice
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: luck-essence
+          - material: DEEPSLATE_COAL_ORE
+            amount: 1
+            id: cursed-ore
+          supplementary:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: fate-fragment
+          - material: FEATHER
+            amount: 1
+            id: probability-stone
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: chaos-crystal
+          - material: FEATHER
+            amount: 1
+            id: fractured-fate-stone
+          supplementary:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: entropy-essence
+          - material: MAGMA_CREAM
+            amount: 1
+            id: void-shard
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: ENDER_PEARL
+            amount: 1
+            id: sovereign-fate-crystal
+          - material: SLIME_BALL
+            amount: 1
+            id: destiny-core
+          supplementary:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: prophetic-essence
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.fortune.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: serpent-scale
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: dream-core
+          supplementary:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: mercury-essence
+  chaos:
+    name: chaos
+    color: dark_purple
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.chaos.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.chaos.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.chaos.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.chaos.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.chaos.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  patriarch:
+    name: patriarch
+    color: light_purple
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.patriarch.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.patriarch.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.patriarch.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.patriarch.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.patriarch.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  edict:
+    name: edict
+    color: green
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.edict.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.edict.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.edict.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.edict.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.edict.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  priest:
+    name: priest
+    color: red
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.priest.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: red-wolf-heart
+          supplementary:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: red-wine
+          - material: POPPY
+            amount: 1
+            id: red-chestnut-flower
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.priest.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: provoker-tongue
+          - material: GUNPOWDER
+            amount: 1
+            id: rage-coral
+          supplementary:
+          - material: LEATHER
+            amount: 1
+            id: grapevine-powder
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.priest.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: fire-salamander-gland
+          - material: RABBIT_FOOT
+            amount: 1
+            id: magma-elf-core
+          supplementary:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: fire-salamander-blood
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.priest.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: INK_SAC
+            amount: 1
+            id: black-hunting-spider-eyes
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: sphinx-brain
+          supplementary:
+          - material: ENDER_PEARL
+            amount: 1
+            id: sphinx-blood
+          - material: ENDER_PEARL
+            amount: 1
+            id: black-hunting-spider-poison-gland
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.priest.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GUNPOWDER
+            amount: 1
+            id: gray-demonic-wolf-blood
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: forest-hunter-fangs
+          supplementary:
+          - material: HONEYCOMB
+            amount: 1
+            id: gray-demonic-wolf-claws
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: forest-hunter-tongue
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.priest.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: magma-giant-core
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: stone-of-catastrophe
+          supplementary:
+          - material: MAGMA_BLOCK
+            amount: 1
+            id: boiling-magma
+          - material: OAK_SAPLING
+            amount: 1
+            id: acorn
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.priest.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: war-lion-heart
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: iron-crusader-core
+          supplementary:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: ancient-war-chant-scroll
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: veteran-commander-badge
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.priest.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: warlord-soul-crystal
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: divine-beast-core
+          supplementary:
+          - material: RABBIT_FOOT
+            amount: 1
+            id: crimson-marshal-seal
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: ancient-command-rune
+  chained:
+    name: chained
+    color: dark_red
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: STRING
+            amount: 1
+            id: prisoner-shackles
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: iron-cage-fragment
+          supplementary:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: lockpick-set
+          - material: IRON_ORE
+            amount: 1
+            id: rusty-chain
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: STRING
+            amount: 1
+            id: madness-essence
+          - material: REDSTONE
+            amount: 1
+            id: broken-mirror-shard
+          supplementary:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: asylum-key
+          - material: FEATHER
+            amount: 1
+            id: twisted-mind-fragment
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: werewolf-blood
+          - material: SHULKER_SHELL
+            amount: 1
+            id: full-moon-fur
+          supplementary:
+          - material: EGG
+            amount: 1
+            id: wolf-fang
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: lunar-crystal
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: INK_SAC
+            amount: 1
+            id: zombie-heart
+          - material: BONE
+            amount: 1
+            id: preserved-corpse-skin
+          supplementary:
+          - material: SPIDER_EYE
+            amount: 1
+            id: frost-essence
+          - material: HONEYCOMB
+            amount: 1
+            id: decay-powder
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: wraith-essence
+          - material: MAGMA_CREAM
+            amount: 1
+            id: spectral-chains
+          supplementary:
+          - material: SLIME_BALL
+            amount: 1
+            id: soul-anchor
+          - material: BLAZE_POWDER
+            amount: 1
+            id: ethereal-mist
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: puppet-strings
+          - material: BLAZE_POWDER
+            amount: 1
+            id: cursed-doll-heart
+          supplementary:
+          - material: SLIME_BALL
+            amount: 1
+            id: binding-ritual-scroll
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: voodoo-needle
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GUNPOWDER
+            amount: 1
+            id: crystallised-silence
+          - material: SLIME_BALL
+            amount: 1
+            id: ancient-cursed-seal
+          supplementary:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: silent-oath-scroll
+          - material: DRAGON_BREATH
+            amount: 1
+            id: corruption-shard
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: ancient-bane-essence
+          - material: EGG
+            amount: 1
+            id: void-chain-fragment
+          supplementary:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: realm-anchor-crystal
+          - material: BLAZE_POWDER
+            amount: 1
+            id: shadow-binding-seal
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.chained.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: abomination-essence
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: corrupted-world-fragment
+          supplementary:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: blood-moon-crystal
+          - material: INK_SAC
+            amount: 1
+            id: deviant-soul
+  tyrant:
+    name: tyrant
+    color: blue
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: murloc-bladder
+          supplementary:
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: salted-seaweed
+          - material: LEATHER
+            amount: 1
+            id: pearl-powder
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SLIME_BALL
+            amount: 1
+            id: storm-serpent-heart
+          - material: EMERALD_ORE
+            amount: 1
+            id: wind-essence-crystal
+          supplementary:
+          - material: GUNPOWDER
+            amount: 1
+            id: rage-coral
+          - material: STRING
+            amount: 1
+            id: condensed-sea-fog
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: storm-whale-blubber
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: tempest-eagle-eye
+          supplementary:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: powdered-sea-glass
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: condensed-storm-cloud
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GUNPOWDER
+            amount: 1
+            id: blue-shadow-falcon-feather
+          - material: FEATHER
+            amount: 1
+            id: dragon-eyed-sea-condor-eyeball
+          supplementary:
+          - material: SPIDER_EYE
+            amount: 1
+            id: storm-crystal
+          - material: MAGMA_CREAM
+            amount: 1
+            id: cloud-essence
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: STRING
+            amount: 1
+            id: sea-serpent-scale
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: crystallized-lightning-essence
+          supplementary:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: siren-vocal-cord
+          - material: RABBIT_FOOT
+            amount: 1
+            id: deep-ocean-pearl
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: storm-giant-heart
+          - material: RABBIT_FOOT
+            amount: 1
+            id: elemental-core
+          supplementary:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: hurricane-essence
+          - material: STONE
+            amount: 1
+            id: earthquake-stone
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: BLAZE_POWDER
+            amount: 1
+            id: skull-of-a-deep-sea-python
+          - material: BONE
+            amount: 1
+            id: eye-of-the-king-of-green-wings
+          supplementary:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: small-idol-imbued-with-sea-god-faith
+          - material: LEATHER
+            amount: 1
+            id: 50-grams-of-freshly-sun-dried-sea-salt
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: eye-of-the-leviathan
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: crown-of-storms
+          supplementary:
+          - material: INK_SAC
+            amount: 1
+            id: compressed-storm-core
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: crystallized-wrath
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.tyrant.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: heart-of-the-storm-god
+          - material: EGG
+            amount: 1
+            id: wrath-of-the-deep-throne
+          supplementary:
+          - material: GLOWSTONE_DUST
+            amount: 1
+            id: distilled-calamity-essence
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: fragment-of-gods-wrath
+  devouring:
+    name: devouring
+    color: aqua
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.devouring.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.devouring.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.devouring.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.devouring.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.devouring.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  secondlaw:
+    name: secondlaw
+    color: green
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.secondlaw.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.secondlaw.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.secondlaw.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.secondlaw.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.secondlaw.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  aeon:
+    name: aeon
+    color: blue
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.aeon.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.aeon.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.aeon.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.aeon.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.aeon.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+  moon:
+    name: moon
+    color: dark_red
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: EGG
+            amount: 1
+            id: flying-unicorn-horn
+          - material: BLAZE_POWDER
+            amount: 1
+            id: royal-jellyfish-venom-crystal
+          supplementary:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: flying-unicorn-blood
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: arsenic-powder
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: elf-spring-marrow-crystal
+          - material: RABBIT_FOOT
+            amount: 1
+            id: king-sword-flower-fruit
+          supplementary:
+          - material: PHANTOM_MEMBRANE
+            amount: 1
+            id: elf-spring-water
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: wild-eggplant-extract
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: sanguine-blood-essence
+          - material: SHULKER_SHELL
+            amount: 1
+            id: bloodthirsty-beast-heart
+          supplementary:
+          - material: INK_SAC
+            amount: 1
+            id: red-headed-bat-teeth
+          - material: MAGMA_CREAM
+            amount: 1
+            id: osmanthus-flower-water
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GUNPOWDER
+            amount: 1
+            id: sanguine-baron-legacy
+          - material: DRAGON_BREATH
+            amount: 1
+            id: giant-monster-sage-brain
+          supplementary:
+          - material: SHULKER_SHELL
+            amount: 1
+            id: dark-bat-wings
+          - material: RABBIT_FOOT
+            amount: 1
+            id: june-snow-oil
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: sanguine-viscount-legacy
+          - material: BLAZE_POWDER
+            amount: 1
+            id: moon-worshipping-monster-blood-crystal
+          supplementary:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: elder-bat-eye
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: blood-moon-water
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: SPIDER_EYE
+            amount: 1
+            id: sanguine-earl-legacy
+          - material: FEATHER
+            amount: 1
+            id: elf-spring-consciousness-core
+          supplementary:
+          - material: STRING
+            amount: 1
+            id: dark-spirit-dust-aggregate
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: moonflower-oil
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: legacy-of-sanguine-marquis
+          - material: BONE
+            amount: 1
+            id: blood-of-a-high-summoner-sanguine-marquis
+          supplementary:
+          - material: GLISTERING_MELON_SLICE
+            amount: 1
+            id: nails-of-high-summoner-sanguine-marquis
+          - material: MAGMA_CREAM
+            amount: 1
+            id: moon-paper-substitute-of-oneself
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: MAGMA_CREAM
+            amount: 1
+            id: legacy-of-a-sanguine-duke
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: blood-of-a-life-giver-sanguine-duke
+          supplementary:
+          - material: LEATHER
+            amount: 1
+            id: oak-seed
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: hair-from-blood-offspring
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.moon.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DRAGON_BREATH
+            amount: 1
+            id: the-beyonder-characteristic-of-auernia
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: amniotic-fluid-from-oneselfs-conception
+          supplementary:
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: incomparable-work-of-art
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: blood-from-a-gods-child
+  emperor:
+    name: emperor
+    color: dark_gray
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: REDSTONE
+            amount: 1
+            id: ancient-law-tome
+          - material: GOLDEN_CARROT
+            amount: 1
+            id: scale-of-justice
+          supplementary:
+          - material: OBSIDIAN
+            amount: 1
+            id: obsidian-shard
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+            amount: 1
+            id: grass-of-madness
+          - material: RABBIT_FOOT
+            amount: 1
+            id: core-horn-crystal
+          supplementary:
+          - material: GHAST_TEAR
+            amount: 1
+            id: deep-grained-walnut
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: fragrance-hornet-grass
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: REDSTONE
+            amount: 1
+            id: weeping-infant-flower
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: strange-faced-cannabis-crystal
+          supplementary:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: golden-jimsonweed
+          - material: GUNPOWDER
+            amount: 1
+            id: black-jimsonweed
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: corrupted-soul-fragment
+          - material: GUNPOWDER
+            amount: 1
+            id: heart-of-darkness
+          supplementary:
+          - material: DIAMOND_ORE
+            amount: 1
+            id: void-crystal
+          - material: LEATHER
+            amount: 1
+            id: rotten-essence
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: chaos-shard
+          - material: REDSTONE
+            amount: 1
+            id: crown-fragment
+          supplementary:
+          - material: EMERALD_ORE
+            amount: 1
+            id: disorder-crystal
+          - material: RABBIT_FOOT
+            amount: 1
+            id: madness-bloom
+      sequence_4:
+        level: 4
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.4",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: fallen-angel-feather
+          - material: TOTEM_OF_UNDYING
+            amount: 1
+            id: baboon-wisdom-stone
+          supplementary:
+          - material: FERMENTED_SPIDER_EYE
+            amount: 1
+            id: royal-seal-fragment
+          - material: BONE
+            amount: 1
+            id: ancient-corruption-core
+      sequence_3:
+        level: 3
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.3",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: CHORUS_FRUIT
+            amount: 1
+            id: heart-of-a-black-mountain-lord
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: tail-of-a-violent-man-ape
+          supplementary:
+          - material: BONE
+            amount: 1
+            id: black-mountain-lords-blood
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: teeth-of-a-violent-man-ape
+          - material: BONE
+            amount: 1
+            id: distorted-gold
+          - material: SPIDER_EYE
+            amount: 1
+            id: skin-harvested-from-mutations
+      sequence_2:
+        level: 2
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.2",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: HONEYCOMB
+            amount: 1
+            id: solomons-knuckle
+          - material: ROTTEN_FLESH
+            amount: 1
+            id: duke-of-entropy-blood
+          supplementary:
+          - material: FEATHER
+            amount: 1
+            id: royal-martial-law-decree
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: balancer-contaminants
+          - material: GLOW_INK_SAC
+            amount: 1
+            id: luminous-gem
+      sequence_1:
+        level: 1
+        name: TranslatableComponentImpl{key="circleofimagination.emperor.sequences.1",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main:
+          - material: NAUTILUS_SHELL
+            amount: 1
+            id: fragment-of-solomons-skull
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: vial-of-blood-of-a-prince
+          supplementary:
+          - material: PRISMARINE_CRYSTALS
+            amount: 1
+            id: blood-from-a-true-sovereign
+          - material: HEART_OF_THE_SEA
+            amount: 1
+            id: section-of-the-original-laws-of-an-empire
+          - material: PRISMARINE_SHARD
+            amount: 1
+            id: drops-of-corpse-fluid-from-a-betrayed-true-god
+          - material: POPPED_CHORUS_FRUIT
+            amount: 1
+            id: set-of-widely-circulated-currency-issued-by-concoctor
+  sublunary:
+    name: sublunary
+    color: yellow
+    sequences:
+      sequence_9:
+        level: 9
+        name: TranslatableComponentImpl{key="circleofimagination.sublunary.sequences.9",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_8:
+        level: 8
+        name: TranslatableComponentImpl{key="circleofimagination.sublunary.sequences.8",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_7:
+        level: 7
+        name: TranslatableComponentImpl{key="circleofimagination.sublunary.sequences.7",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_6:
+        level: 6
+        name: TranslatableComponentImpl{key="circleofimagination.sublunary.sequences.6",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+      sequence_5:
+        level: 5
+        name: TranslatableComponentImpl{key="circleofimagination.sublunary.sequences.5",
+          arguments=[], fallback=null, style=StyleImpl{obfuscated=not_set, bold=not_set,
+          strikethrough=not_set, underlined=not_set, italic=false, color=null, shadowColor=null,
+          clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}
+        ingredients:
+          main: []
+          supplementary: []
+generated_at: 1781680499941
+generated_by: CircleOfImagination
