@@ -24,6 +24,7 @@ public class ResourceLoader extends SimplePreparableReloadListener<Map<Identifie
     private static final Identifier PATHWAY_DATA = Identifier.fromNamespaceAndPath("coi-client", "archive/pathway-data.json");
 
     private final Map<String, IngredientInfo> ingredientLookup = new HashMap<>();
+    private final Map<String, ChatFormatting> pathwayColors = new HashMap<>();
 
     @Override
     protected @NonNull Map<Identifier, JsonElement> prepare(ResourceManager resourceManager, @NonNull ProfilerFiller profiler) {
@@ -53,6 +54,7 @@ public class ResourceLoader extends SimplePreparableReloadListener<Map<Identifie
     @Override
     protected void apply(Map<Identifier, JsonElement> prepared, @NonNull ResourceManager resourceManager, @NonNull ProfilerFiller profiler) {
         ingredientLookup.clear();
+        pathwayColors.clear();
 
         prepared.forEach((_, element) -> {
             if (element.isJsonObject() && element.getAsJsonObject().has("pathways")) {
@@ -69,6 +71,7 @@ public class ResourceLoader extends SimplePreparableReloadListener<Map<Identifie
             String pathwayKey = pathwayEntry.getKey();
             JsonObject pathway = pathwayEntry.getValue().getAsJsonObject();
             ChatFormatting color = parseColor(pathway.has("color") ? pathway.get("color").getAsString() : "white");
+            pathwayColors.put(pathwayKey, color);
             JsonObject sequences = pathway.getAsJsonObject("sequences");
             if (sequences == null) continue;
 
@@ -111,5 +114,9 @@ public class ResourceLoader extends SimplePreparableReloadListener<Map<Identifie
 
     public IngredientInfo getIngredient(String id) {
         return ingredientLookup.get(id);
+    }
+
+    public ChatFormatting getPathwayColor(String pathway) {
+        return pathwayColors.getOrDefault(pathway, ChatFormatting.WHITE);
     }
 }

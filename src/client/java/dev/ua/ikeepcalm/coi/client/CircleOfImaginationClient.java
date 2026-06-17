@@ -24,6 +24,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -117,25 +118,58 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
             Optional<CompoundTag> values = tag.getCompound("PublicBukkitValues");
             if (values.isEmpty()) return;
-            if (!values.get().contains("circleofimagination:ingredient")) return;
 
-            Optional<String> ingredientId = values.get().getString("circleofimagination:ingredient");
-            if (ingredientId.isEmpty()) return;
+            CompoundTag pdc = values.get();
 
-            IngredientInfo info = CLIENT_DATA_LOADER.getIngredient(ingredientId.get());
-            if (info == null) return;
+            if (pdc.contains("circleofimagination:ingredient")) {
+                Optional<String> ingredientId = pdc.getString("circleofimagination:ingredient");
+                if (ingredientId.isEmpty()) return;
 
-            String icon = PATHWAY_ICONS.get(info.pathway());
-            if (icon != null && !lines.isEmpty()) {
-                Component name = lines.getFirst();
-                lines.set(0, Component.empty()
-                        .append(Component.literal(icon).withStyle(Style.EMPTY.withFont(new FontDescription.Resource(PATHWAY_ICONS_FONT))))
-                        .append(Component.literal(" "))
-                        .append(name));
+                IngredientInfo info = CLIENT_DATA_LOADER.getIngredient(ingredientId.get());
+                if (info == null) return;
+
+                String icon = PATHWAY_ICONS.get(info.pathway());
+                if (icon != null && !lines.isEmpty()) {
+                    Component name = lines.getFirst();
+                    lines.set(0, Component.empty()
+                            .append(Component.literal(icon).withStyle(Style.EMPTY.withFont(new FontDescription.Resource(PATHWAY_ICONS_FONT))))
+                            .append(Component.literal(" "))
+                            .append(name));
+                }
+
+                lines.add(Component.literal(info.isMain() ? "Main ingredient" : "Supplementary ingredient").withStyle(info.color()));
+                lines.add(Component.literal("Sequence " + info.sequence() + " of the " + formatPathwayName(info.pathway()) + " pathway").withStyle(info.color()));
+
+            } else if (pdc.contains("venturetothesubspace:loot_shard_id")) {
+                Optional<String> shardIdOpt = pdc.getString("venturetothesubspace:loot_shard_id");
+                if (shardIdOpt.isEmpty()) return;
+
+                // format: "coi:ingredients-{pathway}-{sequence}", e.g. "coi:ingredients-demoness-9"
+                String path = shardIdOpt.get().contains(":") ? shardIdOpt.get().split(":", 2)[1] : shardIdOpt.get();
+                String[] parts = path.split("-", 3);
+                if (parts.length < 3) return;
+
+                String pathway = parts[1];
+                int sequence;
+                try {
+                    sequence = Integer.parseInt(parts[2]);
+                } catch (NumberFormatException e) {
+                    return;
+                }
+
+                ChatFormatting color = CLIENT_DATA_LOADER.getPathwayColor(pathway);
+
+                String icon = PATHWAY_ICONS.get(pathway);
+                if (icon != null && !lines.isEmpty()) {
+                    Component name = lines.getFirst();
+                    lines.set(0, Component.empty()
+                            .append(Component.literal(icon).withStyle(Style.EMPTY.withFont(new FontDescription.Resource(PATHWAY_ICONS_FONT))))
+                            .append(Component.literal(" "))
+                            .append(name));
+                }
+
+                lines.add(Component.literal("Sequence " + sequence + " of the " + formatPathwayName(pathway) + " pathway").withStyle(color));
             }
-
-            lines.add(Component.literal(info.isMain() ? "Main ingredient" : "Supplementary ingredient").withStyle(info.color()));
-            lines.add(Component.literal("Sequence " + info.sequence() + " of the " + formatPathwayName(info.pathway()) + " pathway").withStyle(info.color()));
         });
 
     }
