@@ -174,6 +174,7 @@ public class MadnessHudOverlay {
                 barY = h - settings.madnessYOffset;
             }
         }
+        barX = Mth.clamp(barX + settings.madnessXOffset, 0, Math.max(0, w - barWidth));
 
         // Apply screen shake offset on madness increase
         float flash = ClientBeyonderState.getFlashIntensity();

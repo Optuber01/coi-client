@@ -12,6 +12,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+
 public class HudSettingsScreen extends Screen {
 
     private final Screen parent;
@@ -31,6 +34,7 @@ public class HudSettingsScreen extends Screen {
     private EditBox slotSpacingField;
     private EditBox hudScaleField;
     private EditBox wheelSlotsField;
+    private EditBox madnessXOffsetField;
     private EditBox madnessYOffsetField;
 
     private Button resetButton;
@@ -39,6 +43,9 @@ public class HudSettingsScreen extends Screen {
     private int currentPreset = 0;
     private static final String[] PRESETS = {"Default", "Compact", "Large", "Minimal"};
     private static final String[] ANCHORS = {"TOP_LEFT", "TOP_CENTER", "BOTTOM_LEFT", "BOTTOM_CENTER"};
+    private static final int ROW_SPACING = 35;
+    private static final int FIELD_WIDTH = 52;
+    private static final int SECTION_GAP = 24;
 
     public HudSettingsScreen(Screen parent) {
         super(Component.translatable("screen.coi.hud_settings"));
@@ -60,245 +67,137 @@ public class HudSettingsScreen extends Screen {
         to.wheelSlots = from.wheelSlots;
         to.epilepsyMode = from.epilepsyMode;
         to.showMadnessBar = from.showMadnessBar;
+        to.madnessXOffset = from.madnessXOffset;
         to.madnessYOffset = from.madnessYOffset;
+        to.madnessAnchor = from.madnessAnchor;
+    }
+
+    private SettingsLayout createLayout() {
+        int buttonY = this.height - Math.max(40, this.height / 10);
+        boolean twoColumns = this.width >= 560;
+        int contentWidth = Math.min(this.width - 40, twoColumns ? 560 : 280);
+        int gap = twoColumns ? SECTION_GAP : 0;
+        int columnWidth = twoColumns ? (contentWidth - gap) / 2 : contentWidth;
+        int leftX = (this.width - contentWidth) / 2;
+        int rightX = twoColumns ? leftX + columnWidth + gap : leftX;
+        int sliderWidth = Math.max(118, columnWidth - FIELD_WIDTH - 8);
+        int topY = Math.max(58, this.height / 8);
+
+        return new SettingsLayout(twoColumns, leftX, rightX, columnWidth, sliderWidth, buttonY, topY);
+    }
+
+    private EditBox addIntSliderField(int x, int y, SettingsLayout layout, String label, Component fieldLabel,
+                                      int min, int max, int initialValue, IntConsumer setter) {
+        final EditBox[] fieldRef = new EditBox[1];
+        int clampedInitial = Math.clamp(initialValue, min, max);
+        double sliderValue = (clampedInitial - min) / (double) (max - min);
+
+        AbstractSliderButton slider = new AbstractSliderButton(x, y, layout.sliderWidth, 20, Component.literal(label + ": " + clampedInitial), sliderValue) {
+            @Override
+            protected void updateMessage() {
+                int value = min + (int) Math.round(this.value * (max - min));
+                setter.accept(value);
+                this.setMessage(Component.literal(label + ": " + value));
+                if (fieldRef[0] != null) {
+                    fieldRef[0].setValue(String.valueOf(value));
+                }
+            }
+
+            @Override
+            protected void applyValue() {
+                updateMessage();
+            }
+        };
+        this.addRenderableWidget(slider);
+
+        EditBox field = new EditBox(this.font, x + layout.sliderWidth + 8, y, FIELD_WIDTH, 20, fieldLabel);
+        field.setValue(String.valueOf(clampedInitial));
+        field.setResponder(text -> {
+            try {
+                setter.accept(Math.clamp(Integer.parseInt(text), min, max));
+            } catch (NumberFormatException ignored) {
+            }
+        });
+        fieldRef[0] = field;
+        this.addRenderableWidget(field);
+        return field;
+    }
+
+    private EditBox addDecimalSliderField(int x, int y, SettingsLayout layout, String label, Component fieldLabel,
+                                          double min, double max, double initialValue, DoubleConsumer setter) {
+        final EditBox[] fieldRef = new EditBox[1];
+        double clampedInitial = Math.clamp(initialValue, min, max);
+        double sliderValue = (clampedInitial - min) / (max - min);
+
+        AbstractSliderButton slider = new AbstractSliderButton(x, y, layout.sliderWidth, 20, Component.literal(label + ": " + String.format("%.1f", clampedInitial)), sliderValue) {
+            @Override
+            protected void updateMessage() {
+                double value = min + this.value * (max - min);
+                value = Math.round(value * 10.0) / 10.0;
+                setter.accept(value);
+                this.setMessage(Component.literal(label + ": " + String.format("%.1f", value)));
+                if (fieldRef[0] != null) {
+                    fieldRef[0].setValue(String.format("%.1f", value));
+                }
+            }
+
+            @Override
+            protected void applyValue() {
+                updateMessage();
+            }
+        };
+        this.addRenderableWidget(slider);
+
+        EditBox field = new EditBox(this.font, x + layout.sliderWidth + 8, y, FIELD_WIDTH, 20, fieldLabel);
+        field.setValue(String.format("%.1f", clampedInitial));
+        field.setResponder(text -> {
+            try {
+                setter.accept(Math.clamp(Double.parseDouble(text), min, max));
+            } catch (NumberFormatException ignored) {
+            }
+        });
+        fieldRef[0] = field;
+        this.addRenderableWidget(field);
+        return field;
+    }
+
+    private void drawSection(GuiGraphicsExtractor graphics, String title, int x, int y) {
+        graphics.text(this.font, Component.literal(title).withStyle(ChatFormatting.GRAY), x, y, 0xFFA0A0A0);
+    }
+
+    private void drawSettingLabels(GuiGraphicsExtractor graphics, int x, int firstY, Component... labels) {
+        for (int i = 0; i < labels.length; i++) {
+            graphics.text(this.font, labels[i], x, firstY + i * ROW_SPACING - 12, 0xFFA0A0A0);
+        }
+    }
+
+    private record SettingsLayout(boolean twoColumns, int leftX, int rightX, int columnWidth, int sliderWidth, int buttonY, int topY) {
     }
 
     @Override
     protected void init() {
+        SettingsLayout layout = createLayout();
         int centerX = this.width / 2;
-        int columnSpacing = Math.min(160, this.width / 3);
-        int leftColumn = centerX - columnSpacing;
-        int rightColumn = centerX + Math.min(30, this.width / 20);
-        int startY = Math.max(40, this.height / 12);
-        int spacing = Math.max(35, this.height / 15);
-        int currentY = startY;
 
         enabledCheckbox = Checkbox.builder(Component.translatable("screen.coi.hud_enabled"), Minecraft.getInstance().font)
-                .pos(leftColumn, currentY).selected(settings.enabled)
+                .pos(layout.leftX, Math.max(32, layout.topY - 34)).selected(settings.enabled)
                 .maxWidth(200)
                 .build();
         this.addRenderableWidget(enabledCheckbox);
-        currentY += spacing;
+        int leftY = layout.topY + 24;
+        int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 6 + SECTION_GAP;
 
-        int sliderWidth = Math.min(160, this.width / 4);
-        int fieldWidth = Math.min(60, this.width / 12);
+        hudXField = addIntSliderField(layout.leftX, leftY, layout, "X", Component.translatable("screen.coi.hud_x_field"), 0, 500, settings.hudX, value -> settings.hudX = value);
+        hudYOffsetField = addIntSliderField(layout.leftX, leftY + ROW_SPACING, layout, "Y Offset", Component.translatable("screen.coi.hud_y_offset_field"), 0, 200, settings.hudYOffset, value -> settings.hudYOffset = value);
+        slotSizeField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 2, layout, "Slot Size", Component.translatable("screen.coi.slot_size_field"), 20, 100, settings.slotSize, value -> settings.slotSize = value);
+        slotSpacingField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 3, layout, "Spacing", Component.translatable("screen.coi.slot_spacing_field"), 30, 100, settings.slotSpacing, value -> settings.slotSpacing = value);
+        hudScaleField = addDecimalSliderField(layout.leftX, leftY + ROW_SPACING * 4, layout, "Scale", Component.translatable("screen.coi.hud_scale_field"), 0.5, 2.0, settings.hudScale, value -> settings.hudScale = (float) value);
+        wheelSlotsField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 5, layout, "Wheel Slots", Component.translatable("screen.coi.wheel_slots_field"), 2, 16, settings.wheelSlots, value -> settings.wheelSlots = value);
 
-        AbstractSliderButton hudXSlider = new AbstractSliderButton(leftColumn, currentY, sliderWidth, 20, Component.literal("X: " + settings.hudX), settings.hudX / 500.0) {
-            @Override
-            protected void updateMessage() {
-                settings.hudX = (int) (this.value * 500);
-                this.setMessage(Component.literal("X: " + settings.hudX));
-                hudXField.setValue(String.valueOf(settings.hudX));
-            }
+        madnessXOffsetField = addIntSliderField(layout.rightX, rightY, layout, "Madness X", Component.translatable("screen.coi.madness_x_offset_field"), -500, 500, settings.madnessXOffset, value -> settings.madnessXOffset = value);
+        madnessYOffsetField = addIntSliderField(layout.rightX, rightY + ROW_SPACING, layout, "Madness Y", Component.translatable("screen.coi.madness_y_offset_field"), 0, 200, settings.madnessYOffset, value -> settings.madnessYOffset = value);
 
-            @Override
-            protected void applyValue() {
-                settings.hudX = (int) (this.value * 500);
-                this.setMessage(Component.literal("X: " + settings.hudX));
-                hudXField.setValue(String.valueOf(settings.hudX));
-            }
-        };
-        this.addRenderableWidget(hudXSlider);
-
-        hudXField = new EditBox(this.font, rightColumn, currentY, fieldWidth, 20, Component.translatable("screen.coi.hud_x_field"));
-        hudXField.setValue(String.valueOf(settings.hudX));
-        hudXField.setResponder(text -> {
-            try {
-                int value = Integer.parseInt(text);
-                settings.hudX = Math.clamp(value, 0, 500);
-                // hudXSlider.setValue(settings.hudX / 500.0);
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        this.addRenderableWidget(hudXField);
-        currentY += spacing;
-
-        AbstractSliderButton hudYOffsetSlider = new AbstractSliderButton(leftColumn, currentY, sliderWidth, 20, Component.literal("Y Offset: " + settings.hudYOffset), settings.hudYOffset / 200.0) {
-            @Override
-            protected void updateMessage() {
-                settings.hudYOffset = (int) (this.value * 200);
-                this.setMessage(Component.literal("Y Offset: " + settings.hudYOffset));
-                hudYOffsetField.setValue(String.valueOf(settings.hudYOffset));
-            }
-
-            @Override
-            protected void applyValue() {
-                settings.hudYOffset = (int) (this.value * 200);
-                this.setMessage(Component.literal("Y Offset: " + settings.hudYOffset));
-                hudYOffsetField.setValue(String.valueOf(settings.hudYOffset));
-            }
-        };
-        this.addRenderableWidget(hudYOffsetSlider);
-
-        hudYOffsetField = new EditBox(this.font, rightColumn, currentY, fieldWidth, 20, Component.translatable("screen.coi.hud_y_offset_field"));
-        hudYOffsetField.setValue(String.valueOf(settings.hudYOffset));
-        hudYOffsetField.setResponder(text -> {
-            try {
-                int value = Integer.parseInt(text);
-                settings.hudYOffset = Math.clamp(value, 0, 200);
-                // hudYOffsetSlider.setValue(settings.hudYOffset / 200.0);
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        this.addRenderableWidget(hudYOffsetField);
-        currentY += spacing;
-
-        AbstractSliderButton slotSizeSlider = new AbstractSliderButton(leftColumn, currentY, sliderWidth, 20, Component.literal("Slot Size: " + settings.slotSize), (settings.slotSize - 20) / 80.0) {
-            @Override
-            protected void updateMessage() {
-                settings.slotSize = 20 + (int) (this.value * 80);
-                this.setMessage(Component.literal("Slot Size: " + settings.slotSize));
-                slotSizeField.setValue(String.valueOf(settings.slotSize));
-            }
-
-            @Override
-            protected void applyValue() {
-                settings.slotSize = 20 + (int) (this.value * 80);
-                this.setMessage(Component.literal("Slot Size: " + settings.slotSize));
-                slotSizeField.setValue(String.valueOf(settings.slotSize));
-            }
-        };
-        this.addRenderableWidget(slotSizeSlider);
-
-        slotSizeField = new EditBox(this.font, rightColumn, currentY, fieldWidth, 20, Component.translatable("screen.coi.slot_size_field"));
-        slotSizeField.setValue(String.valueOf(settings.slotSize));
-        slotSizeField.setResponder(text -> {
-            try {
-                int value = Integer.parseInt(text);
-                settings.slotSize = Math.clamp(value, 20, 100);
-                // slotSizeSlider.setValue((settings.slotSize - 20) / 80.0);
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        this.addRenderableWidget(slotSizeField);
-        currentY += spacing;
-
-        AbstractSliderButton slotSpacingSlider = new AbstractSliderButton(leftColumn, currentY, sliderWidth, 20, Component.literal("Spacing: " + settings.slotSpacing), (settings.slotSpacing - 30) / 70.0) {
-            @Override
-            protected void updateMessage() {
-                settings.slotSpacing = 30 + (int) (this.value * 70);
-                this.setMessage(Component.literal("Spacing: " + settings.slotSpacing));
-                slotSpacingField.setValue(String.valueOf(settings.slotSpacing));
-            }
-
-            @Override
-            protected void applyValue() {
-                settings.slotSpacing = 30 + (int) (this.value * 70);
-                this.setMessage(Component.literal("Spacing: " + settings.slotSpacing));
-                slotSpacingField.setValue(String.valueOf(settings.slotSpacing));
-            }
-        };
-        this.addRenderableWidget(slotSpacingSlider);
-
-        slotSpacingField = new EditBox(this.font, rightColumn, currentY, fieldWidth, 20, Component.translatable("screen.coi.slot_spacing_field"));
-        slotSpacingField.setValue(String.valueOf(settings.slotSpacing));
-        slotSpacingField.setResponder(text -> {
-            try {
-                int value = Integer.parseInt(text);
-                settings.slotSpacing = Math.clamp(value, 30, 100);
-                // slotSpacingSlider.setValue((settings.slotSpacing - 30) / 70.0);
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        this.addRenderableWidget(slotSpacingField);
-        currentY += spacing;
-
-        AbstractSliderButton hudScaleSlider = new AbstractSliderButton(leftColumn, currentY, sliderWidth, 20, Component.literal("Scale: " + String.format("%.1f", settings.hudScale)), (settings.hudScale - 0.5) / 1.5) {
-            @Override
-            protected void updateMessage() {
-                settings.hudScale = 0.5f + (float) (this.value * 1.5);
-                this.setMessage(Component.literal("Scale: " + String.format("%.1f", settings.hudScale)));
-                hudScaleField.setValue(String.format("%.1f", settings.hudScale));
-            }
-
-            @Override
-            protected void applyValue() {
-                settings.hudScale = 0.5f + (float) (this.value * 1.5);
-                this.setMessage(Component.literal("Scale: " + String.format("%.1f", settings.hudScale)));
-                hudScaleField.setValue(String.format("%.1f", settings.hudScale));
-            }
-        };
-        this.addRenderableWidget(hudScaleSlider);
-
-        hudScaleField = new EditBox(this.font, rightColumn, currentY, fieldWidth, 20, Component.translatable("screen.coi.hud_scale_field"));
-        hudScaleField.setValue(String.format("%.1f", settings.hudScale));
-        hudScaleField.setResponder(text -> {
-            try {
-                float value = Float.parseFloat(text);
-                settings.hudScale = Math.clamp(value, 0.5f, 2.0f);
-                // hudScaleSlider.setValue((settings.hudScale - 0.5) / 1.5);
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        this.addRenderableWidget(hudScaleField);
-        currentY += spacing;
-
-        AbstractSliderButton wheelSlotsSlider = new AbstractSliderButton(leftColumn, currentY, sliderWidth, 20, Component.literal("Wheel Slots: " + settings.wheelSlots), (settings.wheelSlots - 2) / 14.0) {
-            @Override
-            protected void updateMessage() {
-                settings.wheelSlots = 2 + (int) (this.value * 14);
-                this.setMessage(Component.literal("Wheel Slots: " + settings.wheelSlots));
-                wheelSlotsField.setValue(String.valueOf(settings.wheelSlots));
-            }
-
-            @Override
-            protected void applyValue() {
-                settings.wheelSlots = 2 + (int) (this.value * 14);
-                this.setMessage(Component.literal("Wheel Slots: " + settings.wheelSlots));
-                wheelSlotsField.setValue(String.valueOf(settings.wheelSlots));
-            }
-        };
-        this.addRenderableWidget(wheelSlotsSlider);
-
-        wheelSlotsField = new EditBox(this.font, rightColumn, currentY, fieldWidth, 20, Component.translatable("screen.coi.wheel_slots_field"));
-        wheelSlotsField.setValue(String.valueOf(settings.wheelSlots));
-        wheelSlotsField.setResponder(text -> {
-            try {
-                int value = Integer.parseInt(text);
-                settings.wheelSlots = Math.clamp(value, 2, 16);
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        this.addRenderableWidget(wheelSlotsField);
-        currentY += spacing;
-
-        AbstractSliderButton madnessYOffsetSlider = new AbstractSliderButton(leftColumn, currentY, sliderWidth, 20, Component.literal("Madness Y Offset: " + settings.madnessYOffset), settings.madnessYOffset / 200.0) {
-            @Override
-            protected void updateMessage() {
-                settings.madnessYOffset = (int) (this.value * 200);
-                this.setMessage(Component.literal("Madness Y Offset: " + settings.madnessYOffset));
-                madnessYOffsetField.setValue(String.valueOf(settings.madnessYOffset));
-            }
-
-            @Override
-            protected void applyValue() {
-                settings.madnessYOffset = (int) (this.value * 200);
-                this.setMessage(Component.literal("Madness Y Offset: " + settings.madnessYOffset));
-                madnessYOffsetField.setValue(String.valueOf(settings.madnessYOffset));
-            }
-        };
-        this.addRenderableWidget(madnessYOffsetSlider);
-
-        madnessYOffsetField = new EditBox(this.font, rightColumn, currentY, fieldWidth, 20, Component.translatable("screen.coi.madness_y_offset_field"));
-        madnessYOffsetField.setValue(String.valueOf(settings.madnessYOffset));
-        madnessYOffsetField.setResponder(text -> {
-            try {
-                int value = Integer.parseInt(text);
-                settings.madnessYOffset = Math.clamp(value, 0, 200);
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        this.addRenderableWidget(madnessYOffsetField);
-        currentY += spacing;
-
-        showKeybindsCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_keybinds"), Minecraft.getInstance().font)
-                .pos(leftColumn, currentY)
-                .maxWidth(200).onValueChange((checkbox, checked) -> settings.showKeybinds = checked).selected(settings.showKeybinds)
-                .build();
-
-        this.addRenderableWidget(showKeybindsCheckbox);
-
-        madnessAnchorButton = Button.builder(Component.literal("Madness Anchor: " + settings.madnessAnchor),
+        madnessAnchorButton = Button.builder(Component.literal("Anchor: " + settings.madnessAnchor),
                 button -> {
                     int idx = 0;
                     for (int i = 0; i < ANCHORS.length; i++) {
@@ -309,43 +208,47 @@ public class HudSettingsScreen extends Screen {
                     }
                     int nextIdx = (idx + 1) % ANCHORS.length;
                     settings.madnessAnchor = ANCHORS[nextIdx];
-                    button.setMessage(Component.literal("Madness Anchor: " + settings.madnessAnchor));
-                }).bounds(rightColumn, currentY, 130, 20).build();
+                    button.setMessage(Component.literal("Anchor: " + settings.madnessAnchor));
+                }).bounds(layout.rightX, rightY + ROW_SPACING * 2, layout.columnWidth, 20).build();
         this.addRenderableWidget(madnessAnchorButton);
-        currentY += 25;
-
-        showAbilityNamesCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_ability_names"), Minecraft.getInstance().font)
-                .pos(leftColumn, currentY)
-                .maxWidth(200).onValueChange((checkbox, checked) -> settings.showAbilityNames = checked).selected(settings.showAbilityNames)
-                .build();
-
-        this.addRenderableWidget(showAbilityNamesCheckbox);
-        currentY += 25;
-
-        showGlowEffectCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_glow_effect"), Minecraft.getInstance().font)
-                .pos(leftColumn, currentY)
-                .maxWidth(200).onValueChange((checkbox, checked) -> settings.showGlowEffect = checked).selected(settings.showGlowEffect)
-                .build();
-
-        this.addRenderableWidget(showGlowEffectCheckbox);
-        currentY += 25;
-
-        epilepsyModeCheckbox = Checkbox.builder(Component.translatable("screen.coi.epilepsy_mode"), Minecraft.getInstance().font)
-                .pos(leftColumn, currentY)
-                .maxWidth(200).onValueChange((checkbox, checked) -> settings.epilepsyMode = checked).selected(settings.epilepsyMode)
-                .build();
-
-        this.addRenderableWidget(epilepsyModeCheckbox);
-        currentY += 25;
 
         showMadnessBarCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_madness_bar"), Minecraft.getInstance().font)
-                .pos(leftColumn, currentY)
-                .maxWidth(200).onValueChange((checkbox, checked) -> settings.showMadnessBar = checked).selected(settings.showMadnessBar)
+                .pos(layout.rightX, rightY + ROW_SPACING * 3)
+                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.showMadnessBar = checked).selected(settings.showMadnessBar)
                 .build();
-
         this.addRenderableWidget(showMadnessBarCheckbox);
 
-        int buttonY = this.height - Math.max(40, this.height / 10);
+        int displayY = Math.max(leftY + ROW_SPACING * 6, rightY + ROW_SPACING * 4) + SECTION_GAP;
+        int displayLeftX = layout.leftX;
+        int displayRightX = layout.twoColumns ? layout.rightX : layout.leftX;
+        int displayColumnYOffset = layout.twoColumns ? 0 : 24;
+        int displaySecondRowY = layout.twoColumns ? displayY + 24 : displayY + 48;
+
+        showKeybindsCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_keybinds"), Minecraft.getInstance().font)
+                .pos(displayLeftX, displayY)
+                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.showKeybinds = checked).selected(settings.showKeybinds)
+                .build();
+        this.addRenderableWidget(showKeybindsCheckbox);
+
+        showAbilityNamesCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_ability_names"), Minecraft.getInstance().font)
+                .pos(displayRightX, displayY + displayColumnYOffset)
+                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.showAbilityNames = checked).selected(settings.showAbilityNames)
+                .build();
+        this.addRenderableWidget(showAbilityNamesCheckbox);
+
+        showGlowEffectCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_glow_effect"), Minecraft.getInstance().font)
+                .pos(displayLeftX, displaySecondRowY)
+                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.showGlowEffect = checked).selected(settings.showGlowEffect)
+                .build();
+        this.addRenderableWidget(showGlowEffectCheckbox);
+
+        epilepsyModeCheckbox = Checkbox.builder(Component.translatable("screen.coi.epilepsy_mode"), Minecraft.getInstance().font)
+                .pos(displayRightX, displaySecondRowY + displayColumnYOffset)
+                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.epilepsyMode = checked).selected(settings.epilepsyMode)
+                .build();
+        this.addRenderableWidget(epilepsyModeCheckbox);
+
+        int buttonY = layout.buttonY;
         int buttonWidth = Math.min(100, this.width / 8);
         int smallButtonWidth = Math.min(90, this.width / 9);
 
@@ -385,6 +288,7 @@ public class HudSettingsScreen extends Screen {
                 settings.showAbilityNames = true;
                 settings.showGlowEffect = true;
                 settings.showMadnessBar = true;
+                settings.madnessXOffset = 0;
                 settings.madnessYOffset = 55;
                 settings.madnessAnchor = "TOP_LEFT";
                 break;
@@ -398,6 +302,7 @@ public class HudSettingsScreen extends Screen {
                 settings.showAbilityNames = false;
                 settings.showGlowEffect = false;
                 settings.showMadnessBar = true;
+                settings.madnessXOffset = 0;
                 settings.madnessYOffset = 35;
                 settings.madnessAnchor = "TOP_LEFT";
                 break;
@@ -411,6 +316,7 @@ public class HudSettingsScreen extends Screen {
                 settings.showAbilityNames = true;
                 settings.showGlowEffect = true;
                 settings.showMadnessBar = true;
+                settings.madnessXOffset = 0;
                 settings.madnessYOffset = 70;
                 settings.madnessAnchor = "TOP_LEFT";
                 break;
@@ -424,6 +330,7 @@ public class HudSettingsScreen extends Screen {
                 settings.showAbilityNames = false;
                 settings.showGlowEffect = false;
                 settings.showMadnessBar = false;
+                settings.madnessXOffset = 0;
                 settings.madnessYOffset = 25;
                 settings.madnessAnchor = "TOP_LEFT";
                 break;
@@ -444,9 +351,10 @@ public class HudSettingsScreen extends Screen {
         slotSpacingField.setValue(String.valueOf(settings.slotSpacing));
         hudScaleField.setValue(String.format("%.1f", settings.hudScale));
         wheelSlotsField.setValue(String.valueOf(settings.wheelSlots));
+        madnessXOffsetField.setValue(String.valueOf(settings.madnessXOffset));
         madnessYOffsetField.setValue(String.valueOf(settings.madnessYOffset));
         if (madnessAnchorButton != null) {
-            madnessAnchorButton.setMessage(Component.literal("Madness Anchor: " + settings.madnessAnchor));
+            madnessAnchorButton.setMessage(Component.literal("Anchor: " + settings.madnessAnchor));
         }
 
         presetButton.setMessage(Component.translatable("screen.coi.preset").append(": " + PRESETS[currentPreset]));
@@ -469,36 +377,27 @@ public class HudSettingsScreen extends Screen {
 
         graphics.centeredText(this.font, this.title, this.width / 2, 20, 0xFFFFFFFF);
 
-        int columnSpacing = Math.min(160, this.width / 3);
-        int leftColumn = this.width / 2 - columnSpacing;
-        int startY = Math.max(80, this.height / 8);
-        int spacing = Math.max(35, this.height / 15);
-        int labelY = startY + 5;
+        SettingsLayout layout = createLayout();
+        int leftY = layout.topY + 24;
+        int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 6 + SECTION_GAP;
+        int displayY = Math.max(leftY + ROW_SPACING * 6, rightY + ROW_SPACING * 4) + SECTION_GAP;
 
-        graphics.text(this.font, Component.translatable("screen.coi.hud_x"), leftColumn, labelY - 15, 0xFFA0A0A0);
-        labelY += spacing;
+        drawSection(graphics, "Ability HUD", layout.leftX, leftY - 24);
+        drawSettingLabels(graphics, layout.leftX, leftY,
+                Component.translatable("screen.coi.hud_x"),
+                Component.translatable("screen.coi.hud_y_offset"),
+                Component.translatable("screen.coi.slot_size"),
+                Component.translatable("screen.coi.slot_spacing"),
+                Component.translatable("screen.coi.hud_scale"),
+                Component.translatable("screen.coi.wheel_slots"));
 
-        graphics.text(this.font, Component.translatable("screen.coi.hud_y_offset"), leftColumn, labelY - 15, 0xFFA0A0A0);
-        labelY += spacing;
+        drawSection(graphics, "Madness HUD", layout.rightX, rightY - 24);
+        drawSettingLabels(graphics, layout.rightX, rightY,
+                Component.translatable("screen.coi.madness_x_offset"),
+                Component.translatable("screen.coi.madness_y_offset"),
+                Component.literal("Madness Anchor"));
 
-        graphics.text(this.font, Component.translatable("screen.coi.slot_size"),
-                leftColumn, labelY - 15, 0xFFA0A0A0);
-        labelY += spacing;
-
-        graphics.text(this.font, Component.translatable("screen.coi.slot_spacing"),
-                leftColumn, labelY - 15, 0xFFA0A0A0);
-        labelY += spacing;
-
-        graphics.text(this.font, Component.translatable("screen.coi.hud_scale"),
-                leftColumn, labelY - 15, 0xFFA0A0A0);
-        labelY += spacing;
-
-        graphics.text(this.font, Component.translatable("screen.coi.wheel_slots"),
-                leftColumn, labelY - 15, 0xFFA0A0A0);
-        labelY += spacing;
-
-        graphics.text(this.font, Component.translatable("screen.coi.madness_y_offset"),
-                leftColumn, labelY - 15, 0xFFA0A0A0);
+        drawSection(graphics, "Display", layout.leftX, displayY - 14);
 
         if (!settings.enabled) {
             graphics.centeredText(this.font, Component.translatable("screen.coi.hud_disabled_warning").withStyle(ChatFormatting.RED),

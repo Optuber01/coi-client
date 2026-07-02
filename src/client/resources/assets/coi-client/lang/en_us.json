@@ -60,6 +60,8 @@
   "screen.coi.empty_slot": "Empty",
   "screen.coi.select_ability": "Select an Ability",
   "screen.coi.show_madness_bar": "Show Madness Bar",
+  "screen.coi.madness_x_offset": "Madness Horizontal Position",
+  "screen.coi.madness_x_offset_field": "Madness X",
   "screen.coi.madness_y_offset": "Madness Vertical Position",
   "screen.coi.madness_y_offset_field": "Madness Y"
 }
