@@ -227,7 +227,7 @@ public class AbilityBindingScreen extends Screen {
         graphics.text(this.font, label, x, y, 0xFFA0A0A0);
 
         if (!isWheel) {
-            graphics.text(this.font, "[" + key.tryCollapseToString() + "]", x + this.font.width(label) + 5, y, 0xFFFFFF55);
+            graphics.text(this.font, "Use [" + key.tryCollapseToString() + "]", x + this.font.width(label) + 5, y, 0xFFFFFF55);
         }
 
         String bound = isWheel ? CircleOfImaginationClient.getWheelAbility(slot) : CircleOfImaginationClient.getBoundAbility(slot);

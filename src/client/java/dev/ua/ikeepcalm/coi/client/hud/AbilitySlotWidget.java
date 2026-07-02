@@ -108,18 +108,19 @@ public class AbilitySlotWidget {
 
     private void renderAbilityIcon(GuiGraphicsExtractor context, int x, int y, int size) {
         if (abilityId == null) return;
+        String id = AbilityInfo.extractId(abilityId);
 
         int iconX = x + 3;
         int iconY = y + 3;
         int iconSize = size - 6;
 
         // Pathway-colored background behind the icon
-        int pathwayColor = getPathwayColor(abilityId);
+        int pathwayColor = getPathwayColor(id);
         context.fill(iconX, iconY, iconX + iconSize, iconY + iconSize, pathwayColor);
 
         // Category texture
         String cat = (category != null && !category.isEmpty()) ? category.toLowerCase() : "uncategorized";
-        String tier = getTierFromAbilityId(abilityId);
+        String tier = getTierFromAbilityId(id);
         Identifier texture = Identifier.fromNamespaceAndPath("coi-client", "textures/icons/" + cat + "/" + tier + ".png");
         context.blit(RenderPipelines.GUI_TEXTURED, texture, iconX, iconY, 0, 0, iconSize, iconSize, iconSize, iconSize);
     }
@@ -193,8 +194,7 @@ public class AbilitySlotWidget {
     private void renderAbilityName(GuiGraphicsExtractor context, Font textRenderer, int x, int y, int size) {
         if (abilityId == null) return;
 
-        AbilityInfo info = CircleOfImaginationClient.getAbilityInfo(AbilityInfo.extractId(abilityId));
-        String displayName = info != null ? info.englishName() : abilityName;
+        String displayName = AbilityInfo.extractDisplayName(abilityId);
         if (displayName == null) return;
 
         if (displayName.length() > 12) {
@@ -260,9 +260,8 @@ public class AbilitySlotWidget {
     public void setAbility(String abilityId) {
         this.abilityId = abilityId;
         if (abilityId != null && abilityId.contains(" - ")) {
-            String[] parts = abilityId.split(" - ", 2);
-            AbilityInfo info = CircleOfImaginationClient.getAbilityInfo(parts[0]);
-            this.abilityName = info != null ? info.englishName() : parts[1];
+            AbilityInfo info = CircleOfImaginationClient.getAbilityInfo(AbilityInfo.extractId(abilityId));
+            this.abilityName = AbilityInfo.extractDisplayName(abilityId);
             this.category = info != null ? info.category() : "uncategorized";
         } else {
             this.abilityName = null;

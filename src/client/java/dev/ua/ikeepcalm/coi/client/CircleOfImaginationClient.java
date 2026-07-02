@@ -291,14 +291,15 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     private static void useAbility(String abilityIdWithName) {
         if (abilityIdWithName == null) return;
 
-        String abilityId = abilityIdWithName.contains(" - ") ? abilityIdWithName.split(" - ")[0] : abilityIdWithName;
+        String abilityId = AbilityInfo.extractId(abilityIdWithName);
+        String action = AbilityInfo.extractAction(abilityIdWithName);
 
-        ClientPlayNetworking.send(new AbilityUsePayload(abilityId));
+        ClientPlayNetworking.send(new AbilityUsePayload(abilityId, action));
 
         AbilityInfo info = getAbilityInfo(abilityId);
         String displayName = info != null ? info.englishName() : AbilityInfo.extractDisplayName(abilityIdWithName);
         Minecraft client = Minecraft.getInstance();
-        if (client.player != null) {
+        if (client.player != null && AbilityInfo.ACTION_EXECUTE.equals(action)) {
             client.player.sendOverlayMessage(Component.translatable("notification.coi.ability_used", displayName));
         }
     }
@@ -323,10 +324,14 @@ public class CircleOfImaginationClient implements ClientModInitializer {
                     String localizedName = parts[1];
                     String englishName = parts.length > 2 ? parts[2] : localizedName;
                     String category = parts.length > 3 ? parts[3] : "uncategorized";
+                    boolean hasLeftClick = parts.length >= 5 && Boolean.parseBoolean(parts[4]);
 
-                    String formatted = id + " - " + englishName;
+                    String formatted = AbilityInfo.formatStored(id, englishName, AbilityInfo.ACTION_EXECUTE);
                     availableAbilities.add(formatted);
-                    abilityInfoMap.put(id, new AbilityInfo(id, localizedName, englishName, category));
+                    if (hasLeftClick) {
+                        availableAbilities.add(AbilityInfo.formatStored(id, englishName + " (Left Click)", AbilityInfo.ACTION_LEFT_CLICK));
+                    }
+                    abilityInfoMap.put(id, new AbilityInfo(id, localizedName, englishName, category, hasLeftClick));
                     System.out.println("COI Client: Added ability: " + formatted);
                 }
             }
@@ -354,11 +359,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         for (int i = 0; i < MAX_ABILITIES; i++) {
             if (boundAbilities[i] == null) continue;
 
-            String boundId = AbilityInfo.extractId(boundAbilities[i]);
-            String freshEntry = availableAbilities.stream()
-                    .filter(a -> a.startsWith(boundId + " - "))
-                    .findFirst()
-                    .orElse(null);
+            String freshEntry = findFreshAbilityEntry(boundAbilities[i]);
 
             if (freshEntry == null) {
                 System.out.println("COI Client: Clearing invalid bound ability: " + boundAbilities[i]);
@@ -373,11 +374,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         for (int i = 0; i < MAX_WHEEL_SIZE; i++) {
             if (wheelAbilities[i] == null) continue;
 
-            String boundId = AbilityInfo.extractId(wheelAbilities[i]);
-            String freshEntry = availableAbilities.stream()
-                    .filter(a -> a.startsWith(boundId + " - "))
-                    .findFirst()
-                    .orElse(null);
+            String freshEntry = findFreshAbilityEntry(wheelAbilities[i]);
 
             if (freshEntry == null) {
                 System.out.println("COI Client: Clearing invalid wheel ability: " + wheelAbilities[i]);
@@ -394,12 +391,27 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         }
     }
 
+    private static String findFreshAbilityEntry(String storedAbility) {
+        String boundId = AbilityInfo.extractId(storedAbility);
+        String boundAction = AbilityInfo.extractAction(storedAbility);
+        return availableAbilities.stream()
+                .filter(a -> Objects.equals(AbilityInfo.extractId(a), boundId))
+                .filter(a -> Objects.equals(AbilityInfo.extractAction(a), boundAction))
+                .findFirst()
+                .orElse(null);
+    }
+
     public static List<String> getAvailableAbilities() {
         return new ArrayList<>(availableAbilities);
     }
 
     public static AbilityInfo getAbilityInfo(String abilityId) {
         return abilityInfoMap.get(abilityId);
+    }
+
+    public static boolean hasLeftClick(String abilityIdWithName) {
+        AbilityInfo info = getAbilityInfo(AbilityInfo.extractId(abilityIdWithName));
+        return info != null && info.hasLeftClick();
     }
 
     public static String getBoundAbility(int slot) {

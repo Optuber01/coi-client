@@ -55,8 +55,10 @@ public class AbilityDropdownWidget extends AbstractWidget {
         String displayText;
         if (selected != null) {
             String selectedId = AbilityInfo.extractId(selected);
+            String selectedAction = AbilityInfo.extractAction(selected);
             displayText = options.stream()
-                    .filter(o -> o.startsWith(selectedId + " - "))
+                    .filter(o -> AbilityInfo.extractId(o).equals(selectedId))
+                    .filter(o -> AbilityInfo.extractAction(o).equals(selectedAction))
                     .findFirst()
                     .map(AbilityInfo::extractDisplayName)
                     .orElseGet(() -> AbilityInfo.extractDisplayName(selected));

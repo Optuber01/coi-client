@@ -126,9 +126,7 @@ public class AbilityWheelScreen extends Screen {
         if (selectedSlot != -1) {
             String abilityIdWithName = CircleOfImaginationClient.getWheelAbility(selectedSlot);
             if (abilityIdWithName != null) {
-                String id = AbilityInfo.extractId(abilityIdWithName);
-                AbilityInfo info = CircleOfImaginationClient.getAbilityInfo(id);
-                String name = info != null ? info.englishName() : AbilityInfo.extractDisplayName(abilityIdWithName);
+                String name = AbilityInfo.extractDisplayName(abilityIdWithName);
                 graphics.centeredText(this.font, Component.literal(name), centerX, centerY - 10, 0xFFFFFFFF);
             } else {
                 graphics.centeredText(this.font, Component.translatable("screen.coi.empty_slot"), centerX, centerY - 10, 0xFFAAAAAA);
