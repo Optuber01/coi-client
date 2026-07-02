@@ -17,15 +17,24 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * MMORPG-style world-space spell impact VFX: a soft core flash, expanding
+ * shockwave rings, radial light spikes and physical spark streaks composed
+ * per style. Rendered as emissive translucent geometry at the impact point;
+ * soft edges come from per-vertex alpha gradients (no textures needed).
+ *
+ * The optional screen component (scope=screen/both) is a single subtle
+ * accent-colored edge pulse — no full-screen frame flashing.
+ */
 public class ImpactFrameEffect implements VisualEffect {
 
     public static final String ID = "impact";
     private static final Identifier WHITE_TEXTURE = Identifier.fromNamespaceAndPath("coi-client", "textures/entity/white.png");
     private static final int FULL_BRIGHT = 0x00F000F0;
+    private static final long MIN_WORLD_DURATION = 450;
 
     private static final List<WorldImpact> ACTIVE_IMPACTS = new ArrayList<>();
     private static boolean initialized = false;
@@ -37,36 +46,28 @@ public class ImpactFrameEffect implements VisualEffect {
         if (initialized) return;
         initialized = true;
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (ACTIVE_IMPACTS.isEmpty()) return;
-
-            Iterator<WorldImpact> it = ACTIVE_IMPACTS.iterator();
-            while (it.hasNext()) {
-                WorldImpact impact = it.next();
-                impact.tick();
-                if (impact.isFinished()) {
-                    it.remove();
-                }
-            }
-        });
+        ClientTickEvents.END_CLIENT_TICK.register(client ->
+                ACTIVE_IMPACTS.removeIf(WorldImpact::isFinished));
 
         LevelRenderEvents.COLLECT_SUBMITS.register(context -> {
             if (ACTIVE_IMPACTS.isEmpty()) return;
 
+            PoseStack poseStack = context.poseStack();
+            Vec3 cameraPos = context.levelState().cameraRenderState.pos;
+            SubmitNodeCollector collector = context.submitNodeCollector();
+
             for (WorldImpact impact : new ArrayList<>(ACTIVE_IMPACTS)) {
-                PoseStack poseStack = context.poseStack();
-                Vec3 cameraPos = context.levelState().cameraRenderState.pos;
+                Vec3 camLocal = cameraPos.subtract(impact.position);
                 poseStack.pushPose();
                 poseStack.translate(
                         impact.position.x - cameraPos.x,
                         impact.position.y - cameraPos.y,
                         impact.position.z - cameraPos.z
                 );
-                SubmitNodeCollector collector = context.submitNodeCollector();
                 collector.order(900).submitCustomGeometry(
                         poseStack,
                         RenderTypes.entityTranslucentEmissive(WHITE_TEXTURE),
-                        (pose, consumer) -> impact.render(pose, consumer)
+                        (pose, consumer) -> impact.render(pose, consumer, camLocal)
                 );
                 poseStack.popPose();
             }
@@ -89,7 +90,7 @@ public class ImpactFrameEffect implements VisualEffect {
 
     @Override
     public String getDefaultParams() {
-        return "style=burst,scope=both,color=FFFFFF,accent=FF2200,intensity=0.85,radius=3.0,duration=320,frames=3";
+        return "style=burst,scope=world,color=FFFFFF,accent=FF7A22,intensity=0.85,radius=2.0,duration=900";
     }
 
     @Override
@@ -113,22 +114,26 @@ public class ImpactFrameEffect implements VisualEffect {
         if (activeParams == null) return;
 
         long elapsed = System.currentTimeMillis() - screenStartTime;
-        float progress = Math.min(1f, elapsed / (float) activeParams.duration);
-        int frame = Math.min(activeParams.frames - 1, (int) (progress * activeParams.frames));
-        float framePulse = 1f - Math.min(1f, (elapsed % Math.max(1, activeParams.duration / activeParams.frames)) / (float) Math.max(1, activeParams.duration / activeParams.frames));
-        float fade = Math.max(1f - easeOutCubic(progress), framePulse * 0.28f);
+        long pulseDuration = Math.min(activeParams.duration, 450);
+        if (elapsed > pulseDuration) return;
 
-        switch (activeParams.style) {
-            case "slash" -> renderSlashFrame(ctx, w, h, activeParams, frame, fade);
-            case "void" -> renderVoidFrame(ctx, w, h, activeParams, frame, fade);
-            case "holy" -> renderHolyFrame(ctx, w, h, activeParams, frame, fade);
-            case "pierce" -> renderPierceFrame(ctx, w, h, activeParams, frame, fade);
-            case "crush" -> renderCrushFrame(ctx, w, h, activeParams, frame, fade);
-            case "ripple" -> renderRippleFrame(ctx, w, h, activeParams, frame, fade);
-            case "fracture" -> renderFractureFrame(ctx, w, h, activeParams, frame, fade);
-            case "blood" -> renderBloodFrame(ctx, w, h, activeParams, frame, fade);
-            case "frost" -> renderFrostFrame(ctx, w, h, activeParams, frame, fade);
-            default -> renderBurstFrame(ctx, w, h, activeParams, frame, fade);
+        float fade = 1f - elapsed / (float) pulseDuration;
+        fade *= fade;
+
+        int accent = activeParams.accent;
+        int maxA = (int) (110 * activeParams.intensity * fade);
+        int vigH = (int) (h * 0.30f);
+        ctx.fillGradient(0, 0, w, vigH, argb(accent, maxA), argb(accent, 0));
+        ctx.fillGradient(0, h - vigH, w, h, argb(accent, 0), argb(accent, maxA));
+
+        // Left / right — banded strips (no horizontal gradient available)
+        int bands = 10;
+        int stepW = Math.max(1, (int) (w * 0.22f) / bands);
+        for (int i = 0; i < bands; i++) {
+            float t = (bands - i) / (float) bands;
+            int a = (int) (maxA * t * t);
+            ctx.fill(i * stepW, 0, i * stepW + stepW, h, argb(accent, a));
+            ctx.fill(w - i * stepW - stepW, 0, w - i * stepW, h, argb(accent, a));
         }
     }
 
@@ -143,341 +148,632 @@ public class ImpactFrameEffect implements VisualEffect {
         clearWorldImpacts();
     }
 
+    private record Spike(float angle, float lengthMul) {
+    }
+
+    private record Spark(float dirX, float dirY, float dirZ, float speed, float sizeMul, float lifeFrac, int colorIdx, float phase) {
+    }
+
+    private record Shard(float x, float z, float height, float width, boolean accented) {
+    }
+
     private static class WorldImpact {
         private final Vec3 position;
         private final int color;
         private final int accent;
-        private final String style;
         private final float intensity;
         private final float radius;
         private final long duration;
-        private final int frames;
-        private final long startTime;
-        private final List<LinePlane> lines = new ArrayList<>();
-        private int ageTicks;
+        private final long startTime = System.currentTimeMillis();
+
+        // Style composition
+        private float flashStrength;
+        private boolean delayedFlash;
+        private boolean flatFlash;
+        private boolean darkCore;
+        private int groundRingCount;
+        private int cameraRingCount;
+        private boolean implode;
+        private boolean lances;
+        private boolean pillar;
+        private boolean twinkle;
+        private float sparkGravity;
+        private float sparkWidthMul = 1f;
+        private boolean sparksInward;
+
+        private final List<Spike> spikes = new ArrayList<>();
+        private final List<Spark> sparks = new ArrayList<>();
+        private final List<Shard> shards = new ArrayList<>();
+        private final List<float[]> cracks = new ArrayList<>();
+        private float[] slashAngles = new float[0];
 
         private WorldImpact(ImpactParams params) {
             this.position = params.position;
             this.color = params.color;
             this.accent = params.accent;
-            this.style = params.style;
             this.intensity = params.intensity;
             this.radius = params.radius;
-            this.duration = params.duration;
-            this.frames = params.frames;
-            this.startTime = System.currentTimeMillis();
-            generateLines(params.seed);
-        }
+            this.duration = Math.max(MIN_WORLD_DURATION, params.duration);
 
-        private void tick() {
-            ageTicks++;
+            int spikeCount = 0;
+            int sparkCount = 0;
+            int shardCount = 0;
+            int crackCount = 0;
+            boolean jaggedSpikes = false;
+            float sparkSpeed = 0f;
+            float sparkUpBias = 0f;
+
+            switch (params.style) {
+                case "slash" -> {
+                    flashStrength = 0.45f;
+                    slashAngles = new float[]{-0.42f, 0.26f};
+                    sparkCount = 16;
+                    sparkSpeed = 8f;
+                    sparkGravity = 9f;
+                    sparkUpBias = 0.25f;
+                }
+                case "void" -> {
+                    flashStrength = 0.8f;
+                    delayedFlash = true;
+                    darkCore = true;
+                    implode = true;
+                    groundRingCount = 1;
+                    cameraRingCount = 2;
+                    sparkCount = 24;
+                    sparksInward = true;
+                }
+                case "holy" -> {
+                    flashStrength = 0.9f;
+                    pillar = true;
+                    groundRingCount = 1;
+                    spikeCount = 12;
+                    sparkCount = 22;
+                    sparkSpeed = 2.6f;
+                    sparkGravity = -3.5f;
+                    sparkUpBias = 0.85f;
+                }
+                case "pierce" -> {
+                    flashStrength = 0.7f;
+                    lances = true;
+                    cameraRingCount = 3;
+                    sparkCount = 12;
+                    sparkSpeed = 9f;
+                    sparkGravity = 6f;
+                    sparkUpBias = 0.2f;
+                }
+                case "crush" -> {
+                    flashStrength = 0.8f;
+                    flatFlash = true;
+                    groundRingCount = 2;
+                    crackCount = 7;
+                    sparkCount = 26;
+                    sparkSpeed = 5f;
+                    sparkGravity = 18f;
+                    sparkUpBias = 0.7f;
+                }
+                case "ripple" -> {
+                    flashStrength = 0.35f;
+                    groundRingCount = 3;
+                    cameraRingCount = 2;
+                    sparkCount = 8;
+                    sparkSpeed = 2f;
+                    sparkGravity = 0.5f;
+                    sparkUpBias = 0.3f;
+                }
+                case "fracture" -> {
+                    flashStrength = 0.8f;
+                    spikeCount = 14;
+                    jaggedSpikes = true;
+                    crackCount = 8;
+                    sparkCount = 20;
+                    sparkSpeed = 7f;
+                    sparkGravity = 10f;
+                    sparkUpBias = 0.45f;
+                    sparkWidthMul = 1.8f;
+                }
+                case "blood" -> {
+                    flashStrength = 0.55f;
+                    groundRingCount = 1;
+                    sparkCount = 34;
+                    sparkSpeed = 6.5f;
+                    sparkGravity = 16f;
+                    sparkUpBias = 0.55f;
+                    sparkWidthMul = 1.4f;
+                }
+                case "frost" -> {
+                    flashStrength = 0.5f;
+                    shardCount = 9;
+                    groundRingCount = 1;
+                    twinkle = true;
+                    sparkCount = 18;
+                    sparkSpeed = 1.8f;
+                    sparkGravity = 1.2f;
+                    sparkUpBias = 0.6f;
+                }
+                default -> {
+                    flashStrength = 1f;
+                    groundRingCount = 2;
+                    cameraRingCount = 1;
+                    spikeCount = 10;
+                    sparkCount = 30;
+                    sparkSpeed = 7f;
+                    sparkGravity = 11f;
+                    sparkUpBias = 0.45f;
+                }
+            }
+
+            Random rng = new Random(params.seed);
+
+            for (int i = 0; i < spikeCount; i++) {
+                float angle = (float) (Math.PI * 2 * i / spikeCount + rng.nextDouble() * 0.3);
+                float lengthMul = jaggedSpikes ? 0.45f + rng.nextFloat() * 0.75f : 0.85f + rng.nextFloat() * 0.3f;
+                spikes.add(new Spike(angle, lengthMul));
+            }
+
+            sparkCount = Math.round(sparkCount * (0.4f + 0.6f * intensity));
+            for (int i = 0; i < sparkCount; i++) {
+                float yaw = (float) (rng.nextDouble() * Math.PI * 2);
+                float up = clamp(sparkUpBias + (rng.nextFloat() - 0.5f) * 0.7f, -1f, 1f);
+                float horiz = (float) Math.sqrt(Math.max(0f, 1f - up * up));
+                sparks.add(new Spark(
+                        (float) Math.cos(yaw) * horiz, up, (float) Math.sin(yaw) * horiz,
+                        sparkSpeed * (0.55f + rng.nextFloat() * 0.75f),
+                        0.7f + rng.nextFloat() * 0.8f,
+                        0.55f + rng.nextFloat() * 0.45f,
+                        rng.nextInt(3),
+                        (float) (rng.nextDouble() * Math.PI * 2)
+                ));
+            }
+
+            for (int i = 0; i < shardCount; i++) {
+                float angle = (float) (Math.PI * 2 * i / shardCount + rng.nextDouble() * 0.6);
+                float dist = radius * (0.15f + rng.nextFloat() * 0.5f);
+                shards.add(new Shard(
+                        (float) Math.cos(angle) * dist,
+                        (float) Math.sin(angle) * dist,
+                        radius * (0.6f + rng.nextFloat() * 0.7f),
+                        radius * (0.08f + rng.nextFloat() * 0.07f),
+                        i % 2 == 0
+                ));
+            }
+
+            for (int i = 0; i < crackCount; i++) {
+                float angle = (float) (Math.PI * 2 * i / crackCount + (rng.nextDouble() - 0.5) * 0.5);
+                float totalLen = radius * (1.0f + rng.nextFloat());
+                float[] pts = new float[8];
+                float x = 0f, z = 0f;
+                for (int j = 1; j < 4; j++) {
+                    angle += (rng.nextFloat() - 0.5f) * 0.7f;
+                    x += (float) Math.cos(angle) * totalLen / 3f;
+                    z += (float) Math.sin(angle) * totalLen / 3f;
+                    pts[j * 2] = x;
+                    pts[j * 2 + 1] = z;
+                }
+                cracks.add(pts);
+            }
         }
 
         private boolean isFinished() {
             return System.currentTimeMillis() - startTime > duration;
         }
 
-        private void render(PoseStack.Pose pose, VertexConsumer consumer) {
-            float progress = Math.min(1f, (System.currentTimeMillis() - startTime) / (float) duration);
-            float fade = 1f - easeOutCubic(progress);
-            int frame = Math.min(frames - 1, (int) (progress * frames));
-            int main = frame % 2 == 0 ? color : 0x060606;
-            int alt = frame % 2 == 0 ? 0x050505 : accent;
+        private void render(PoseStack.Pose pose, VertexConsumer consumer, Vec3 camLocal) {
+            float p = Math.min(1f, (System.currentTimeMillis() - startTime) / (float) duration);
+            float energy = 0.55f + 0.45f * intensity;
 
-            float plateAlpha = (0.50f + 0.32f * intensity) * fade;
-            float ringAlpha = (0.72f + 0.20f * intensity) * fade;
-            float lineAlpha = (0.82f + 0.15f * intensity) * fade;
+            renderFlash(pose, consumer, p, energy);
+            renderGroundRings(pose, consumer, p, energy);
+            renderCameraRings(pose, consumer, p, energy);
+            renderSpikes(pose, consumer, p, energy);
+            renderLances(pose, consumer, p, energy);
+            renderSlashes(pose, consumer, p, energy);
+            renderPillar(pose, consumer, p, energy);
+            renderShards(pose, consumer, camLocal, p, energy);
+            renderCracks(pose, consumer, p, energy);
+            renderSparks(pose, consumer, camLocal, p, energy);
+        }
 
-            if (!"slash".equals(style) && !"pierce".equals(style) && !"crush".equals(style)) {
-                drawBillboardQuad(pose, consumer, radius * (2.0f + progress * 1.3f), main, plateAlpha);
-            }
-            if ("void".equals(style) || "fracture".equals(style)) {
-                drawDiamond(pose, consumer, radius * (1.25f + progress * 2.2f), 0x050505, ringAlpha);
+        private void renderFlash(PoseStack.Pose pose, VertexConsumer consumer, float p, float energy) {
+            if (flashStrength <= 0f) return;
+
+            float alpha;
+            float grow;
+            if (delayedFlash) {
+                // Void: implosion first, then the snap of light mid-way through
+                float pf = clamp((p - 0.35f) / 0.3f, 0f, 1f);
+                alpha = (pf <= 0f || pf >= 1f) ? 0f : 1f - Math.abs(2f * pf - 1f);
+                grow = easeOutCubic(pf);
             } else {
-                drawDiamond(pose, consumer, radius * (0.85f + progress * 1.8f), alt, ringAlpha);
+                float pf = clamp(p / 0.3f, 0f, 1f);
+                alpha = (1f - pf) * (1f - pf);
+                grow = easeOutCubic(pf);
             }
-            if (!"slash".equals(style) && !"pierce".equals(style)) {
-                drawRing(pose, consumer, radius * (0.35f + progress * 2.0f), radius * 0.055f, accent, ringAlpha);
-            }
-            if (!"holy".equals(style) && !"ripple".equals(style) && !"frost".equals(style)) {
-                drawSlashes(pose, consumer, radius, main, ringAlpha);
+            alpha *= flashStrength * energy;
+            if (alpha <= 0.01f) return;
+
+            if (flatFlash) {
+                drawGroundGlow(pose, consumer, radius * (0.5f + 1.3f * grow), 0.05f, accent, alpha * 0.8f);
+                return;
             }
 
-            for (LinePlane line : lines) {
-                float travel = radius * (0.35f + progress * 1.55f);
-                drawLinePlane(pose, consumer, line, travel, line.frameParity == frame % 2 ? alt : main, lineAlpha);
+            drawGlowDisc(pose, consumer, radius * (0.75f + 1.4f * grow), 0.02f, accent, alpha * 0.65f);
+            drawGlowDisc(pose, consumer, radius * (0.35f + 0.75f * grow), 0.03f, 0xFFFFFF, alpha);
+            if (darkCore) {
+                drawGlowDisc(pose, consumer, radius * (0.3f + 0.5f * grow), 0.04f, 0x05030A, Math.min(1f, alpha * 1.2f));
+            }
+        }
+
+        private void renderGroundRings(PoseStack.Pose pose, VertexConsumer consumer, float p, float energy) {
+            for (int i = 0; i < groundRingCount; i++) {
+                float delay = 0.10f * i;
+                float pr = clamp((p - delay) / (1f - delay), 0f, 1f);
+                if (pr <= 0f) continue;
+
+                float alpha = (float) Math.pow(1f - pr, 1.5) * 0.8f * energy;
+                if (alpha <= 0.01f) continue;
+
+                float r = implode
+                        ? radius * (0.15f + 2.0f * (1f - easeOutCubic(pr)))
+                        : radius * (0.2f + 2.0f * easeOutCubic(pr));
+                float thickness = radius * (0.18f - 0.08f * pr);
+                drawGroundRing(pose, consumer, r, thickness, 0.06f + 0.02f * i, i % 2 == 0 ? accent : color, alpha);
             }
         }
 
-        private void generateLines(long seed) {
-            Random rng = new Random(seed);
-            int count = Math.max(18, (int) (34 * intensity));
-            for (int i = 0; i < count; i++) {
-                double angle = Math.PI * 2 * i / count + rng.nextDouble() * 0.42;
-                float y = (rng.nextFloat() - 0.5f) * radius * 1.15f;
-                float length = radius * (0.55f + rng.nextFloat() * 0.75f);
-                float width = radius * (0.035f + rng.nextFloat() * 0.055f);
-                lines.add(new LinePlane((float) Math.cos(angle), y, (float) Math.sin(angle), length, width, i % 2));
+        private void renderCameraRings(PoseStack.Pose pose, VertexConsumer consumer, float p, float energy) {
+            for (int i = 0; i < cameraRingCount; i++) {
+                float delay = 0.08f * i;
+                float pr = clamp((p - delay) / (1f - delay), 0f, 1f);
+                if (pr <= 0f) continue;
+
+                float alpha = (float) Math.pow(1f - pr, 1.5) * 0.6f * energy;
+                if (alpha <= 0.01f) continue;
+
+                float r = implode
+                        ? radius * (0.12f + 1.7f * (1f - easeOutCubic(pr)))
+                        : radius * (0.15f + 1.7f * easeOutCubic(pr));
+                float thickness = radius * (0.14f - 0.06f * pr);
+                drawBillboardRing(pose, consumer, r, thickness, 0.05f + 0.01f * i, i % 2 == 0 ? accent : color, alpha);
             }
+        }
+
+        private void renderSpikes(PoseStack.Pose pose, VertexConsumer consumer, float p, float energy) {
+            if (spikes.isEmpty()) return;
+
+            float grow = easeOutCubic(clamp(p / 0.18f, 0f, 1f));
+            float alpha = (float) Math.pow(1f - clamp(p / 0.6f, 0f, 1f), 1.6) * energy;
+            if (alpha <= 0.01f) return;
+
+            PoseStack.Pose bp = billboard(pose);
+            int i = 0;
+            for (Spike spike : spikes) {
+                float length = radius * 1.9f * spike.lengthMul() * grow;
+                float width = radius * 0.05f * (1f + 0.5f * (1f - grow));
+                drawSpike(bp, consumer, spike.angle(), radius * 0.15f, radius * 0.15f + length, width, 0.06f,
+                        i++ % 2 == 0 ? 0xFFFFFF : accent, alpha);
+            }
+        }
+
+        private void renderLances(PoseStack.Pose pose, VertexConsumer consumer, float p, float energy) {
+            if (!lances) return;
+
+            float grow = easeOutCubic(clamp(p / 0.25f, 0f, 1f));
+            float alpha = (float) Math.pow(1f - clamp(p / 0.8f, 0f, 1f), 1.4) * energy;
+            if (alpha <= 0.01f) return;
+
+            PoseStack.Pose bp = billboard(pose);
+            float length = radius * 3.4f * grow;
+            drawSpike(bp, consumer, 0f, 0f, length, radius * 0.09f, 0.07f, accent, alpha);
+            drawSpike(bp, consumer, (float) Math.PI, 0f, length, radius * 0.09f, 0.07f, accent, alpha);
+            drawSpike(bp, consumer, 0f, 0f, length * 0.9f, radius * 0.035f, 0.08f, 0xFFFFFF, alpha);
+            drawSpike(bp, consumer, (float) Math.PI, 0f, length * 0.9f, radius * 0.035f, 0.08f, 0xFFFFFF, alpha);
+        }
+
+        private void renderSlashes(PoseStack.Pose pose, VertexConsumer consumer, float p, float energy) {
+            for (int i = 0; i < slashAngles.length; i++) {
+                float delay = 0.05f * i;
+                float grow = easeOutCubic(clamp((p - delay) / 0.12f, 0f, 1f));
+                if (grow <= 0f) continue;
+
+                float alpha = (float) Math.pow(1f - clamp((p - delay) / 0.5f, 0f, 1f), 1.5) * energy;
+                if (alpha <= 0.01f) continue;
+
+                float angle = slashAngles[i];
+                float length = radius * 1.8f * (0.5f + 0.5f * grow) * (i == 0 ? 1f : 0.72f);
+                float width = radius * 0.14f * (1f - 0.4f * p);
+                PoseStack.Pose bp = billboard(pose);
+                drawSpike(bp, consumer, angle, 0f, length, width, 0.08f, accent, alpha);
+                drawSpike(bp, consumer, angle + (float) Math.PI, 0f, length, width, 0.08f, accent, alpha);
+                drawSpike(bp, consumer, angle, 0f, length * 0.9f, width * 0.38f, 0.09f, 0xFFFFFF, alpha);
+                drawSpike(bp, consumer, angle + (float) Math.PI, 0f, length * 0.9f, width * 0.38f, 0.09f, 0xFFFFFF, alpha);
+            }
+        }
+
+        private void renderPillar(PoseStack.Pose pose, VertexConsumer consumer, float p, float energy) {
+            if (!pillar) return;
+
+            float grow = easeOutCubic(clamp(p / 0.2f, 0f, 1f));
+            float alpha = (float) Math.pow(1f - clamp((p - 0.3f) / 0.7f, 0f, 1f), 1.3) * energy;
+            if (alpha <= 0.01f) return;
+
+            float height = radius * 3.4f * grow;
+            float width = radius * 0.45f * (1f - 0.3f * p);
+            drawPillarPlane(pose, consumer, width, 0f, height, accent, alpha * 0.8f);
+            drawPillarPlane(pose, consumer, 0f, width, height, accent, alpha * 0.8f);
+            float core = width * 0.4f * 0.7071f;
+            drawPillarPlane(pose, consumer, core, core, height * 0.9f, 0xFFFFFF, alpha);
+            drawPillarPlane(pose, consumer, core, -core, height * 0.9f, 0xFFFFFF, alpha);
+            drawGroundGlow(pose, consumer, radius * (0.8f + 0.6f * grow), 0.04f, accent, alpha * 0.6f);
+        }
+
+        private void renderShards(PoseStack.Pose pose, VertexConsumer consumer, Vec3 camLocal, float p, float energy) {
+            if (shards.isEmpty()) return;
+
+            float grow = easeOutCubic(clamp(p / 0.22f, 0f, 1f));
+            float alpha = (float) Math.pow(1f - clamp((p - 0.45f) / 0.55f, 0f, 1f), 1.4) * energy;
+            if (alpha <= 0.01f) return;
+
+            for (Shard shard : shards) {
+                float dx = shard.x() - (float) camLocal.x;
+                float dz = shard.z() - (float) camLocal.z;
+                float len = (float) Math.sqrt(dx * dx + dz * dz);
+                if (len < 0.001f) continue;
+                float sx = -dz / len * shard.width();
+                float sz = dx / len * shard.width();
+                float tipY = shard.height() * grow;
+                int shardColor = shard.accented() ? accent : color;
+
+                addVertex(pose, consumer, shard.x() - sx, 0f, shard.z() - sz, shardColor, alpha * 0.9f, 0, 0, 0, 0, 1);
+                addVertex(pose, consumer, shard.x() + sx, 0f, shard.z() + sz, shardColor, alpha * 0.9f, 1, 0, 0, 0, 1);
+                addVertex(pose, consumer, shard.x(), tipY, shard.z(), 0xFFFFFF, alpha * 0.4f, 1, 1, 0, 0, 1);
+                addVertex(pose, consumer, shard.x(), tipY, shard.z(), 0xFFFFFF, alpha * 0.4f, 0, 1, 0, 0, 1);
+            }
+        }
+
+        private void renderCracks(PoseStack.Pose pose, VertexConsumer consumer, float p, float energy) {
+            if (cracks.isEmpty()) return;
+
+            float grow = easeOutCubic(clamp(p / 0.12f, 0f, 1f));
+            float alpha = (float) Math.pow(1f - clamp((p - 0.35f) / 0.65f, 0f, 1f), 1.2) * 0.9f * energy;
+            if (alpha <= 0.01f) return;
+
+            float baseWidth = radius * 0.05f;
+            for (float[] pts : cracks) {
+                for (int j = 0; j < 3; j++) {
+                    float x1 = pts[j * 2] * grow;
+                    float z1 = pts[j * 2 + 1] * grow;
+                    float x2 = pts[j * 2 + 2] * grow;
+                    float z2 = pts[j * 2 + 3] * grow;
+                    float dx = x2 - x1;
+                    float dz = z2 - z1;
+                    float len = (float) Math.sqrt(dx * dx + dz * dz);
+                    if (len < 0.001f) continue;
+                    float width = baseWidth * (1f - j * 0.28f);
+                    float sx = -dz / len * width;
+                    float sz = dx / len * width;
+
+                    addVertex(pose, consumer, x1 - sx, 0.04f, z1 - sz, accent, alpha, 0, 0, 0, 1, 0);
+                    addVertex(pose, consumer, x1 + sx, 0.04f, z1 + sz, accent, alpha, 1, 0, 0, 1, 0);
+                    addVertex(pose, consumer, x2 + sx, 0.04f, z2 + sz, accent, alpha * 0.7f, 1, 1, 0, 1, 0);
+                    addVertex(pose, consumer, x2 - sx, 0.04f, z2 - sz, accent, alpha * 0.7f, 0, 1, 0, 1, 0);
+                }
+            }
+        }
+
+        private void renderSparks(PoseStack.Pose pose, VertexConsumer consumer, Vec3 camLocal, float p, float energy) {
+            if (sparks.isEmpty()) return;
+
+            float t = (System.currentTimeMillis() - startTime) / 1000f;
+            float durationSec = duration / 1000f;
+
+            for (Spark spark : sparks) {
+                float life = durationSec * spark.lifeFrac();
+                float sp = t / life;
+                if (sp >= 1f) continue;
+
+                float alpha = (float) Math.pow(1f - sp, 0.9) * energy;
+                if (twinkle) {
+                    alpha *= 0.55f + 0.45f * (float) Math.sin(t * 30f + spark.phase());
+                }
+                if (alpha <= 0.01f) continue;
+
+                float[] head;
+                float[] tail;
+                if (sparksInward) {
+                    head = inwardPos(spark, sp);
+                    tail = inwardPos(spark, Math.max(0f, sp - 0.06f));
+                } else {
+                    head = ballisticPos(spark, t);
+                    tail = ballisticPos(spark, Math.max(0f, t - 0.05f));
+                }
+
+                float vx = head[0] - tail[0];
+                float vy = head[1] - tail[1];
+                float vz = head[2] - tail[2];
+                if (vx * vx + vy * vy + vz * vz < 1.0e-6f) {
+                    tail[0] = head[0] - spark.dirX() * 0.05f;
+                    tail[1] = head[1] - spark.dirY() * 0.05f;
+                    tail[2] = head[2] - spark.dirZ() * 0.05f;
+                    vx = head[0] - tail[0];
+                    vy = head[1] - tail[1];
+                    vz = head[2] - tail[2];
+                }
+
+                // Side vector = streak direction × view direction, so the quad always has thickness on screen
+                float wx = head[0] - (float) camLocal.x;
+                float wy = head[1] - (float) camLocal.y;
+                float wz = head[2] - (float) camLocal.z;
+                float cx = vy * wz - vz * wy;
+                float cy = vz * wx - vx * wz;
+                float cz = vx * wy - vy * wx;
+                float cLen = (float) Math.sqrt(cx * cx + cy * cy + cz * cz);
+                if (cLen < 1.0e-5f) {
+                    cx = -vz;
+                    cy = 0f;
+                    cz = vx;
+                    cLen = (float) Math.sqrt(cx * cx + cz * cz);
+                    if (cLen < 1.0e-5f) continue;
+                }
+                float width = radius * 0.045f * spark.sizeMul() * sparkWidthMul * (1f - 0.5f * sp);
+                cx = cx / cLen * width;
+                cy = cy / cLen * width;
+                cz = cz / cLen * width;
+
+                int sparkColor = switch (spark.colorIdx()) {
+                    case 0 -> 0xFFFFFF;
+                    case 1 -> accent;
+                    default -> color;
+                };
+
+                addVertex(pose, consumer, head[0] - cx, head[1] - cy, head[2] - cz, sparkColor, alpha, 0, 0, 0, 0, 1);
+                addVertex(pose, consumer, head[0] + cx, head[1] + cy, head[2] + cz, sparkColor, alpha, 1, 0, 0, 0, 1);
+                addVertex(pose, consumer, tail[0] + cx, tail[1] + cy, tail[2] + cz, sparkColor, alpha * 0.15f, 1, 1, 0, 0, 1);
+                addVertex(pose, consumer, tail[0] - cx, tail[1] - cy, tail[2] - cz, sparkColor, alpha * 0.15f, 0, 1, 0, 0, 1);
+            }
+        }
+
+        /**
+         * Analytic ballistic motion with horizontal drag, so sparks stay
+         * smooth at any framerate without per-tick integration.
+         */
+        private float[] ballisticPos(Spark spark, float t) {
+            float drag = 2.6f;
+            float travel = (1f - (float) Math.exp(-drag * t)) / drag;
+            return new float[]{
+                    spark.dirX() * spark.speed() * travel,
+                    spark.dirY() * spark.speed() * travel - 0.5f * sparkGravity * t * t,
+                    spark.dirZ() * spark.speed() * travel
+            };
+        }
+
+        private float[] inwardPos(Spark spark, float sp) {
+            float dist = radius * 1.25f * (1f - easeOutCubic(clamp(sp, 0f, 1f)));
+            return new float[]{spark.dirX() * dist, spark.dirY() * dist, spark.dirZ() * dist};
         }
     }
 
-    private record LinePlane(float dirX, float y, float dirZ, float length, float width, int frameParity) {
-    }
+    // ---- world-space drawing primitives -------------------------------------
 
-    private static void drawBillboardQuad(PoseStack.Pose pose, VertexConsumer consumer, float size, int color, float alpha) {
-        PoseStack stack = new PoseStack();
-        stack.mulPose(pose.pose());
-        faceCamera(stack);
-        PoseStack.Pose billboardPose = stack.last();
-        float half = size * 0.5f;
-        addVertex(billboardPose, consumer, -half, -half, 0, color, alpha, 0, 0, 0, 0, 1);
-        addVertex(billboardPose, consumer, half, -half, 0, color, alpha, 1, 0, 0, 0, 1);
-        addVertex(billboardPose, consumer, half, half, 0, color, alpha, 1, 1, 0, 0, 1);
-        addVertex(billboardPose, consumer, -half, half, 0, color, alpha, 0, 1, 0, 0, 1);
-    }
-
-    private static void drawDiamond(PoseStack.Pose pose, VertexConsumer consumer, float size, int color, float alpha) {
-        PoseStack stack = new PoseStack();
-        stack.mulPose(pose.pose());
-        faceCamera(stack);
-        stack.mulPose(Axis.ZP.rotationDegrees(45.0f));
-        PoseStack.Pose diamondPose = stack.last();
-        float half = size * 0.5f;
-        addVertex(diamondPose, consumer, -half, -half, 0.01f, color, alpha, 0, 0, 0, 0, 1);
-        addVertex(diamondPose, consumer, half, -half, 0.01f, color, alpha, 1, 0, 0, 0, 1);
-        addVertex(diamondPose, consumer, half, half, 0.01f, color, alpha, 1, 1, 0, 0, 1);
-        addVertex(diamondPose, consumer, -half, half, 0.01f, color, alpha, 0, 1, 0, 0, 1);
-    }
-
-    private static void drawRing(PoseStack.Pose pose, VertexConsumer consumer, float radius, float thickness, int color, float alpha) {
-        int segments = 40;
+    /**
+     * Camera-facing disc with a radial alpha gradient (bright center, transparent edge).
+     */
+    private static void drawGlowDisc(PoseStack.Pose pose, VertexConsumer consumer, float radius, float z, int color, float alpha) {
+        PoseStack.Pose bp = billboard(pose);
+        int segments = 24;
         for (int i = 0; i < segments; i++) {
             double a1 = Math.PI * 2 * i / segments;
             double a2 = Math.PI * 2 * (i + 1) / segments;
-            float ix1 = (float) Math.cos(a1) * (radius - thickness);
-            float iz1 = (float) Math.sin(a1) * (radius - thickness);
-            float ox1 = (float) Math.cos(a1) * (radius + thickness);
-            float oz1 = (float) Math.sin(a1) * (radius + thickness);
-            float ix2 = (float) Math.cos(a2) * (radius - thickness);
-            float iz2 = (float) Math.sin(a2) * (radius - thickness);
-            float ox2 = (float) Math.cos(a2) * (radius + thickness);
-            float oz2 = (float) Math.sin(a2) * (radius + thickness);
-
-            addVertex(pose, consumer, ix1, 0, iz1, color, alpha, 0, 0, 0, 1, 0);
-            addVertex(pose, consumer, ox1, 0, oz1, color, alpha, 1, 0, 0, 1, 0);
-            addVertex(pose, consumer, ox2, 0, oz2, color, alpha, 1, 1, 0, 1, 0);
-            addVertex(pose, consumer, ix2, 0, iz2, color, alpha, 0, 1, 0, 1, 0);
+            addVertex(bp, consumer, 0, 0, z, color, alpha, 0.5f, 0.5f, 0, 0, 1);
+            addVertex(bp, consumer, 0, 0, z, color, alpha, 0.5f, 0.5f, 0, 0, 1);
+            addVertex(bp, consumer, (float) Math.cos(a2) * radius, (float) Math.sin(a2) * radius, z, color, 0f, 1, 1, 0, 0, 1);
+            addVertex(bp, consumer, (float) Math.cos(a1) * radius, (float) Math.sin(a1) * radius, z, color, 0f, 0, 1, 0, 0, 1);
         }
     }
 
-    private static void drawSlashes(PoseStack.Pose pose, VertexConsumer consumer, float radius, int color, float alpha) {
-        drawSlash(pose, consumer, -25.0f, radius * 1.35f, radius * 0.16f, color, alpha);
-        drawSlash(pose, consumer, 18.0f, radius * 1.05f, radius * 0.11f, color, alpha * 0.75f);
+    /**
+     * Flat disc on the ground plane with a radial alpha gradient.
+     */
+    private static void drawGroundGlow(PoseStack.Pose pose, VertexConsumer consumer, float radius, float y, int color, float alpha) {
+        int segments = 24;
+        for (int i = 0; i < segments; i++) {
+            double a1 = Math.PI * 2 * i / segments;
+            double a2 = Math.PI * 2 * (i + 1) / segments;
+            addVertex(pose, consumer, 0, y, 0, color, alpha, 0.5f, 0.5f, 0, 1, 0);
+            addVertex(pose, consumer, 0, y, 0, color, alpha, 0.5f, 0.5f, 0, 1, 0);
+            addVertex(pose, consumer, (float) Math.cos(a2) * radius, y, (float) Math.sin(a2) * radius, color, 0f, 1, 1, 0, 1, 0);
+            addVertex(pose, consumer, (float) Math.cos(a1) * radius, y, (float) Math.sin(a1) * radius, color, 0f, 0, 1, 0, 1, 0);
+        }
     }
 
-    private static void drawSlash(PoseStack.Pose pose, VertexConsumer consumer, float degrees, float length, float width, int color, float alpha) {
+    /**
+     * Horizontal shockwave ring with soft inner and outer edges.
+     */
+    private static void drawGroundRing(PoseStack.Pose pose, VertexConsumer consumer, float radius, float thickness, float y, int color, float alpha) {
+        int segments = 48;
+        float rIn = Math.max(0.01f, radius - thickness);
+        float rOut = radius + thickness;
+        for (int i = 0; i < segments; i++) {
+            double a1 = Math.PI * 2 * i / segments;
+            double a2 = Math.PI * 2 * (i + 1) / segments;
+            float c1 = (float) Math.cos(a1);
+            float s1 = (float) Math.sin(a1);
+            float c2 = (float) Math.cos(a2);
+            float s2 = (float) Math.sin(a2);
+
+            addVertex(pose, consumer, c1 * rIn, y, s1 * rIn, color, 0f, 0, 0, 0, 1, 0);
+            addVertex(pose, consumer, c2 * rIn, y, s2 * rIn, color, 0f, 1, 0, 0, 1, 0);
+            addVertex(pose, consumer, c2 * radius, y, s2 * radius, color, alpha, 1, 1, 0, 1, 0);
+            addVertex(pose, consumer, c1 * radius, y, s1 * radius, color, alpha, 0, 1, 0, 1, 0);
+
+            addVertex(pose, consumer, c1 * radius, y, s1 * radius, color, alpha, 0, 0, 0, 1, 0);
+            addVertex(pose, consumer, c2 * radius, y, s2 * radius, color, alpha, 1, 0, 0, 1, 0);
+            addVertex(pose, consumer, c2 * rOut, y, s2 * rOut, color, 0f, 1, 1, 0, 1, 0);
+            addVertex(pose, consumer, c1 * rOut, y, s1 * rOut, color, 0f, 0, 1, 0, 1, 0);
+        }
+    }
+
+    /**
+     * Camera-facing shockwave ring with soft inner and outer edges.
+     */
+    private static void drawBillboardRing(PoseStack.Pose pose, VertexConsumer consumer, float radius, float thickness, float z, int color, float alpha) {
+        PoseStack.Pose bp = billboard(pose);
+        int segments = 48;
+        float rIn = Math.max(0.01f, radius - thickness);
+        float rOut = radius + thickness;
+        for (int i = 0; i < segments; i++) {
+            double a1 = Math.PI * 2 * i / segments;
+            double a2 = Math.PI * 2 * (i + 1) / segments;
+            float c1 = (float) Math.cos(a1);
+            float s1 = (float) Math.sin(a1);
+            float c2 = (float) Math.cos(a2);
+            float s2 = (float) Math.sin(a2);
+
+            addVertex(bp, consumer, c1 * rIn, s1 * rIn, z, color, 0f, 0, 0, 0, 0, 1);
+            addVertex(bp, consumer, c2 * rIn, s2 * rIn, z, color, 0f, 1, 0, 0, 0, 1);
+            addVertex(bp, consumer, c2 * radius, s2 * radius, z, color, alpha, 1, 1, 0, 0, 1);
+            addVertex(bp, consumer, c1 * radius, s1 * radius, z, color, alpha, 0, 1, 0, 0, 1);
+
+            addVertex(bp, consumer, c1 * radius, s1 * radius, z, color, alpha, 0, 0, 0, 0, 1);
+            addVertex(bp, consumer, c2 * radius, s2 * radius, z, color, alpha, 1, 0, 0, 0, 1);
+            addVertex(bp, consumer, c2 * rOut, s2 * rOut, z, color, 0f, 1, 1, 0, 0, 1);
+            addVertex(bp, consumer, c1 * rOut, s1 * rOut, z, color, 0f, 0, 1, 0, 0, 1);
+        }
+    }
+
+    /**
+     * Tapered ray in the billboard plane: full width/alpha at the base, a point at the tip.
+     */
+    private static void drawSpike(PoseStack.Pose bp, VertexConsumer consumer, float angle, float r0, float r1, float width, float z, int color, float alpha) {
+        float dx = (float) Math.cos(angle);
+        float dy = (float) Math.sin(angle);
+        float sx = -dy * width;
+        float sy = dx * width;
+
+        addVertex(bp, consumer, dx * r0 - sx, dy * r0 - sy, z, color, alpha, 0, 0, 0, 0, 1);
+        addVertex(bp, consumer, dx * r0 + sx, dy * r0 + sy, z, color, alpha, 1, 0, 0, 0, 1);
+        addVertex(bp, consumer, dx * r1, dy * r1, z, color, 0f, 1, 1, 0, 0, 1);
+        addVertex(bp, consumer, dx * r1, dy * r1, z, color, 0f, 0, 1, 0, 0, 1);
+    }
+
+    /**
+     * Vertical light plane spanning (-dx,-dz)→(dx,dz), bright at the base and fading to the top.
+     */
+    private static void drawPillarPlane(PoseStack.Pose pose, VertexConsumer consumer, float dx, float dz, float height, int color, float alpha) {
+        addVertex(pose, consumer, -dx, 0f, -dz, color, alpha, 0, 0, 0, 0, 1);
+        addVertex(pose, consumer, dx, 0f, dz, color, alpha, 1, 0, 0, 0, 1);
+        addVertex(pose, consumer, dx, height, dz, color, 0f, 1, 1, 0, 0, 1);
+        addVertex(pose, consumer, -dx, height, -dz, color, 0f, 0, 1, 0, 0, 1);
+    }
+
+    private static PoseStack.Pose billboard(PoseStack.Pose pose) {
         PoseStack stack = new PoseStack();
         stack.mulPose(pose.pose());
-        faceCamera(stack);
-        stack.mulPose(Axis.ZP.rotationDegrees(degrees));
-        PoseStack.Pose slashPose = stack.last();
-        addVertex(slashPose, consumer, -length, -width, 0.03f, color, alpha, 0, 0, 0, 0, 1);
-        addVertex(slashPose, consumer, length, -width, 0.03f, color, alpha, 1, 0, 0, 0, 1);
-        addVertex(slashPose, consumer, length, width, 0.03f, color, alpha, 1, 1, 0, 0, 1);
-        addVertex(slashPose, consumer, -length, width, 0.03f, color, alpha, 0, 1, 0, 0, 1);
-    }
-
-    private static void drawLinePlane(PoseStack.Pose pose, VertexConsumer consumer, LinePlane line, float travel, int color, float alpha) {
-        float startX = line.dirX * travel;
-        float startZ = line.dirZ * travel;
-        float endX = line.dirX * (travel + line.length);
-        float endZ = line.dirZ * (travel + line.length);
-        float sideX = -line.dirZ * line.width;
-        float sideZ = line.dirX * line.width;
-
-        addVertex(pose, consumer, startX - sideX, line.y, startZ - sideZ, color, alpha, 0, 0, 0, 1, 0);
-        addVertex(pose, consumer, endX - sideX, line.y, endZ - sideZ, color, alpha, 1, 0, 0, 1, 0);
-        addVertex(pose, consumer, endX + sideX, line.y, endZ + sideZ, color, alpha, 1, 1, 0, 1, 0);
-        addVertex(pose, consumer, startX + sideX, line.y, startZ + sideZ, color, alpha, 0, 1, 0, 1, 0);
-    }
-
-    private static void renderBurstFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        int main = frame % 2 == 0 ? params.color : 0x050505;
-        int accent = frame % 2 == 0 ? 0x050505 : params.accent;
-        ctx.fill(0, 0, w, h, argb(main, (int) (210 * params.intensity * fade)));
-        drawLetterbox(ctx, w, h, (int) (52 * params.intensity * fade));
-
-        int cx = w / 2;
-        int cy = h / 2;
-        int rays = Math.max(16, (int) (34 * params.intensity));
-        for (int i = 0; i < rays; i++) {
-            float angle = (float) (Math.PI * 2 * i / rays);
-            int len = (int) (Math.max(w, h) * (0.35f + 0.32f * ((i % 5) / 4f)));
-            int thick = 2 + (i % 3);
-            drawScreenLine(ctx, cx, cy, angle, len, thick, argb(accent, (int) (220 * fade)));
-        }
-
-        drawScreenLine(ctx, cx, cy, -0.28f, (int) (w * 0.34f), Math.max(8, h / 45), argb(params.accent, (int) (235 * fade)));
-        drawScreenLine(ctx, cx, cy, 0.22f, (int) (w * 0.22f), Math.max(5, h / 70), argb(params.color, (int) (200 * fade)));
-    }
-
-    private static void renderSlashFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        ctx.fill(0, 0, w, h, argb(frame % 2 == 0 ? 0x070707 : params.color, (int) (190 * params.intensity * fade)));
-        drawLetterbox(ctx, w, h, (int) (130 * fade));
-        int slashColor = argb(frame % 2 == 0 ? params.color : params.accent, (int) (255 * fade));
-        drawScreenLine(ctx, w / 2, h / 2, -0.55f, (int) (w * 0.70f), Math.max(14, h / 22), slashColor);
-        drawScreenLine(ctx, w / 2, h / 2 + h / 14, -0.55f, (int) (w * 0.48f), Math.max(6, h / 48), argb(0x050505, (int) (230 * fade)));
-        drawScreenLine(ctx, w / 2, h / 2 - h / 10, 0.35f, (int) (w * 0.32f), Math.max(5, h / 60), argb(params.accent, (int) (190 * fade)));
-    }
-
-    private static void renderVoidFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        ctx.fill(0, 0, w, h, argb(0x000000, (int) (235 * params.intensity * fade)));
-        int cx = w / 2;
-        int cy = h / 2;
-        int ringColor = argb(frame % 2 == 0 ? params.accent : params.color, (int) (220 * fade));
-        int rings = 4;
-        for (int i = 0; i < rings; i++) {
-            int rw = (int) (w * (0.10f + i * 0.085f + (1f - fade) * 0.12f));
-            int rh = (int) (h * (0.08f + i * 0.060f + (1f - fade) * 0.08f));
-            drawScreenRectOutline(ctx, cx - rw, cy - rh, cx + rw, cy + rh, Math.max(2, h / 130), ringColor);
-        }
-        drawScreenLine(ctx, cx, cy, 0f, (int) (w * 0.42f), Math.max(3, h / 95), argb(params.accent, (int) (170 * fade)));
-        drawScreenLine(ctx, cx, cy, (float) Math.PI / 2f, (int) (h * 0.35f), Math.max(3, h / 95), argb(params.accent, (int) (170 * fade)));
-    }
-
-    private static void renderHolyFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        ctx.fill(0, 0, w, h, argb(frame % 2 == 0 ? 0xFFF6AA : 0xFFFFFF, (int) (180 * params.intensity * fade)));
-        int cx = w / 2;
-        int cy = h / 2;
-        int gold = argb(params.accent, (int) (230 * fade));
-        drawScreenLine(ctx, cx, cy, 0f, (int) (w * 0.42f), Math.max(6, h / 42), gold);
-        drawScreenLine(ctx, cx, cy, (float) Math.PI / 2f, (int) (h * 0.42f), Math.max(6, h / 42), gold);
-        for (int i = 0; i < 12; i++) {
-            float angle = (float) (Math.PI * 2 * i / 12);
-            drawScreenLine(ctx, cx, cy, angle, (int) (Math.min(w, h) * 0.34f), Math.max(2, h / 110), argb(params.color, (int) (160 * fade)));
-        }
-    }
-
-    private static void renderPierceFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        int cx = w / 2;
-        int cy = h / 2;
-        ctx.fill(0, 0, w, h, argb(frame % 2 == 0 ? 0x050505 : params.color, (int) (170 * params.intensity * fade)));
-        drawLetterbox(ctx, w, h, (int) (155 * fade));
-        int lance = argb(frame % 2 == 0 ? params.color : params.accent, (int) (255 * fade));
-        drawScreenLine(ctx, cx, cy, 0f, (int) (w * 0.92f), Math.max(4, h / 44), lance);
-        drawScreenLine(ctx, cx, cy, (float) Math.PI / 2f, (int) (h * 0.46f), Math.max(2, h / 95), argb(params.accent, (int) (190 * fade)));
-        drawScreenRectOutline(ctx, cx - w / 18, cy - h / 12, cx + w / 18, cy + h / 12, Math.max(2, h / 110), argb(0x050505, (int) (235 * fade)));
-        drawScreenRectOutline(ctx, cx - w / 28, cy - h / 18, cx + w / 28, cy + h / 18, Math.max(1, h / 180), lance);
-    }
-
-    private static void renderCrushFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        int cx = w / 2;
-        int cy = h / 2;
-        int black = argb(0x000000, (int) (240 * params.intensity * fade));
-        int block = argb(frame % 2 == 0 ? params.color : params.accent, (int) (190 * fade));
-        ctx.fill(0, 0, w, h, argb(0x111111, (int) (145 * fade)));
-        int squeeze = (int) (h * (0.18f + 0.15f * fade));
-        ctx.fill(0, 0, w, squeeze, black);
-        ctx.fill(0, h - squeeze, w, h, black);
-        ctx.fill(0, cy - h / 16, w, cy + h / 16, block);
-        ctx.fill(cx - w / 5, cy - h / 5, cx + w / 5, cy + h / 5, argb(0x000000, (int) (165 * fade)));
-        drawScreenRectOutline(ctx, cx - w / 4, cy - h / 4, cx + w / 4, cy + h / 4, Math.max(4, h / 70), block);
-    }
-
-    private static void renderRippleFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        int cx = w / 2;
-        int cy = h / 2;
-        ctx.fill(0, 0, w, h, argb(frame % 2 == 0 ? params.color : 0x050505, (int) (135 * params.intensity * fade)));
-        int rings = 7;
-        for (int i = 0; i < rings; i++) {
-            float t = i / (float) rings;
-            int rw = (int) (w * (0.05f + t * 0.42f + (1f - fade) * 0.08f));
-            int rh = (int) (h * (0.04f + t * 0.32f + (1f - fade) * 0.06f));
-            int color = argb(i % 2 == 0 ? params.accent : params.color, (int) ((210 - i * 18) * fade));
-            drawScreenRectOutline(ctx, cx - rw, cy - rh, cx + rw, cy + rh, Math.max(1, h / 150), color);
-        }
-        for (int i = 0; i < 10; i++) {
-            float angle = (float) (Math.PI * 2 * i / 10);
-            drawScreenLine(ctx, cx, cy, angle, (int) (Math.min(w, h) * 0.22f), Math.max(1, h / 180), argb(params.accent, (int) (120 * fade)));
-        }
-    }
-
-    private static void renderFractureFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        int cx = w / 2;
-        int cy = h / 2;
-        ctx.fill(0, 0, w, h, argb(frame % 2 == 0 ? 0xF3F3F3 : 0x050505, (int) (185 * params.intensity * fade)));
-        int crack = argb(frame % 2 == 0 ? 0x050505 : params.accent, (int) (245 * fade));
-        drawScreenLine(ctx, cx, cy, -0.85f, (int) (w * 0.52f), Math.max(3, h / 95), crack);
-        drawScreenLine(ctx, cx - w / 8, cy - h / 12, 0.42f, (int) (w * 0.38f), Math.max(2, h / 115), crack);
-        drawScreenLine(ctx, cx + w / 9, cy + h / 10, 1.15f, (int) (h * 0.36f), Math.max(2, h / 130), crack);
-        drawScreenLine(ctx, cx - w / 5, cy + h / 9, -0.12f, (int) (w * 0.28f), Math.max(1, h / 150), crack);
-        drawScreenLine(ctx, cx + w / 5, cy - h / 7, -0.42f, (int) (w * 0.26f), Math.max(1, h / 150), crack);
-    }
-
-    private static void renderBloodFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        int red = frame % 2 == 0 ? 0x7A0000 : params.accent;
-        ctx.fill(0, 0, w, h, argb(red, (int) (205 * params.intensity * fade)));
-        drawLetterbox(ctx, w, h, (int) (165 * fade));
-        int cx = w / 2;
-        int cy = h / 2;
-        drawScreenLine(ctx, cx, cy, -0.38f, (int) (w * 0.65f), Math.max(16, h / 20), argb(0x150000, (int) (230 * fade)));
-        drawScreenLine(ctx, cx, cy, -0.38f, (int) (w * 0.55f), Math.max(6, h / 55), argb(params.color, (int) (150 * fade)));
-        for (int i = 0; i < 8; i++) {
-            int x = (i * 97) % w;
-            int top = (i * 37) % Math.max(1, h / 3);
-            int length = h / 8 + (i % 4) * h / 18;
-            ctx.fill(x, top, x + Math.max(2, w / 180), top + length, argb(0x2A0000, (int) (150 * fade)));
-        }
-    }
-
-    private static void renderFrostFrame(GuiGraphicsExtractor ctx, int w, int h, ImpactParams params, int frame, float fade) {
-        ctx.fill(0, 0, w, h, argb(frame % 2 == 0 ? 0xDDF8FF : 0xFFFFFF, (int) (165 * params.intensity * fade)));
-        int ice = argb(params.accent, (int) (220 * fade));
-        int cx = w / 2;
-        int cy = h / 2;
-        for (int i = 0; i < 12; i++) {
-            float angle = (float) (Math.PI * 2 * i / 12);
-            drawScreenLine(ctx, cx, cy, angle, (int) (Math.min(w, h) * (0.24f + (i % 3) * 0.045f)), Math.max(2, h / 120), ice);
-        }
-        drawScreenRectOutline(ctx, w / 18, h / 14, w - w / 18, h - h / 14, Math.max(3, h / 95), argb(0xEFFFFF, (int) (210 * fade)));
-        drawScreenRectOutline(ctx, w / 10, h / 8, w - w / 10, h - h / 8, Math.max(1, h / 170), ice);
-    }
-
-    private static void drawLetterbox(GuiGraphicsExtractor ctx, int w, int h, int alpha) {
-        int bar = Math.max(12, h / 9);
-        int color = argb(0x000000, alpha);
-        ctx.fill(0, 0, w, bar, color);
-        ctx.fill(0, h - bar, w, h, color);
-    }
-
-    private static void drawScreenRectOutline(GuiGraphicsExtractor ctx, int x1, int y1, int x2, int y2, int thickness, int color) {
-        ctx.fill(x1, y1, x2, y1 + thickness, color);
-        ctx.fill(x1, y2 - thickness, x2, y2, color);
-        ctx.fill(x1, y1, x1 + thickness, y2, color);
-        ctx.fill(x2 - thickness, y1, x2, y2, color);
-    }
-
-    private static void drawScreenLine(GuiGraphicsExtractor ctx, int cx, int cy, float angle, int length, int thickness, int color) {
-        var matrices = ctx.pose();
-        matrices.pushMatrix();
-        matrices.translate(cx, cy);
-        matrices.rotate(angle);
-        int half = length / 2;
-        int halfT = Math.max(1, thickness / 2);
-        ctx.fill(-half, -halfT, half, halfT, color);
-        matrices.popMatrix();
-    }
-
-    private static int argb(int rgb, int alpha) {
-        return (Math.max(0, Math.min(255, alpha)) << 24) | (rgb & 0xFFFFFF);
-    }
-
-    private static void faceCamera(PoseStack stack) {
         Entity camera = Minecraft.getInstance().getCameraEntity();
-        if (camera == null) return;
-        stack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
-        stack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        if (camera != null) {
+            stack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+            stack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        }
+        return stack.last();
     }
 
     private static void addVertex(PoseStack.Pose pose, VertexConsumer consumer, float x, float y, float z, int color, float alpha, float u, float v, float nx, float ny, float nz) {
@@ -493,22 +789,29 @@ public class ImpactFrameEffect implements VisualEffect {
                 .setNormal(pose, nx, ny, nz);
     }
 
+    private static int argb(int rgb, int alpha) {
+        return (Math.max(0, Math.min(255, alpha)) << 24) | (rgb & 0xFFFFFF);
+    }
+
     private static float easeOutCubic(float t) {
         float inv = 1f - t;
         return 1f - inv * inv * inv;
     }
 
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
     private static class ImpactParams {
         private Vec3 position;
         private String style = "burst";
-        private boolean screen = true;
+        private boolean screen = false;
         private boolean world = true;
         private int color = 0xFFFFFF;
-        private int accent = 0xFF2200;
+        private int accent = 0xFF7A22;
         private float intensity = 0.85f;
-        private float radius = 3.0f;
-        private long duration = 320;
-        private int frames = 3;
+        private float radius = 2.0f;
+        private long duration = 900;
         private long seed = System.nanoTime();
 
         private static ImpactParams parse(String params) {
@@ -529,7 +832,7 @@ public class ImpactFrameEffect implements VisualEffect {
                     case "style" -> parsed.style = value.toLowerCase();
                     case "scope" -> {
                         String scope = value.toLowerCase();
-                        parsed.screen = !"world".equals(scope);
+                        parsed.screen = "screen".equals(scope) || "both".equals(scope);
                         parsed.world = !"screen".equals(scope);
                     }
                     case "x" -> x = Double.parseDouble(value);
@@ -540,8 +843,8 @@ public class ImpactFrameEffect implements VisualEffect {
                     case "intensity" -> parsed.intensity = clamp(Float.parseFloat(value), 0f, 1f);
                     case "radius" -> parsed.radius = Math.max(0.25f, Float.parseFloat(value));
                     case "duration" -> parsed.duration = Math.max(80, Long.parseLong(value));
-                    case "frames" -> parsed.frames = Math.max(1, Math.min(8, Integer.parseInt(value)));
                     case "seed" -> parsed.seed = Long.parseLong(value);
+                    // "frames" is accepted and ignored for backwards compatibility
                 }
             }
 
@@ -566,9 +869,5 @@ public class ImpactFrameEffect implements VisualEffect {
                 position = camera.getEyePosition().add(camera.getLookAngle().scale(4.0));
             }
         }
-    }
-
-    private static float clamp(float value, float min, float max) {
-        return Math.max(min, Math.min(max, value));
     }
 }

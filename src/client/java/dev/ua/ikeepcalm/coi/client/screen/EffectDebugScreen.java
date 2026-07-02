@@ -67,7 +67,7 @@ public class EffectDebugScreen extends Screen {
                 String p = raw.isEmpty() ? defaultParams : raw;
                 if (ImpactFrameEffect.ID.equals(id)) {
                     if (raw.isEmpty()) {
-                        p = "style=burst,scope=both,color=FFFFFF,accent=FF2200,intensity=0.95,radius=4.0,duration=1400,frames=4";
+                        p = "style=burst,scope=world,color=FFFFFF,accent=FF7A22,intensity=0.95,radius=2.5,duration=1200";
                     }
                     EffectManager.triggerDebug(id, p);
                     onClose();

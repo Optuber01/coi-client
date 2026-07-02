@@ -38,7 +38,7 @@ public class EffectManager {
         REGISTRY.put(id, factory);
     }
 
-    private static final Set<String> PHOTOSENSITIVE_EFFECTS = Set.of(FlashEffect.ID, GlitchEffect.ID, HeartbeatEffect.ID, ImpactFrameEffect.ID);
+    private static final Set<String> PHOTOSENSITIVE_EFFECTS = Set.of(FlashEffect.ID, GlitchEffect.ID, HeartbeatEffect.ID);
 
     /**
      * Trigger an effect by id. Special cases:
