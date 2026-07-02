@@ -1,6 +1,7 @@
 package dev.ua.ikeepcalm.coi.client.screen;
 
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
+import dev.ua.ikeepcalm.coi.client.effects.impl.ImpactFrameEffect;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
 import dev.ua.ikeepcalm.coi.client.effects.VisualEffect;
 import net.minecraft.ChatFormatting;
@@ -64,7 +65,15 @@ public class EffectDebugScreen extends Screen {
             Button testBtn = Button.builder(Component.literal("Test"), btn -> {
                 String raw = paramsField.getValue().trim();
                 String p = raw.isEmpty() ? defaultParams : raw;
-                EffectManager.trigger(id, p);
+                if (ImpactFrameEffect.ID.equals(id)) {
+                    if (raw.isEmpty()) {
+                        p = "style=burst,scope=both,color=FFFFFF,accent=FF2200,intensity=0.95,radius=4.0,duration=1400,frames=4";
+                    }
+                    EffectManager.triggerDebug(id, p);
+                    onClose();
+                } else {
+                    EffectManager.trigger(id, p);
+                }
             }).bounds(panelX, rowY, BTN_W, 20).build();
             addRenderableWidget(testBtn);
 

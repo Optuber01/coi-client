@@ -214,6 +214,55 @@ effect("flash", "color=000000,intensity=0.8,duration=800")   // darkness flash
 
 ---
 
+### `impact`
+Client-rendered impact frame with configurable cinematic styles. It can draw a receiving-player screen impact frame, an optional in-world anchor, or both. Good for: spell hits, ultimates, parries, executions, divine reveals, void effects, and boss attacks.
+
+This effect is blocked when the player's epilepsy mode setting is enabled.
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `style` | see presets below | `burst` | Visual preset |
+| `scope` | `screen`, `world`, `both` | `both` | Whether to render the cinematic screen frame, world anchor, or both |
+| `x` | double | crosshair/front of camera | World X coordinate |
+| `y` | double | crosshair/front of camera | World Y coordinate |
+| `z` | double | crosshair/front of camera | World Z coordinate |
+| `color` | hex RGB (no `#`) | `FFFFFF` | Primary impact-frame geometry color |
+| `accent` | hex RGB (no `#`) | `FF2200` | Ring/slash/accent geometry color |
+| `intensity` | float 0-1 | `0.85` | Screen opacity, geometry opacity, and speed-line count |
+| `radius` | float | `3.0` | Approximate world radius in blocks |
+| `duration` | long ms | `320` | Total lifetime of the impact frame |
+| `frames` | int 1-8 | `3` | Number of alternating color frames |
+
+**Examples:**
+```
+effect("impact", "style=burst,scope=both,x=120.5,y=64.0,z=-33.5,color=FFFFFF,accent=FF2200,intensity=0.9,radius=2.5,duration=260,frames=3") // heavy hit
+effect("impact", "style=slash,scope=screen,x=120.5,y=64.0,z=-33.5,color=FFFFFF,accent=FF2200,intensity=0.95,duration=220,frames=3") // sword/cut/parry
+effect("impact", "style=holy,scope=both,x=120.5,y=64.0,z=-33.5,color=FFFFFF,accent=FFD966,intensity=0.85,radius=3.0,duration=360,frames=3") // sun/priest reveal
+effect("impact", "style=void,scope=both,x=120.5,y=64.0,z=-33.5,color=111111,accent=8B00FF,intensity=1.0,radius=4.0,duration=420,frames=4") // dark/fool finisher
+effect("impact", "style=pierce,scope=screen,color=FFFFFF,accent=66CCFF,intensity=0.9,duration=180,frames=2") // beam/lance hit
+effect("impact", "style=crush,scope=screen,color=FFFFFF,accent=555555,intensity=0.95,duration=280,frames=3") // gravity/blunt hit
+effect("impact", "style=ripple,scope=both,x=120.5,y=64.0,z=-33.5,color=FFFFFF,accent=00CCCC,intensity=0.75,radius=4.0,duration=460,frames=3") // spatial ripple
+effect("impact", "style=fracture,scope=screen,color=FFFFFF,accent=FF2200,intensity=0.85,duration=360,frames=3") // reality crack
+effect("impact", "style=blood,scope=screen,color=FFFFFF,accent=AA0000,intensity=0.9,duration=300,frames=3") // brutal/demoness hit
+effect("impact", "style=frost,scope=screen,color=FFFFFF,accent=AADDFF,intensity=0.8,duration=340,frames=3") // ice/freeze hit
+```
+
+Presets:
+- `burst`: general explosive hit, good default.
+- `slash`: cutting/parry/execution frame.
+- `void`: dark implosion or Fool/Door corruption.
+- `holy`: Sun/Priest reveal or purification.
+- `pierce`: beam, lance, bullet, or precise single-target hit.
+- `crush`: gravity, blunt force, suppression, or stun.
+- `ripple`: space-time distortion, teleport impact, barrier shock.
+- `fracture`: reality crack, glass break, catastrophic backlash.
+- `blood`: brutal hit, curse, sacrifice, Demoness-style impact.
+- `frost`: freeze, ice magic, time-stop cold snap.
+
+When tested from the debug screen without params, the client uses a longer `style=burst,scope=both` preview, closes the debug screen, and spawns the world anchor at the current crosshair hit position or about 4 blocks in front of the camera.
+
+---
+
 ## Combining Effects
 
 Effects are independent layers — multiple can be active simultaneously:
@@ -226,6 +275,10 @@ sendEffect(player, "cracks",     "intensity=0.6,pulse=true");
 
 // Teleportation: brief glitch
 sendEffect(player, "glitch", "intensity=0.8,duration=1500");
+
+// Big spell hit: impact frame plus a short pathway flash
+sendEffect(player, "impact", "style=burst,scope=both,x=120.5,y=64.0,z=-33.5,color=FFFFFF,accent=00CCCC,intensity=0.9,radius=2.5,duration=260,frames=3");
+sendEffect(player, "flash", "color=00CCCC,intensity=0.35,duration=450");
 
 // Clear everything on respawn / sanity restore
 sendEffect(player, "all", "stop");

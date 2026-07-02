@@ -28,6 +28,8 @@ public class EffectManager {
         register(WhispersEffect.ID, WhispersEffect::new);
         register(TunnelEffect.ID, TunnelEffect::new);
         register(FlashEffect.ID, FlashEffect::new);
+        register(ImpactFrameEffect.ID, ImpactFrameEffect::new);
+        ImpactFrameEffect.initializeWorldRenderer();
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Identifier.fromNamespaceAndPath("coi-client", "effects"), EffectManager::render);
     }
@@ -36,7 +38,7 @@ public class EffectManager {
         REGISTRY.put(id, factory);
     }
 
-    private static final Set<String> PHOTOSENSITIVE_EFFECTS = Set.of(FlashEffect.ID, GlitchEffect.ID, HeartbeatEffect.ID);
+    private static final Set<String> PHOTOSENSITIVE_EFFECTS = Set.of(FlashEffect.ID, GlitchEffect.ID, HeartbeatEffect.ID, ImpactFrameEffect.ID);
 
     /**
      * Trigger an effect by id. Special cases:
@@ -44,7 +46,18 @@ public class EffectManager {
      * effectId = "all"  → stop all active effects (params ignored)
      */
     public static void trigger(String effectId, String params) {
-        if (HudConfig.getSettings().epilepsyMode && PHOTOSENSITIVE_EFFECTS.contains(effectId)) return;
+        trigger(effectId, params, false);
+    }
+
+    public static void triggerDebug(String effectId, String params) {
+        trigger(effectId, params, true);
+    }
+
+    private static void trigger(String effectId, String params, boolean bypassPhotosensitiveGuard) {
+        if (!bypassPhotosensitiveGuard && HudConfig.getSettings().epilepsyMode && PHOTOSENSITIVE_EFFECTS.contains(effectId)) {
+            System.out.println("COI Effects: Skipped photosensitive effect '" + effectId + "' because epilepsy mode is enabled");
+            return;
+        }
 
         if ("all".equals(effectId)) {
             stopAll();
@@ -70,6 +83,10 @@ public class EffectManager {
     }
 
     public static void stopEffect(String effectId) {
+        if (ImpactFrameEffect.ID.equals(effectId)) {
+            ImpactFrameEffect.clearWorldImpacts();
+        }
+
         activeEffects.stream()
                 .filter(e -> e.getId().equals(effectId))
                 .forEach(VisualEffect::stop);
@@ -77,6 +94,7 @@ public class EffectManager {
     }
 
     public static void stopAll() {
+        ImpactFrameEffect.clearWorldImpacts();
         activeEffects.forEach(VisualEffect::stop);
         activeEffects.clear();
     }
