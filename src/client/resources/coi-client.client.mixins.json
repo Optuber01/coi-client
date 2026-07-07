@@ -4,13 +4,18 @@
   "package": "dev.ua.ikeepcalm.coi.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "AvatarRendererMixin",
+    "AvatarRenderStateMixin",
+    "EntityRendererAccessor",
+    "JoinMultiplayerScreenMixin",
     "LoadingOverlayMixin",
     "PlayerRendererMixin",
-    "EntityRendererAccessor",
-    "AvatarRenderStateMixin",
-    "AvatarRendererMixin"
+    "OnlineServerEntryMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "EntryInvoker"
+  ]
 }

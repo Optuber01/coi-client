@@ -45,7 +45,7 @@ public class SunForm implements MythicalCreatureForm {
         int organisms = 16;
         for (int i = 0; i < organisms; i++) {
             Random rand = new Random(i * 98765L);
-            float speed = 0.48f + rand.nextFloat() * 1.0f;
+            float speed = 0.48f + rand.nextFloat();
             float phase = rand.nextFloat() * 100f;
             float oAngle = time * 0.05f * speed + phase;
             float oH = 1.1f + rand.nextFloat() * 1.35f;
@@ -74,7 +74,7 @@ public class SunForm implements MythicalCreatureForm {
     }
 
     private void drawFirePart(PoseStack.Pose pose, VertexConsumer consumer,
-                               float x1, float y1, float z1, float x2, float y2, float z2, int light, boolean intense) {
+                              float x1, float y1, float z1, float x2, float y2, float z2, int light, boolean intense) {
         // Outer inferno (deep red)
         drawBox(pose, consumer, x1, y1, z1, x2, y2, z2, 1.0f, 0.28f, 0.0f, 0.20f, light);
         // Mid orange layer

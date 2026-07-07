@@ -1,11 +1,12 @@
 package dev.ua.ikeepcalm.coi.client.effects.impl;
 
 import dev.ua.ikeepcalm.coi.client.effects.VisualEffect;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class WhispersEffect implements VisualEffect {
 
@@ -29,13 +30,11 @@ public class WhispersEffect implements VisualEffect {
             "he is watching",
             "HE IS WATCHING11!!!!!1!!",
     };
-
+    private final List<Whisper> active = new ArrayList<>();
     private float intensity = 0.7f;
     private long duration = -1;
     private long startTime;
     private String[] textPool = DEFAULT_POOL;
-
-    private final List<Whisper> active = new ArrayList<>();
     private long nextSpawn = 0;
 
     @Override
@@ -78,13 +77,30 @@ public class WhispersEffect implements VisualEffect {
         for (Whisper wh : active) {
             long age = elapsed - wh.spawnTime;
             float a = computeAlpha(age, wh.lifetime);
-            if (a <= 0) continue;
 
-            // Encode alpha into the color — drawTextWithShadow respects ARGB
-            int alpha = (int) (200 * a * intensity);
-            int color = (alpha << 24) | 0xCCCCCC;
+            // Uneven candle-like flicker, plus rare hard dropouts
+            a *= 0.8f + 0.2f * (float) Math.sin(elapsed * 0.02 + wh.phase);
+            if (((elapsed / 90) + (long) (wh.phase * 100)) % 23 == 0) a *= 0.3f;
 
-            ctx.text(font, wh.text, wh.x, wh.y, color);
+            int alpha = (int) (210 * a * intensity);
+            if (alpha < 8) continue; // vanilla treats near-zero text alpha as opaque
+
+            // Whispers drift slowly, mostly upward, like escaping breath
+            float fx = wh.x + wh.driftX * age / 1000f;
+            float fy = wh.y + wh.driftY * age / 1000f;
+
+            int textW = font.width(wh.text);
+            var matrices = ctx.pose();
+            matrices.pushMatrix();
+            matrices.translate(fx, fy);
+            matrices.rotate(wh.rot);
+            matrices.scale(wh.scale, wh.scale);
+
+            // Ghost double-image behind the main text
+            ctx.text(font, wh.text, -textW / 2 + 2, 1, (alpha / 3 << 24) | (wh.rgb & 0xFFFFFF), false);
+            ctx.text(font, wh.text, -textW / 2, 0, (alpha << 24) | (wh.rgb & 0xFFFFFF), false);
+
+            matrices.popMatrix();
         }
     }
 
@@ -100,26 +116,38 @@ public class WhispersEffect implements VisualEffect {
         Random rng = new Random(elapsed ^ startTime);
         String text = textPool[rng.nextInt(textPool.length)];
 
-        var font = Minecraft.getInstance().font;
-        int textW = font.width(text);
+        // Shouted whispers read as a threat — tint them blood red
+        int upper = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (Character.isUpperCase(text.charAt(i))) upper++;
+        }
+        int rgb = upper >= 3 ? 0xC03333 : 0xCCCCCC;
 
-        // Prefer screen edges and mid-periphery; avoid exact center
-        int margin = 20;
-        int x, y;
-        int attempt = 0;
-        do {
-            x = margin + rng.nextInt(Math.max(1, w - margin * 2 - textW));
-            y = margin + rng.nextInt(Math.max(1, h - margin * 2 - 10));
-            attempt++;
-        } while (isTooClose(x, y) && attempt < 8);
+        // Prefer the periphery: reject candidates landing in the center box
+        int margin = 30;
+        int x = w / 2, y = h / 2;
+        for (int attempt = 0; attempt < 10; attempt++) {
+            x = margin + rng.nextInt(Math.max(1, w - margin * 2));
+            y = margin + rng.nextInt(Math.max(1, h - margin * 2));
+            boolean inCenter = x > w * 0.32f && x < w * 0.68f && y > h * 0.35f && y < h * 0.65f;
+            if (!inCenter && !isTooClose(x, y)) break;
+        }
 
-        long lifetime = 2000 + (long) (rng.nextFloat() * 2000);
-        active.add(new Whisper(text, x, y, elapsed, lifetime));
+        long lifetime = 2400 + (long) (rng.nextFloat() * 2600);
+        active.add(new Whisper(
+                text, x, y, elapsed, lifetime,
+                0.75f + rng.nextFloat() * 0.9f,
+                (rng.nextFloat() - 0.5f) * 0.24f,
+                (rng.nextFloat() - 0.5f) * 8f,
+                -3f - rng.nextFloat() * 5f,
+                rgb,
+                (float) (rng.nextDouble() * Math.PI * 2)
+        ));
     }
 
     private boolean isTooClose(int x, int y) {
         for (Whisper wh : active) {
-            if (Math.abs(wh.x - x) < 60 && Math.abs(wh.y - y) < 20) return true;
+            if (Math.abs(wh.x - x) < 70 && Math.abs(wh.y - y) < 24) return true;
         }
         return false;
     }
@@ -146,6 +174,7 @@ public class WhispersEffect implements VisualEffect {
         }
     }
 
-    private record Whisper(String text, int x, int y, long spawnTime, long lifetime) {
+    private record Whisper(String text, float x, float y, long spawnTime, long lifetime,
+                           float scale, float rot, float driftX, float driftY, int rgb, float phase) {
     }
 }

@@ -23,15 +23,15 @@ public class AbyssForm implements MythicalCreatureForm {
 
         // 9 shifting flesh blobs distributed along the humanoid silhouette
         float[][] blobCenters = {
-            {0.20f, 0.48f},  // right leg
-            {-0.20f, 0.48f}, // left leg
-            {0.0f, 1.18f},   // lower torso
-            {0.0f, 1.68f},   // upper torso
-            {0.56f, 1.45f},  // right arm
-            {-0.56f, 1.45f}, // left arm
-            {0.0f, 2.25f},   // head
-            {0.28f, 0.88f},  // right hip
-            {-0.28f, 0.88f}, // left hip
+                {0.20f, 0.48f},  // right leg
+                {-0.20f, 0.48f}, // left leg
+                {0.0f, 1.18f},   // lower torso
+                {0.0f, 1.68f},   // upper torso
+                {0.56f, 1.45f},  // right arm
+                {-0.56f, 1.45f}, // left arm
+                {0.0f, 2.25f},   // head
+                {0.28f, 0.88f},  // right hip
+                {-0.28f, 0.88f}, // left hip
         };
 
         for (int i = 0; i < blobCenters.length; i++) {

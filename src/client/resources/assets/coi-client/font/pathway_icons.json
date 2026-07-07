@@ -1,29 +1,229 @@
 {
   "providers": [
-    { "type": "bitmap", "file": "coi-client:pathways/abyss.png",       "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/eternalaeon.png",  "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/chained.png",      "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/darkness.png",     "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/death.png",        "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/demoness.png",     "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/door.png",         "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/emperor.png",      "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/error.png",        "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/fool.png",         "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/fortune.png",      "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/giant.png",        "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/hanged.png",       "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/hermit.png",       "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/justiciar.png",    "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/moon.png",         "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/mother.png",       "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/paragon.png",      "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/patriarch.png",    "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/priest.png",       "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/sublunary.png",    "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/sun.png",          "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/tower.png",        "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/tyrant.png",       "ascent": 8, "height": 9, "chars": [""] },
-    { "type": "bitmap", "file": "coi-client:pathways/visionary.png",    "ascent": 8, "height": 9, "chars": [""] }
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/abyss.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/eternalaeon.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/chained.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/darkness.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/death.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/demoness.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/door.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/emperor.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/error.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/fool.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/fortune.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/giant.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/hanged.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/hermit.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/justiciar.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/moon.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/mother.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/paragon.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/patriarch.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/priest.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/sublunary.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/sun.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/tower.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/tyrant.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "coi-client:pathways/visionary.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": [
+        ""
+      ]
+    }
   ]
 }

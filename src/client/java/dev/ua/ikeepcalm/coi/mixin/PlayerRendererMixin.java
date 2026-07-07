@@ -26,35 +26,6 @@ public abstract class PlayerRendererMixin {
     @Unique
     private static final float COI_MYTHICAL_WALK_EPSILON = 0.015F;
 
-    @Inject(method = "submit", at = @At("HEAD"), cancellable = true)
-    private void coi$renderMythicalForm(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState, CallbackInfo ci) {
-        if (state instanceof AvatarRenderState avatarState) {
-            String playerUuid = ((AvatarRenderStateAccessor) avatarState).coi$getPlayerUuid();
-            if (playerUuid != null) {
-                String form = MythicalFormManager.getForm(playerUuid);
-                if (form != null) {
-                    poseStack.pushPose();
-                    poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - state.bodyRot));
-                    coi$applyMythicalWalkAnimation(state, poseStack);
-
-                    collector.order(0).submitCustomGeometry(
-                            poseStack,
-                            RenderTypes.entityTranslucent(Identifier.fromNamespaceAndPath("coi-client", "textures/entity/white.png")),
-                            (pose, consumer) -> MythicalFormManager.renderFormSubmit(form, avatarState, pose, consumer)
-                    );
-                    coi$submitMythicalHeldItems(avatarState, poseStack, collector);
-
-                    poseStack.popPose();
-
-                    // Preserve the name tag display via accessor invoker
-                    ((EntityRendererAccessor) this).callSubmitNameDisplay(avatarState, poseStack, collector, cameraState);
-
-                    ci.cancel();
-                }
-            }
-        }
-    }
-
     @Unique
     private static void coi$applyMythicalWalkAnimation(LivingEntityRenderState state, PoseStack poseStack) {
         float walkAmount = Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
@@ -102,5 +73,34 @@ public abstract class PlayerRendererMixin {
         }
 
         poseStack.popPose();
+    }
+
+    @Inject(method = "submit*", at = @At("HEAD"), cancellable = true)
+    private void coi$renderMythicalForm(LivingEntityRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState, CallbackInfo ci) {
+        if (state instanceof AvatarRenderState avatarState) {
+            String playerUuid = ((AvatarRenderStateAccessor) avatarState).coi$getPlayerUuid();
+            if (playerUuid != null) {
+                String form = MythicalFormManager.getForm(playerUuid);
+                if (form != null) {
+                    poseStack.pushPose();
+                    poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - state.bodyRot));
+                    coi$applyMythicalWalkAnimation(state, poseStack);
+
+                    collector.order(0).submitCustomGeometry(
+                            poseStack,
+                            RenderTypes.entityTranslucent(Identifier.fromNamespaceAndPath("coi-client", "textures/entity/white.png")),
+                            (pose, consumer) -> MythicalFormManager.renderFormSubmit(form, avatarState, pose, consumer)
+                    );
+                    coi$submitMythicalHeldItems(avatarState, poseStack, collector);
+
+                    poseStack.popPose();
+
+                    // Preserve the name tag display via accessor invoker
+                    ((EntityRendererAccessor) this).callSubmitNameDisplay(avatarState, poseStack, collector, cameraState);
+
+                    ci.cancel();
+                }
+            }
+        }
     }
 }

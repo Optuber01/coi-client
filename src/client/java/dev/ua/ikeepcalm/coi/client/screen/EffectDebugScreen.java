@@ -1,9 +1,10 @@
 package dev.ua.ikeepcalm.coi.client.screen;
 
+import dev.ua.ikeepcalm.coi.client.ClientBeyonderState;
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
+import dev.ua.ikeepcalm.coi.client.effects.VisualEffect;
 import dev.ua.ikeepcalm.coi.client.effects.impl.ImpactFrameEffect;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
-import dev.ua.ikeepcalm.coi.client.effects.VisualEffect;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -28,12 +29,54 @@ public class EffectDebugScreen extends Screen {
     private static final int PANEL_W = 440;
 
     private final Screen parent;
-    private EditBox paramsField;
     private final List<EffectRow> rows = new ArrayList<>();
+    private EditBox paramsField;
+    private int madnessRowY;
 
     public EffectDebugScreen(Screen parent) {
         super(Component.literal("Visual Effects — Debug"));
         this.parent = parent;
+    }
+
+    private static void addMadness(double delta) {
+        setMadness(ClientBeyonderState.getMadness() + delta);
+    }
+
+    /**
+     * Jumps to the next stage threshold: 0 → 25 → 50 → 75 → 100 → 0.
+     */
+    private static void cycleStage() {
+        double m = ClientBeyonderState.getMadness();
+        double next;
+        if (m < 25) next = 25;
+        else if (m < 50) next = 50;
+        else if (m < 75) next = 75;
+        else if (m < 100) next = 100;
+        else next = 0;
+        setMadness(next);
+    }
+
+    private static void addPermMadness(double delta) {
+        double perm = Math.clamp(ClientBeyonderState.getPermanentMadness() + delta, 0.0, 100.0);
+        ClientBeyonderState.updateConditions(
+                ClientBeyonderState.getMadness(),
+                perm,
+                ClientBeyonderState.getFreezeStacks(),
+                ClientBeyonderState.getMentalPressure(),
+                ClientBeyonderState.getTiredness());
+    }
+
+    /**
+     * Sets madness via updateConditions so increases also trigger the
+     * bar's flash/shake animation, exactly like a server update would.
+     */
+    private static void setMadness(double value) {
+        ClientBeyonderState.updateConditions(
+                Math.clamp(value, 0.0, 100.0),
+                ClientBeyonderState.getPermanentMadness(),
+                ClientBeyonderState.getFreezeStacks(),
+                ClientBeyonderState.getMentalPressure(),
+                ClientBeyonderState.getTiredness());
     }
 
     @Override
@@ -92,10 +135,24 @@ public class EffectDebugScreen extends Screen {
 
         y += 6;
 
+        // Madness debug controls — exercise the madness bar stages without a server
+        madnessRowY = y;
+        addRenderableWidget(Button.builder(Component.literal("-10"), btn -> addMadness(-10))
+                .bounds(panelX, madnessRowY, 40, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("+10"), btn -> addMadness(10))
+                .bounds(panelX + 44, madnessRowY, 40, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Cycle Stage"), btn -> cycleStage())
+                .bounds(panelX + 88, madnessRowY, 80, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Perm +10"), btn -> addPermMadness(10))
+                .bounds(panelX + 172, madnessRowY, 70, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Reset"), btn -> ClientBeyonderState.reset())
+                .bounds(panelX + 246, madnessRowY, 50, 20).build());
+        y += 26;
+
         int formY = y;
         java.util.List<String> forms = MythicalFormManager.getRegisteredPathwayNames();
         String currentForm = (minecraft != null && minecraft.player != null) ? MythicalFormManager.getForm(minecraft.player.getName().getString()) : null;
-        final int[] activeIndex = { -1 };
+        final int[] activeIndex = {-1};
         if (currentForm != null) {
             for (int i = 0; i < forms.size(); i++) {
                 if (forms.get(i).equalsIgnoreCase(currentForm)) {
@@ -138,7 +195,7 @@ public class EffectDebugScreen extends Screen {
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         // Semi-transparent panel behind controls (no blur — world is still rendering)
         int panelX = (this.width - PANEL_W) / 2;
-        int panelH = 50 + EffectManager.getRegistry().size() * ROW_H + 34 + 26;
+        int panelH = 50 + EffectManager.getRegistry().size() * ROW_H + 34 + 26 + 26;
         graphics.fill(panelX - 8, 8, panelX + PANEL_W + 8, 8 + panelH, 0xCC000000);
 
         super.extractRenderState(graphics, mouseX, mouseY, a);
@@ -159,6 +216,14 @@ public class EffectDebugScreen extends Screen {
             graphics.text(font, Component.literal(indicator + row.displayName).withStyle(active ? ChatFormatting.GREEN : ChatFormatting.GRAY),
                     row.labelX, row.y + 6, nameColor);
         }
+
+        // Live madness readout next to the debug controls
+        double m = ClientBeyonderState.getMadness();
+        int stage = m >= 100 ? 4 : m >= 75 ? 3 : m >= 50 ? 2 : m >= 25 ? 1 : 0;
+        String madnessLabel = String.format("Madness %.0f%% · S%d (Min %.0f%%)",
+                m, stage, ClientBeyonderState.getPermanentMadness());
+        graphics.text(font, Component.literal(madnessLabel).withStyle(ChatFormatting.LIGHT_PURPLE),
+                panelX + 300, madnessRowY + 6, 0xFFFFFFFF);
     }
 
     @Override

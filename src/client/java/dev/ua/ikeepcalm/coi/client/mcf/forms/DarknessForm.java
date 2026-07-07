@@ -65,7 +65,7 @@ public class DarknessForm implements MythicalCreatureForm {
                 ey = 2.0f + rand.nextFloat() * 0.5f + bodyBob;
                 ez = -0.24f - rand.nextFloat() * 0.04f;
             } else { // eyes covering the torso and arms
-                ex = (rand.nextFloat() - 0.5f) * 1.0f;
+                ex = (rand.nextFloat() - 0.5f);
                 ey = 1.0f + rand.nextFloat() * 0.9f + bodyBob;
                 ez = (rand.nextFloat() - 0.5f) * 0.62f;
             }

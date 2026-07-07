@@ -65,8 +65,8 @@ public class TowerForm implements MythicalCreatureForm {
     }
 
     private void drawLightPillar(PoseStack.Pose pose, VertexConsumer consumer,
-                                  float x1, float y1, float z1, float x2, float y2, float z2,
-                                  float pulse, int light) {
+                                 float x1, float y1, float z1, float x2, float y2, float z2,
+                                 float pulse, int light) {
         drawBox(pose, consumer, x1, y1, z1, x2, y2, z2, 1.0f, 1.0f, 0.92f, 0.42f + pulse, light);
         float s = 0.055f;
         drawBox(pose, consumer, x1 + s, y1 + s, z1 + s, x2 - s, y2 - s, z2 - s, 1.0f, 1.0f, 1.0f, 0.75f + pulse, light);

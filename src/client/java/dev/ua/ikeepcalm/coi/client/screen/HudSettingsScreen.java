@@ -17,17 +17,19 @@ import java.util.function.IntConsumer;
 
 public class HudSettingsScreen extends Screen {
 
+    private static final String[] PRESETS = {"Default", "Compact", "Large", "Minimal"};
+    private static final String[] ANCHORS = {"TOP_LEFT", "TOP_CENTER", "BOTTOM_LEFT", "BOTTOM_CENTER"};
+    private static final int ROW_SPACING = 35;
+    private static final int FIELD_WIDTH = 52;
+    private static final int SECTION_GAP = 24;
     private final Screen parent;
     private HudConfig.HudSettings settings;
-
     private Checkbox enabledCheckbox;
-
     private Checkbox showKeybindsCheckbox;
     private Checkbox showAbilityNamesCheckbox;
     private Checkbox showGlowEffectCheckbox;
     private Checkbox epilepsyModeCheckbox;
     private Checkbox showMadnessBarCheckbox;
-
     private EditBox hudXField;
     private EditBox hudYOffsetField;
     private EditBox slotSizeField;
@@ -36,16 +38,10 @@ public class HudSettingsScreen extends Screen {
     private EditBox wheelSlotsField;
     private EditBox madnessXOffsetField;
     private EditBox madnessYOffsetField;
-
     private Button resetButton;
     private Button presetButton;
     private Button madnessAnchorButton;
     private int currentPreset = 0;
-    private static final String[] PRESETS = {"Default", "Compact", "Large", "Minimal"};
-    private static final String[] ANCHORS = {"TOP_LEFT", "TOP_CENTER", "BOTTOM_LEFT", "BOTTOM_CENTER"};
-    private static final int ROW_SPACING = 35;
-    private static final int FIELD_WIDTH = 52;
-    private static final int SECTION_GAP = 24;
 
     public HudSettingsScreen(Screen parent) {
         super(Component.translatable("screen.coi.hud_settings"));
@@ -169,9 +165,6 @@ public class HudSettingsScreen extends Screen {
         for (int i = 0; i < labels.length; i++) {
             graphics.text(this.font, labels[i], x, firstY + i * ROW_SPACING - 12, 0xFFA0A0A0);
         }
-    }
-
-    private record SettingsLayout(boolean twoColumns, int leftX, int rightX, int columnWidth, int sliderWidth, int buttonY, int topY) {
     }
 
     @Override
@@ -418,5 +411,9 @@ public class HudSettingsScreen extends Screen {
     @Override
     public void onClose() {
         this.minecraft.setScreen(this.parent);
+    }
+
+    private record SettingsLayout(boolean twoColumns, int leftX, int rightX, int columnWidth, int sliderWidth,
+                                  int buttonY, int topY) {
     }
 }

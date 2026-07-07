@@ -18,14 +18,14 @@ import java.util.function.Supplier;
 
 public class AbilityDropdownWidget extends AbstractWidget {
 
+    private static final int ITEM_HEIGHT = 20;
+    private static final int MAX_VISIBLE_ITEMS = 5;
     private final Supplier<List<String>> optionsSupplier;
     private final Consumer<String> onSelect;
     private String selected;
     private boolean expanded = false;
     private int hoveredIndex = -1;
     private int scrollOffset = 0;
-    private static final int ITEM_HEIGHT = 20;
-    private static final int MAX_VISIBLE_ITEMS = 5;
 
     public AbilityDropdownWidget(int x, int y, int width, int height,
                                  Supplier<List<String>> optionsSupplier, String currentSelection,

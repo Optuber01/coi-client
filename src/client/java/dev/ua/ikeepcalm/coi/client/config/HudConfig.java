@@ -18,24 +18,6 @@ public class HudConfig {
 
     private static HudSettings settings = new HudSettings();
 
-    public static class HudSettings {
-        public boolean enabled = true;
-        public int hudX = 10;
-        public int hudYOffset = 60;
-        public int slotSize = 40;
-        public int slotSpacing = 50;
-        public boolean showKeybinds = true;
-        public boolean showAbilityNames = true;
-        public boolean showGlowEffect = true;
-        public float hudScale = 1.0f;
-        public int wheelSlots = 8;
-        public boolean epilepsyMode = false;
-        public boolean showMadnessBar = true;
-        public int madnessXOffset = 0;
-        public int madnessYOffset = 55;
-        public String madnessAnchor = "TOP_LEFT";
-    }
-
     public static void load() {
         if (Files.exists(CONFIG_PATH)) {
             try {
@@ -102,5 +84,23 @@ public class HudConfig {
     public static void resetToDefaults() {
         settings = new HudSettings();
         save();
+    }
+
+    public static class HudSettings {
+        public boolean enabled = true;
+        public int hudX = 10;
+        public int hudYOffset = 60;
+        public int slotSize = 40;
+        public int slotSpacing = 50;
+        public boolean showKeybinds = true;
+        public boolean showAbilityNames = true;
+        public boolean showGlowEffect = true;
+        public float hudScale = 1.0f;
+        public int wheelSlots = 8;
+        public boolean epilepsyMode = false;
+        public boolean showMadnessBar = true;
+        public int madnessXOffset = 0;
+        public int madnessYOffset = 55;
+        public String madnessAnchor = "TOP_LEFT";
     }
 }

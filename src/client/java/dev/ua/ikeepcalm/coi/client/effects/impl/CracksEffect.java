@@ -1,24 +1,24 @@
 package dev.ua.ikeepcalm.coi.client.effects.impl;
 
 import dev.ua.ikeepcalm.coi.client.effects.VisualEffect;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 
 public class CracksEffect implements VisualEffect {
 
     public static final String ID = "cracks";
 
-    private static final int MAX_SEGMENTS = 30;
-
+    private static final int MAX_SEGMENTS = 64;
+    private static final long GROW_MS = 1400;
+    private final List<int[]> segments = new ArrayList<>();
     private float intensity = 0.7f;
     private boolean pulse = false;
     private long duration = -1;
     private long startTime;
-
-    private final List<int[]> segments = new ArrayList<>();
 
     @Override
     public String getId() {
@@ -47,21 +47,44 @@ public class CracksEffect implements VisualEffect {
         if (segments.isEmpty()) generateSegments(w, h);
 
         long elapsed = System.currentTimeMillis() - startTime;
-        float growProgress = Math.min(1f, elapsed / 1200f);
-        int visibleCount = (int) (segments.size() * growProgress);
 
+        // Impact flash sells the initial shatter
+        if (elapsed < 140) {
+            float f = 1f - elapsed / 140f;
+            ctx.fill(0, 0, w, h, EffectPaint.argb(0xFFFFFF, (int) (85 * intensity * f * f)));
+        }
+
+        // Damage vignette rises in as the cracks spread
+        float vigIn = Math.min(1f, elapsed / 600f);
+        EffectPaint.vignette(ctx, w, h, 0x000000, (int) (60 * intensity * vigIn), 0.22f, 0.26f);
+
+        float growProgress = Math.min(1f, elapsed / (float) GROW_MS);
         float pulseVal = pulse ? (float) (0.7 + 0.3 * Math.sin(elapsed * 0.004)) : 1f;
-        int crackAlpha = (int) (230 * pulseVal);
-        int crackColor = (crackAlpha << 24) | 0x080808;
-        int redAlpha = pulse ? (int) (120 * pulseVal * intensity) : 0;
-        int redColor = (redAlpha << 24) | 0xFF1100;
 
-        for (int i = 0; i < Math.min(visibleCount, segments.size()); i++) {
+        int n = segments.size();
+        // Each segment grows along its own length; windows overlap so the
+        // propagation reads as one continuous shatter, not a slideshow.
+        float reach = growProgress * (n + 3);
+
+        int glowColor = EffectPaint.argb(0xFF2A00, (int) (95 * pulseVal * intensity));
+        int darkColor = EffectPaint.argb(0x05060A, 205);
+        int coreColor = EffectPaint.argb(0xE9F1F8, (int) (185 * (0.8f + 0.2f * pulseVal)));
+
+        for (int i = 0; i < n; i++) {
+            float segP = EffectPaint.clamp((reach - i) / 3f, 0f, 1f);
+            if (segP <= 0f) break;
+            float ease = EffectPaint.easeOutCubic(segP);
+
             int[] seg = segments.get(i);
-            drawSegment(ctx, seg[0], seg[1], seg[2], seg[3], crackColor, seg[4]);
-            if (pulse && redAlpha > 0) {
-                drawSegment(ctx, seg[0], seg[1], seg[2], seg[3], redColor, Math.max(1, seg[4] - 1));
+            float ex = seg[0] + (seg[2] - seg[0]) * ease;
+            float ey = seg[1] + (seg[3] - seg[1]) * ease;
+            int thickness = seg[4];
+
+            if (pulse) {
+                EffectPaint.line(ctx, seg[0], seg[1], ex, ey, glowColor, thickness + 3);
             }
+            EffectPaint.line(ctx, seg[0], seg[1], ex, ey, darkColor, thickness + 1);
+            EffectPaint.line(ctx, seg[0], seg[1], ex, ey, coreColor, Math.max(1, thickness - 1));
         }
     }
 
@@ -110,29 +133,6 @@ public class CracksEffect implements VisualEffect {
             float b3 = angle + (rng.nextFloat() - 0.5f) * 1.4f;
             addCrack(rng, ex, ey, b3, newLen * 0.4f, depth - 2, w, h, 1);
         }
-    }
-
-    /**
-     * Draws a true straight line as a single rotated filled rectangle,
-     * so diagonal cracks render as clean solid lines instead of dotted quads.
-     */
-    private static void drawSegment(GuiGraphicsExtractor ctx, int x1, int y1, int x2, int y2, int color, int thickness) {
-        int dx = x2 - x1, dy = y2 - y1;
-        int length = (int) Math.sqrt((double) dx * dx + (double) dy * dy);
-        if (length == 0) return;
-
-        float angle = (float) Math.atan2(dy, dx);
-        float mx = (x1 + x2) / 2f;
-        float my = (y1 + y2) / 2f;
-        int half = length / 2 + 1;
-        int halfT = Math.max(1, thickness / 2);
-
-        var matrices = ctx.pose();
-        matrices.pushMatrix();
-        matrices.translate(mx, my);
-        matrices.rotate(angle);
-        ctx.fill(-half, -halfT, half, halfT, color);
-        matrices.popMatrix();
     }
 
     @Override

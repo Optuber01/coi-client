@@ -25,7 +25,7 @@ import java.util.Random;
  * shockwave rings, radial light spikes and physical spark streaks composed
  * per style. Rendered as emissive translucent geometry at the impact point;
  * soft edges come from per-vertex alpha gradients (no textures needed).
- *
+ * <p>
  * The optional screen component (scope=screen/both) is a single subtle
  * accent-colored edge pulse — no full-screen frame flashing.
  */
@@ -77,6 +77,156 @@ public class ImpactFrameEffect implements VisualEffect {
     public static void clearWorldImpacts() {
         ACTIVE_IMPACTS.clear();
     }
+
+    /**
+     * Camera-facing disc with a radial alpha gradient (bright center, transparent edge).
+     */
+    private static void drawGlowDisc(PoseStack.Pose pose, VertexConsumer consumer, float radius, float z, int color, float alpha) {
+        PoseStack.Pose bp = billboard(pose);
+        int segments = 24;
+        for (int i = 0; i < segments; i++) {
+            double a1 = Math.PI * 2 * i / segments;
+            double a2 = Math.PI * 2 * (i + 1) / segments;
+            addVertex(bp, consumer, 0, 0, z, color, alpha, 0.5f, 0.5f, 0, 0, 1);
+            addVertex(bp, consumer, 0, 0, z, color, alpha, 0.5f, 0.5f, 0, 0, 1);
+            addVertex(bp, consumer, (float) Math.cos(a2) * radius, (float) Math.sin(a2) * radius, z, color, 0f, 1, 1, 0, 0, 1);
+            addVertex(bp, consumer, (float) Math.cos(a1) * radius, (float) Math.sin(a1) * radius, z, color, 0f, 0, 1, 0, 0, 1);
+        }
+    }
+
+    /**
+     * Flat disc on the ground plane with a radial alpha gradient.
+     */
+    private static void drawGroundGlow(PoseStack.Pose pose, VertexConsumer consumer, float radius, float y, int color, float alpha) {
+        int segments = 24;
+        for (int i = 0; i < segments; i++) {
+            double a1 = Math.PI * 2 * i / segments;
+            double a2 = Math.PI * 2 * (i + 1) / segments;
+            addVertex(pose, consumer, 0, y, 0, color, alpha, 0.5f, 0.5f, 0, 1, 0);
+            addVertex(pose, consumer, 0, y, 0, color, alpha, 0.5f, 0.5f, 0, 1, 0);
+            addVertex(pose, consumer, (float) Math.cos(a2) * radius, y, (float) Math.sin(a2) * radius, color, 0f, 1, 1, 0, 1, 0);
+            addVertex(pose, consumer, (float) Math.cos(a1) * radius, y, (float) Math.sin(a1) * radius, color, 0f, 0, 1, 0, 1, 0);
+        }
+    }
+
+    /**
+     * Horizontal shockwave ring with soft inner and outer edges.
+     */
+    private static void drawGroundRing(PoseStack.Pose pose, VertexConsumer consumer, float radius, float thickness, float y, int color, float alpha) {
+        int segments = 48;
+        float rIn = Math.max(0.01f, radius - thickness);
+        float rOut = radius + thickness;
+        for (int i = 0; i < segments; i++) {
+            double a1 = Math.PI * 2 * i / segments;
+            double a2 = Math.PI * 2 * (i + 1) / segments;
+            float c1 = (float) Math.cos(a1);
+            float s1 = (float) Math.sin(a1);
+            float c2 = (float) Math.cos(a2);
+            float s2 = (float) Math.sin(a2);
+
+            addVertex(pose, consumer, c1 * rIn, y, s1 * rIn, color, 0f, 0, 0, 0, 1, 0);
+            addVertex(pose, consumer, c2 * rIn, y, s2 * rIn, color, 0f, 1, 0, 0, 1, 0);
+            addVertex(pose, consumer, c2 * radius, y, s2 * radius, color, alpha, 1, 1, 0, 1, 0);
+            addVertex(pose, consumer, c1 * radius, y, s1 * radius, color, alpha, 0, 1, 0, 1, 0);
+
+            addVertex(pose, consumer, c1 * radius, y, s1 * radius, color, alpha, 0, 0, 0, 1, 0);
+            addVertex(pose, consumer, c2 * radius, y, s2 * radius, color, alpha, 1, 0, 0, 1, 0);
+            addVertex(pose, consumer, c2 * rOut, y, s2 * rOut, color, 0f, 1, 1, 0, 1, 0);
+            addVertex(pose, consumer, c1 * rOut, y, s1 * rOut, color, 0f, 0, 1, 0, 1, 0);
+        }
+    }
+
+    /**
+     * Camera-facing shockwave ring with soft inner and outer edges.
+     */
+    private static void drawBillboardRing(PoseStack.Pose pose, VertexConsumer consumer, float radius, float thickness, float z, int color, float alpha) {
+        PoseStack.Pose bp = billboard(pose);
+        int segments = 48;
+        float rIn = Math.max(0.01f, radius - thickness);
+        float rOut = radius + thickness;
+        for (int i = 0; i < segments; i++) {
+            double a1 = Math.PI * 2 * i / segments;
+            double a2 = Math.PI * 2 * (i + 1) / segments;
+            float c1 = (float) Math.cos(a1);
+            float s1 = (float) Math.sin(a1);
+            float c2 = (float) Math.cos(a2);
+            float s2 = (float) Math.sin(a2);
+
+            addVertex(bp, consumer, c1 * rIn, s1 * rIn, z, color, 0f, 0, 0, 0, 0, 1);
+            addVertex(bp, consumer, c2 * rIn, s2 * rIn, z, color, 0f, 1, 0, 0, 0, 1);
+            addVertex(bp, consumer, c2 * radius, s2 * radius, z, color, alpha, 1, 1, 0, 0, 1);
+            addVertex(bp, consumer, c1 * radius, s1 * radius, z, color, alpha, 0, 1, 0, 0, 1);
+
+            addVertex(bp, consumer, c1 * radius, s1 * radius, z, color, alpha, 0, 0, 0, 0, 1);
+            addVertex(bp, consumer, c2 * radius, s2 * radius, z, color, alpha, 1, 0, 0, 0, 1);
+            addVertex(bp, consumer, c2 * rOut, s2 * rOut, z, color, 0f, 1, 1, 0, 0, 1);
+            addVertex(bp, consumer, c1 * rOut, s1 * rOut, z, color, 0f, 0, 1, 0, 0, 1);
+        }
+    }
+
+    /**
+     * Tapered ray in the billboard plane: full width/alpha at the base, a point at the tip.
+     */
+    private static void drawSpike(PoseStack.Pose bp, VertexConsumer consumer, float angle, float r0, float r1, float width, float z, int color, float alpha) {
+        float dx = (float) Math.cos(angle);
+        float dy = (float) Math.sin(angle);
+        float sx = -dy * width;
+        float sy = dx * width;
+
+        addVertex(bp, consumer, dx * r0 - sx, dy * r0 - sy, z, color, alpha, 0, 0, 0, 0, 1);
+        addVertex(bp, consumer, dx * r0 + sx, dy * r0 + sy, z, color, alpha, 1, 0, 0, 0, 1);
+        addVertex(bp, consumer, dx * r1, dy * r1, z, color, 0f, 1, 1, 0, 0, 1);
+        addVertex(bp, consumer, dx * r1, dy * r1, z, color, 0f, 0, 1, 0, 0, 1);
+    }
+
+    /**
+     * Vertical light plane spanning (-dx,-dz)→(dx,dz), bright at the base and fading to the top.
+     */
+    private static void drawPillarPlane(PoseStack.Pose pose, VertexConsumer consumer, float dx, float dz, float height, int color, float alpha) {
+        addVertex(pose, consumer, -dx, 0f, -dz, color, alpha, 0, 0, 0, 0, 1);
+        addVertex(pose, consumer, dx, 0f, dz, color, alpha, 1, 0, 0, 0, 1);
+        addVertex(pose, consumer, dx, height, dz, color, 0f, 1, 1, 0, 0, 1);
+        addVertex(pose, consumer, -dx, height, -dz, color, 0f, 0, 1, 0, 0, 1);
+    }
+
+    private static PoseStack.Pose billboard(PoseStack.Pose pose) {
+        PoseStack stack = new PoseStack();
+        stack.mulPose(pose.pose());
+        Entity camera = Minecraft.getInstance().getCameraEntity();
+        if (camera != null) {
+            stack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+            stack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        }
+        return stack.last();
+    }
+
+    private static void addVertex(PoseStack.Pose pose, VertexConsumer consumer, float x, float y, float z, int color, float alpha, float u, float v, float nx, float ny, float nz) {
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+        int a = (int) (255 * clamp(alpha, 0f, 1f));
+        consumer.addVertex(pose, x, y, z)
+                .setColor(r, g, b, a)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(FULL_BRIGHT)
+                .setNormal(pose, nx, ny, nz);
+    }
+
+    private static int argb(int rgb, int alpha) {
+        return (Math.max(0, Math.min(255, alpha)) << 24) | (rgb & 0xFFFFFF);
+    }
+
+    private static float easeOutCubic(float t) {
+        float inv = 1f - t;
+        return 1f - inv * inv * inv;
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    // ---- world-space drawing primitives -------------------------------------
 
     @Override
     public String getId() {
@@ -151,7 +301,8 @@ public class ImpactFrameEffect implements VisualEffect {
     private record Spike(float angle, float lengthMul) {
     }
 
-    private record Spark(float dirX, float dirY, float dirZ, float speed, float sizeMul, float lifeFrac, int colorIdx, float phase) {
+    private record Spark(float dirX, float dirY, float dirZ, float speed, float sizeMul, float lifeFrac, int colorIdx,
+                         float phase) {
     }
 
     private record Shard(float x, float z, float height, float width, boolean accented) {
@@ -165,9 +316,12 @@ public class ImpactFrameEffect implements VisualEffect {
         private final float radius;
         private final long duration;
         private final long startTime = System.currentTimeMillis();
-
+        private final List<Spike> spikes = new ArrayList<>();
+        private final List<Spark> sparks = new ArrayList<>();
+        private final List<Shard> shards = new ArrayList<>();
+        private final List<float[]> cracks = new ArrayList<>();
         // Style composition
-        private float flashStrength;
+        private final float flashStrength;
         private boolean delayedFlash;
         private boolean flatFlash;
         private boolean darkCore;
@@ -180,11 +334,6 @@ public class ImpactFrameEffect implements VisualEffect {
         private float sparkGravity;
         private float sparkWidthMul = 1f;
         private boolean sparksInward;
-
-        private final List<Spike> spikes = new ArrayList<>();
-        private final List<Spark> sparks = new ArrayList<>();
-        private final List<Shard> shards = new ArrayList<>();
-        private final List<float[]> cracks = new ArrayList<>();
         private float[] slashAngles = new float[0];
 
         private WorldImpact(ImpactParams params) {
@@ -650,156 +799,6 @@ public class ImpactFrameEffect implements VisualEffect {
             float dist = radius * 1.25f * (1f - easeOutCubic(clamp(sp, 0f, 1f)));
             return new float[]{spark.dirX() * dist, spark.dirY() * dist, spark.dirZ() * dist};
         }
-    }
-
-    // ---- world-space drawing primitives -------------------------------------
-
-    /**
-     * Camera-facing disc with a radial alpha gradient (bright center, transparent edge).
-     */
-    private static void drawGlowDisc(PoseStack.Pose pose, VertexConsumer consumer, float radius, float z, int color, float alpha) {
-        PoseStack.Pose bp = billboard(pose);
-        int segments = 24;
-        for (int i = 0; i < segments; i++) {
-            double a1 = Math.PI * 2 * i / segments;
-            double a2 = Math.PI * 2 * (i + 1) / segments;
-            addVertex(bp, consumer, 0, 0, z, color, alpha, 0.5f, 0.5f, 0, 0, 1);
-            addVertex(bp, consumer, 0, 0, z, color, alpha, 0.5f, 0.5f, 0, 0, 1);
-            addVertex(bp, consumer, (float) Math.cos(a2) * radius, (float) Math.sin(a2) * radius, z, color, 0f, 1, 1, 0, 0, 1);
-            addVertex(bp, consumer, (float) Math.cos(a1) * radius, (float) Math.sin(a1) * radius, z, color, 0f, 0, 1, 0, 0, 1);
-        }
-    }
-
-    /**
-     * Flat disc on the ground plane with a radial alpha gradient.
-     */
-    private static void drawGroundGlow(PoseStack.Pose pose, VertexConsumer consumer, float radius, float y, int color, float alpha) {
-        int segments = 24;
-        for (int i = 0; i < segments; i++) {
-            double a1 = Math.PI * 2 * i / segments;
-            double a2 = Math.PI * 2 * (i + 1) / segments;
-            addVertex(pose, consumer, 0, y, 0, color, alpha, 0.5f, 0.5f, 0, 1, 0);
-            addVertex(pose, consumer, 0, y, 0, color, alpha, 0.5f, 0.5f, 0, 1, 0);
-            addVertex(pose, consumer, (float) Math.cos(a2) * radius, y, (float) Math.sin(a2) * radius, color, 0f, 1, 1, 0, 1, 0);
-            addVertex(pose, consumer, (float) Math.cos(a1) * radius, y, (float) Math.sin(a1) * radius, color, 0f, 0, 1, 0, 1, 0);
-        }
-    }
-
-    /**
-     * Horizontal shockwave ring with soft inner and outer edges.
-     */
-    private static void drawGroundRing(PoseStack.Pose pose, VertexConsumer consumer, float radius, float thickness, float y, int color, float alpha) {
-        int segments = 48;
-        float rIn = Math.max(0.01f, radius - thickness);
-        float rOut = radius + thickness;
-        for (int i = 0; i < segments; i++) {
-            double a1 = Math.PI * 2 * i / segments;
-            double a2 = Math.PI * 2 * (i + 1) / segments;
-            float c1 = (float) Math.cos(a1);
-            float s1 = (float) Math.sin(a1);
-            float c2 = (float) Math.cos(a2);
-            float s2 = (float) Math.sin(a2);
-
-            addVertex(pose, consumer, c1 * rIn, y, s1 * rIn, color, 0f, 0, 0, 0, 1, 0);
-            addVertex(pose, consumer, c2 * rIn, y, s2 * rIn, color, 0f, 1, 0, 0, 1, 0);
-            addVertex(pose, consumer, c2 * radius, y, s2 * radius, color, alpha, 1, 1, 0, 1, 0);
-            addVertex(pose, consumer, c1 * radius, y, s1 * radius, color, alpha, 0, 1, 0, 1, 0);
-
-            addVertex(pose, consumer, c1 * radius, y, s1 * radius, color, alpha, 0, 0, 0, 1, 0);
-            addVertex(pose, consumer, c2 * radius, y, s2 * radius, color, alpha, 1, 0, 0, 1, 0);
-            addVertex(pose, consumer, c2 * rOut, y, s2 * rOut, color, 0f, 1, 1, 0, 1, 0);
-            addVertex(pose, consumer, c1 * rOut, y, s1 * rOut, color, 0f, 0, 1, 0, 1, 0);
-        }
-    }
-
-    /**
-     * Camera-facing shockwave ring with soft inner and outer edges.
-     */
-    private static void drawBillboardRing(PoseStack.Pose pose, VertexConsumer consumer, float radius, float thickness, float z, int color, float alpha) {
-        PoseStack.Pose bp = billboard(pose);
-        int segments = 48;
-        float rIn = Math.max(0.01f, radius - thickness);
-        float rOut = radius + thickness;
-        for (int i = 0; i < segments; i++) {
-            double a1 = Math.PI * 2 * i / segments;
-            double a2 = Math.PI * 2 * (i + 1) / segments;
-            float c1 = (float) Math.cos(a1);
-            float s1 = (float) Math.sin(a1);
-            float c2 = (float) Math.cos(a2);
-            float s2 = (float) Math.sin(a2);
-
-            addVertex(bp, consumer, c1 * rIn, s1 * rIn, z, color, 0f, 0, 0, 0, 0, 1);
-            addVertex(bp, consumer, c2 * rIn, s2 * rIn, z, color, 0f, 1, 0, 0, 0, 1);
-            addVertex(bp, consumer, c2 * radius, s2 * radius, z, color, alpha, 1, 1, 0, 0, 1);
-            addVertex(bp, consumer, c1 * radius, s1 * radius, z, color, alpha, 0, 1, 0, 0, 1);
-
-            addVertex(bp, consumer, c1 * radius, s1 * radius, z, color, alpha, 0, 0, 0, 0, 1);
-            addVertex(bp, consumer, c2 * radius, s2 * radius, z, color, alpha, 1, 0, 0, 0, 1);
-            addVertex(bp, consumer, c2 * rOut, s2 * rOut, z, color, 0f, 1, 1, 0, 0, 1);
-            addVertex(bp, consumer, c1 * rOut, s1 * rOut, z, color, 0f, 0, 1, 0, 0, 1);
-        }
-    }
-
-    /**
-     * Tapered ray in the billboard plane: full width/alpha at the base, a point at the tip.
-     */
-    private static void drawSpike(PoseStack.Pose bp, VertexConsumer consumer, float angle, float r0, float r1, float width, float z, int color, float alpha) {
-        float dx = (float) Math.cos(angle);
-        float dy = (float) Math.sin(angle);
-        float sx = -dy * width;
-        float sy = dx * width;
-
-        addVertex(bp, consumer, dx * r0 - sx, dy * r0 - sy, z, color, alpha, 0, 0, 0, 0, 1);
-        addVertex(bp, consumer, dx * r0 + sx, dy * r0 + sy, z, color, alpha, 1, 0, 0, 0, 1);
-        addVertex(bp, consumer, dx * r1, dy * r1, z, color, 0f, 1, 1, 0, 0, 1);
-        addVertex(bp, consumer, dx * r1, dy * r1, z, color, 0f, 0, 1, 0, 0, 1);
-    }
-
-    /**
-     * Vertical light plane spanning (-dx,-dz)→(dx,dz), bright at the base and fading to the top.
-     */
-    private static void drawPillarPlane(PoseStack.Pose pose, VertexConsumer consumer, float dx, float dz, float height, int color, float alpha) {
-        addVertex(pose, consumer, -dx, 0f, -dz, color, alpha, 0, 0, 0, 0, 1);
-        addVertex(pose, consumer, dx, 0f, dz, color, alpha, 1, 0, 0, 0, 1);
-        addVertex(pose, consumer, dx, height, dz, color, 0f, 1, 1, 0, 0, 1);
-        addVertex(pose, consumer, -dx, height, -dz, color, 0f, 0, 1, 0, 0, 1);
-    }
-
-    private static PoseStack.Pose billboard(PoseStack.Pose pose) {
-        PoseStack stack = new PoseStack();
-        stack.mulPose(pose.pose());
-        Entity camera = Minecraft.getInstance().getCameraEntity();
-        if (camera != null) {
-            stack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
-            stack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
-        }
-        return stack.last();
-    }
-
-    private static void addVertex(PoseStack.Pose pose, VertexConsumer consumer, float x, float y, float z, int color, float alpha, float u, float v, float nx, float ny, float nz) {
-        int r = (color >> 16) & 0xFF;
-        int g = (color >> 8) & 0xFF;
-        int b = color & 0xFF;
-        int a = (int) (255 * clamp(alpha, 0f, 1f));
-        consumer.addVertex(pose, x, y, z)
-                .setColor(r, g, b, a)
-                .setUv(u, v)
-                .setOverlay(OverlayTexture.NO_OVERLAY)
-                .setLight(FULL_BRIGHT)
-                .setNormal(pose, nx, ny, nz);
-    }
-
-    private static int argb(int rgb, int alpha) {
-        return (Math.max(0, Math.min(255, alpha)) << 24) | (rgb & 0xFFFFFF);
-    }
-
-    private static float easeOutCubic(float t) {
-        float inv = 1f - t;
-        return 1f - inv * inv * inv;
-    }
-
-    private static float clamp(float value, float min, float max) {
-        return Math.max(min, Math.min(max, value));
     }
 
     private static class ImpactParams {

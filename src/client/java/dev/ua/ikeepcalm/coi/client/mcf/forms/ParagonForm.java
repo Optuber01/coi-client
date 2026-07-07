@@ -74,7 +74,7 @@ public class ParagonForm implements MythicalCreatureForm {
     }
 
     private void drawBronzePillar(PoseStack.Pose pose, VertexConsumer consumer,
-                                   float x1, float y1, float z1, float x2, float y2, float z2, int light) {
+                                  float x1, float y1, float z1, float x2, float y2, float z2, int light) {
         drawBox(pose, consumer, x1, y1, z1, x2, y2, z2, 0.62f, 0.38f, 0.14f, 0.92f, light);
         float s = 0.04f;
         if (x2 - x1 > s * 2 && y2 - y1 > s * 2 && z2 - z1 > s * 2) {

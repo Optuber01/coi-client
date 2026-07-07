@@ -15,6 +15,7 @@ import java.util.List;
 
 public class AbilityBindingScreen extends Screen {
 
+    private static final int ITEMS_PER_PAGE = 6;
     private final Screen parent;
     private AbilityDropdownWidget[] abilityDropdowns;
     private AbilityDropdownWidget[] wheelDropdowns;
@@ -23,9 +24,7 @@ public class AbilityBindingScreen extends Screen {
     private Button modeToggleButton;
     private int contentHeight;
     private boolean showingWheel = false;
-
     private int currentPage = 0;
-    private static final int ITEMS_PER_PAGE = 6;
 
     public AbilityBindingScreen(Screen parent) {
         super(Component.translatable("screen.coi.ability_binding"));
@@ -51,14 +50,14 @@ public class AbilityBindingScreen extends Screen {
         int wheelSize = CircleOfImaginationClient.getWheelSize();
         int totalItems = showingWheel ? wheelSize : maxAbilities;
         int totalPages = (totalItems + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-        
+
         if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
 
         abilityDropdowns = new AbilityDropdownWidget[maxAbilities];
         wheelDropdowns = new AbilityDropdownWidget[wheelSize];
 
         int centerX = this.width / 2;
-        int topMargin = 60; 
+        int topMargin = 60;
         int spacing = 40;
         int dropdownWidth = Math.clamp(this.width / 3, 200, this.width - 40);
         int dropdownHeight = 20;
@@ -70,7 +69,7 @@ public class AbilityBindingScreen extends Screen {
         for (int i = startIdx; i < endIdx; i++) {
             final int slot = i;
             int y = topMargin + ((i - startIdx) * spacing);
-            
+
             AbilityDropdownWidget dropdown = new AbilityDropdownWidget(
                     centerX - dropdownWidth / 2, y, dropdownWidth, dropdownHeight,
                     CircleOfImaginationClient::getAvailableAbilities,
@@ -80,10 +79,10 @@ public class AbilityBindingScreen extends Screen {
                         else CircleOfImaginationClient.setBoundAbility(slot, selected);
                     }
             );
-            
+
             if (showingWheel) wheelDropdowns[slot] = dropdown;
             else abilityDropdowns[slot] = dropdown;
-            
+
             this.addRenderableWidget(dropdown);
         }
 
@@ -100,7 +99,7 @@ public class AbilityBindingScreen extends Screen {
                 currentPage++;
                 this.init();
             }).bounds(centerX + 160, buttonY - 25, 20, 20).build()).active = currentPage < totalPages - 1;
-            
+
             // Page indicator text handled in render
         }
 
@@ -146,7 +145,7 @@ public class AbilityBindingScreen extends Screen {
 
         int totalItems = showingWheel ? CircleOfImaginationClient.getWheelSize() : CircleOfImaginationClient.getMaxAbilities();
         int totalPages = (totalItems + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-        
+
         if (verticalAmount > 0 && currentPage > 0) {
             currentPage--;
             this.init();
@@ -166,8 +165,8 @@ public class AbilityBindingScreen extends Screen {
 
         graphics.centeredText(this.font,
                 this.title, this.width / 2, 10, 0xFFFFFFFF);
-        
-        graphics.centeredText(this.font, 
+
+        graphics.centeredText(this.font,
                 Component.translatable(showingWheel ? "screen.coi.wheel_bindings" : "screen.coi.key_bindings"),
                 this.width / 2, 25, 0xFFAAAAAA);
 
@@ -223,7 +222,7 @@ public class AbilityBindingScreen extends Screen {
     private void renderSlotInfo(GuiGraphicsExtractor graphics, int slot, int x, int y, Component key, boolean isWheel) {
         Component label = Component.translatable(isWheel ? "screen.coi.wheel_slot" : "screen.coi.ability" + (slot + 1) + "_label");
         if (isWheel) label = label.copy().append(" " + (slot + 1));
-        
+
         graphics.text(this.font, label, x, y, 0xFFA0A0A0);
 
         if (!isWheel) {

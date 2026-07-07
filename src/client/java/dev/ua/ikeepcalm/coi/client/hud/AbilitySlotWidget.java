@@ -3,6 +3,7 @@ package dev.ua.ikeepcalm.coi.client.hud;
 import dev.ua.ikeepcalm.coi.client.CircleOfImaginationClient;
 import dev.ua.ikeepcalm.coi.client.config.AbilityInfo;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
+import dev.ua.ikeepcalm.coi.client.effects.impl.EffectPaint;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -14,14 +15,9 @@ import net.minecraft.util.Mth;
 
 public class AbilitySlotWidget {
 
-    private final int slotIndex;
-    private String abilityId;
-    private String abilityName;
-    private String category;
-    private int cooldownTicks;
-    private int maxCooldownTicks;
-    private long lastUseTime;
-
+    private static final long CAST_POP_MS = 320;
+    private static final long CAST_RING_MS = 420;
+    private static final long READY_FLASH_MS = 650;
     private static final int BORDER_COLOR = 0xFF90EE90;
     private static final int BACKGROUND_GRADIENT_TOP = 0xFF98FB98;
     private static final int BACKGROUND_GRADIENT_BOTTOM = 0xFF0A0A0A;
@@ -31,6 +27,15 @@ public class AbilitySlotWidget {
     private static final int KEYBIND_BACKGROUND = 0xC0000000;
     private static final int ABILITY_NAME_COLOR = 0xFFE0E0E0;
     private static final int SHADOW_COLOR = 0x60000000;
+    private final int slotIndex;
+    private String abilityId;
+    private String abilityName;
+    private String category;
+    private int cooldownTicks;
+    private int maxCooldownTicks;
+    private long lastUseTime;
+    private long castTime;
+    private long readyFlashTime;
 
     public AbilitySlotWidget(int slotIndex) {
         this.slotIndex = slotIndex;
@@ -47,6 +52,20 @@ public class AbilitySlotWidget {
         boolean onCooldown = cooldownTicks > 0;
         boolean isReady = hasAbility && !onCooldown;
 
+        long now = System.currentTimeMillis();
+
+        // Cast punch: the whole slot pops briefly around its center
+        boolean popped = false;
+        if (castTime > 0 && now - castTime < CAST_POP_MS) {
+            float castP = (now - castTime) / (float) CAST_POP_MS;
+            float scale = 1f + 0.13f * (float) Math.sin(Math.PI * castP);
+            var pose = context.pose();
+            pose.pushMatrix();
+            pose.translate(x + size / 2f, y + size / 2f);
+            pose.scale(scale, scale);
+            pose.translate(-(x + size / 2f), -(y + size / 2f));
+            popped = true;
+        }
 
         renderDropShadow(context, x, y, size);
 
@@ -80,9 +99,71 @@ public class AbilitySlotWidget {
             renderKeybind(context, textRenderer, x, y, size);
         }
 
+        renderReadyFlash(context, x, y, size, now);
+        renderCastRing(context, x, y, size, now);
+
+        if (popped) {
+            context.pose().popMatrix();
+        }
+
         if (onCooldown && cooldownTicks > 0) {
             updateCooldown();
         }
+    }
+
+    /**
+     * Pathway-colored ring bursting outward from the slot on cast.
+     */
+    private void renderCastRing(GuiGraphicsExtractor context, int x, int y, int size, long now) {
+        if (castTime <= 0 || abilityId == null) return;
+        float p = (now - castTime) / (float) CAST_RING_MS;
+        if (p >= 1f) return;
+
+        float ease = EffectPaint.easeOutCubic(p);
+        int pathway = AbilityInfo.pathwayColor(AbilityInfo.extractId(abilityId)) & 0xFFFFFF;
+
+        int expand = 2 + (int) (13 * ease);
+        int a = (int) (210 * (1f - p));
+        context.outline(x - expand, y - expand, size + expand * 2, size + expand * 2, EffectPaint.argb(pathway, a));
+
+        int inner = 1 + (int) (7 * ease);
+        context.outline(x - inner, y - inner, size + inner * 2, size + inner * 2, EffectPaint.argb(0xFFFFFF, a / 2));
+    }
+
+    /**
+     * "Ability ready" moment: a glint sweeps across the icon while the
+     * border flares — the payoff players watch cooldowns for.
+     */
+    private void renderReadyFlash(GuiGraphicsExtractor context, int x, int y, int size, long now) {
+        if (readyFlashTime <= 0) return;
+        float p = (now - readyFlashTime) / (float) READY_FLASH_MS;
+        if (p >= 1f) {
+            readyFlashTime = 0;
+            return;
+        }
+
+        // Border flare + soft inner bloom, both decaying
+        int fade = (int) (200 * (1f - p));
+        context.outline(x - 2, y - 2, size + 4, size + 4, EffectPaint.argb(0x88FF88, fade));
+        context.fill(x, y, x + size, y + size, EffectPaint.argb(0xAAFFAA, fade / 4));
+
+        // Diagonal glint sweeping left to right, clipped to the slot
+        float sweep = EffectPaint.smoothstep(p);
+        int bandCx = (int) (x - size * 0.6f + size * 2.2f * sweep);
+        context.enableScissor(x, y, x + size, y + size);
+        var pose = context.pose();
+        pose.pushMatrix();
+        pose.translate(bandCx, y + size / 2f);
+        pose.rotate(-0.45f);
+        context.fill(-2, -size, 2, size, 0xB0FFFFFF);
+        context.fill(-6, -size, -2, size, 0x50FFFFFF);
+        context.fill(2, -size, 6, size, 0x50FFFFFF);
+        pose.popMatrix();
+        context.disableScissor();
+    }
+
+    public void triggerCastAnimation() {
+        castTime = System.currentTimeMillis();
     }
 
 
@@ -115,34 +196,16 @@ public class AbilitySlotWidget {
         int iconSize = size - 6;
 
         // Pathway-colored background behind the icon
-        int pathwayColor = getPathwayColor(id);
+        int pathwayColor = AbilityInfo.pathwayColor(id);
         context.fill(iconX, iconY, iconX + iconSize, iconY + iconSize, pathwayColor);
 
         // Category texture
         String cat = (category != null && !category.isEmpty()) ? category.toLowerCase() : "uncategorized";
-        String tier = getTierFromAbilityId(id);
+        String tier = AbilityInfo.tierOf(id);
         Identifier texture = Identifier.fromNamespaceAndPath("coi-client", "textures/icons/" + cat + "/" + tier + ".png");
         context.blit(RenderPipelines.GUI_TEXTURED, texture, iconX, iconY, 0, 0, iconSize, iconSize, iconSize, iconSize);
     }
 
-    private String getTierFromAbilityId(String rawId) {
-        if (rawId == null) return "low";
-        String id = rawId.contains(" - ") ? rawId.split(" - ")[0] : rawId;
-        String[] parts = id.split("-");
-        if (parts.length < 2) return "low";
-        try {
-            int seq = Integer.parseInt(parts[1]);
-            return switch (seq) {
-                case 0 -> "divine";
-                case 2, 1 -> "fair";
-                case 3, 4 -> "high";
-                case 5, 6, 7 -> "mid";
-                default -> "low";
-            };
-        } catch (NumberFormatException e) {
-            return "low";
-        }
-    }
 
     private void renderCooldownOverlay(GuiGraphicsExtractor context, int x, int y, int size, float tickDelta) {
         if (maxCooldownTicks <= 0) return;
@@ -187,6 +250,7 @@ public class AbilitySlotWidget {
 
             if (cooldownTicks <= 0) {
                 lastUseTime = 0;
+                readyFlashTime = System.currentTimeMillis();
             }
         }
     }
@@ -238,22 +302,6 @@ public class AbilitySlotWidget {
             return CircleOfImaginationClient.abilityKeys[slotIndex];
         }
         return null;
-    }
-
-    private int getPathwayColor(String abilityId) {
-        if (abilityId == null) return 0xFF666666;
-
-        String pathway = abilityId.split("-")[0];
-        return switch (pathway.toLowerCase()) {
-            case "fool" -> 0xFFB347CC;
-            case "door" -> 0xFF5B7FE6;
-            case "sun" -> 0xFFFFE55C;
-            case "tyrant" -> 0xFF4AA3FF;
-            case "demoness" -> 0xFFB22222;
-            case "priest" -> 0xFFFF6B35;
-            case "error" -> 0xFF999999;
-            default -> 0xFF777777;
-        };
     }
 
 

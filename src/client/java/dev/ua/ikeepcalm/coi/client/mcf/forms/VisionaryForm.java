@@ -78,7 +78,7 @@ public class VisionaryForm implements MythicalCreatureForm {
     }
 
     private void drawScaled(PoseStack.Pose pose, VertexConsumer consumer,
-                             float x1, float y1, float z1, float x2, float y2, float z2, int light) {
+                            float x1, float y1, float z1, float x2, float y2, float z2, int light) {
         drawBox(pose, consumer, x1, y1, z1, x2, y2, z2, 0.92f, 0.75f, 0.18f, 0.58f, light);
         float s = 0.042f;
         drawBox(pose, consumer, x1 + s, y1 + s, z1 + s, x2 - s, y2 - s, z2 - s, 1.0f, 0.92f, 0.45f, 0.34f, light);

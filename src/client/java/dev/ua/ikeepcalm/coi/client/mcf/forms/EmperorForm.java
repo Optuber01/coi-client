@@ -73,7 +73,7 @@ public class EmperorForm implements MythicalCreatureForm {
         // Dark authority particles drifting upward alongside the robe
         for (int i = 0; i < 10; i++) {
             Random rand = new Random(i * 9911L);
-            float gSpeed = 0.5f + rand.nextFloat() * 1.0f;
+            float gSpeed = 0.5f + rand.nextFloat();
             float gTime = time * 0.045f * gSpeed + rand.nextFloat() * 100f;
             float gy = 0.18f + (gTime % 2.25f);
             float gradius = 0.55f + rand.nextFloat() * 0.35f;

@@ -22,9 +22,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -75,16 +75,219 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             Map.entry("tyrant", ""),
             Map.entry("visionary", "")
     );
-
-    private static String[] boundAbilities = new String[MAX_ABILITIES];
-    private static String[] wheelAbilities = new String[MAX_WHEEL_SIZE];
-
+    private static final boolean[] keyPressed = new boolean[MAX_ABILITIES + 3];
     public static KeyMapping[] abilityKeys = new KeyMapping[MAX_ABILITIES];
     public static KeyMapping abilityMenu;
     public static KeyMapping abilityWheel;
     public static KeyMapping effectDebugMenu; // null when not in dev environment
+    private static String[] boundAbilities = new String[MAX_ABILITIES];
+    private static String[] wheelAbilities = new String[MAX_WHEEL_SIZE];
 
-    private static final boolean[] keyPressed = new boolean[MAX_ABILITIES + 3];
+    private static void useAbility(String abilityIdWithName) {
+        if (abilityIdWithName == null) return;
+
+        String abilityId = AbilityInfo.extractId(abilityIdWithName);
+        String action = AbilityInfo.extractAction(abilityIdWithName);
+
+        ClientPlayNetworking.send(new AbilityUsePayload(abilityId, action));
+        AbilityHudOverlay.onAbilityCast(abilityId);
+
+        AbilityInfo info = getAbilityInfo(abilityId);
+        String displayName = info != null ? info.englishName() : AbilityInfo.extractDisplayName(abilityIdWithName);
+        Minecraft client = Minecraft.getInstance();
+        if (client.player != null && AbilityInfo.ACTION_EXECUTE.equals(action)) {
+            client.player.sendOverlayMessage(Component.translatable("notification.coi.ability_used", displayName));
+        }
+    }
+
+    public static void handleAbilityData(String data) {
+        availableAbilities.clear();
+
+        if (data.isEmpty()) {
+            System.out.println("COI Client: Received empty ability data");
+            return;
+        }
+
+        System.out.println("COI Client: Received ability data: " + data);
+
+        abilityInfoMap.clear();
+        String[] abilities = data.split(";");
+        for (String ability : abilities) {
+            if (!ability.isEmpty()) {
+                String[] parts = ability.split("\\|");
+                if (parts.length >= 2) {
+                    String id = parts[0];
+                    String localizedName = parts[1];
+                    String englishName = parts.length > 2 ? parts[2] : localizedName;
+                    String category = parts.length > 3 ? parts[3] : "uncategorized";
+                    boolean hasLeftClick = parts.length >= 5 && Boolean.parseBoolean(parts[4]);
+
+                    String formatted = AbilityInfo.formatStored(id, englishName, AbilityInfo.ACTION_EXECUTE);
+                    availableAbilities.add(formatted);
+                    if (hasLeftClick) {
+                        availableAbilities.add(AbilityInfo.formatStored(id, englishName + " (Left Click)", AbilityInfo.ACTION_LEFT_CLICK));
+                    }
+                    abilityInfoMap.put(id, new AbilityInfo(id, localizedName, englishName, category, hasLeftClick));
+                    System.out.println("COI Client: Added ability: " + formatted);
+                }
+            }
+        }
+
+        System.out.println("COI Client: Total abilities loaded: " + availableAbilities.size());
+        updateHudWithCurrentBindings();
+    }
+
+    public static void handleCooldownData(String abilityId, int cooldownTicks) {
+        AbilityHudOverlay.setCooldown(abilityId, cooldownTicks);
+    }
+
+    private static void updateHudWithCurrentBindings() {
+        validateBoundAbilities();
+
+        for (int i = 0; i < MAX_ABILITIES; i++) {
+            AbilityHudOverlay.updateAbilitySlot(i, boundAbilities[i]);
+        }
+    }
+
+    private static void validateBoundAbilities() {
+        boolean needsSave = false;
+
+        for (int i = 0; i < MAX_ABILITIES; i++) {
+            if (boundAbilities[i] == null) continue;
+
+            String freshEntry = findFreshAbilityEntry(boundAbilities[i]);
+
+            if (freshEntry == null) {
+                System.out.println("COI Client: Clearing invalid bound ability: " + boundAbilities[i]);
+                boundAbilities[i] = null;
+                needsSave = true;
+            } else if (!freshEntry.equals(boundAbilities[i])) {
+                boundAbilities[i] = freshEntry;
+                needsSave = true;
+            }
+        }
+
+        for (int i = 0; i < MAX_WHEEL_SIZE; i++) {
+            if (wheelAbilities[i] == null) continue;
+
+            String freshEntry = findFreshAbilityEntry(wheelAbilities[i]);
+
+            if (freshEntry == null) {
+                System.out.println("COI Client: Clearing invalid wheel ability: " + wheelAbilities[i]);
+                wheelAbilities[i] = null;
+                needsSave = true;
+            } else if (!freshEntry.equals(wheelAbilities[i])) {
+                wheelAbilities[i] = freshEntry;
+                needsSave = true;
+            }
+        }
+
+        if (needsSave) {
+            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
+        }
+    }
+
+    private static String findFreshAbilityEntry(String storedAbility) {
+        String boundId = AbilityInfo.extractId(storedAbility);
+        String boundAction = AbilityInfo.extractAction(storedAbility);
+        return availableAbilities.stream()
+                .filter(a -> Objects.equals(AbilityInfo.extractId(a), boundId))
+                .filter(a -> Objects.equals(AbilityInfo.extractAction(a), boundAction))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static List<String> getAvailableAbilities() {
+        return new ArrayList<>(availableAbilities);
+    }
+
+    public static AbilityInfo getAbilityInfo(String abilityId) {
+        return abilityInfoMap.get(abilityId);
+    }
+
+    public static boolean hasLeftClick(String abilityIdWithName) {
+        AbilityInfo info = getAbilityInfo(AbilityInfo.extractId(abilityIdWithName));
+        return info != null && info.hasLeftClick();
+    }
+
+    public static String getBoundAbility(int slot) {
+        return boundAbilities[slot];
+    }
+
+    public static void setBoundAbility(int slot, String abilityId) {
+        if (slot >= 0 && slot < MAX_ABILITIES) {
+            boundAbilities[slot] = abilityId;
+            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
+            AbilityHudOverlay.updateAbilitySlot(slot, abilityId);
+        }
+    }
+
+    public static String getWheelAbility(int slot) {
+        if (slot >= 0 && slot < MAX_WHEEL_SIZE) {
+            return wheelAbilities[slot];
+        }
+        return null;
+    }
+
+    public static void setWheelAbility(int slot, String abilityId) {
+        if (slot >= 0 && slot < MAX_WHEEL_SIZE) {
+            wheelAbilities[slot] = abilityId;
+            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
+        }
+    }
+
+    public static int getWheelSize() {
+        return HudConfig.getSettings().wheelSlots;
+    }
+
+    public static boolean isKeyDown(KeyMapping keyBinding) {
+        if (keyBinding == null || keyBinding.isUnbound()) return false;
+
+        Minecraft client = Minecraft.getInstance();
+        if (client.getWindow() == null) return false;
+
+        long window = client.getWindow().handle();
+        InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(keyBinding);
+
+        if (key.getType() == InputConstants.Type.KEYSYM) {
+            return GLFW.glfwGetKey(window, key.getValue()) != GLFW.GLFW_RELEASE;
+        } else if (key.getType() == InputConstants.Type.MOUSE) {
+            return GLFW.glfwGetMouseButton(window, key.getValue()) != GLFW.GLFW_RELEASE;
+        }
+
+        return false;
+    }
+
+    public static void useAbilityById(String abilityIdWithName) {
+        useAbility(abilityIdWithName);
+    }
+
+    public static int getMaxAbilities() {
+        return MAX_ABILITIES;
+    }
+
+    private static String formatPathwayName(String pathway) {
+        return Character.toUpperCase(pathway.charAt(0)) + pathway.substring(1);
+    }
+
+    public static void requestAbilitiesFromServer() {
+        Minecraft client = Minecraft.getInstance();
+        if (client.player != null) {
+            System.out.println("COI Client: Requesting abilities from server...");
+            ClientPlayNetworking.send(AbilityRequestPayload.INSTANCE);
+        }
+    }
+
+    public static void addTestAbilities() {
+        if (availableAbilities.isEmpty()) {
+            System.out.println("COI Client: Adding test abilities for debugging...");
+            availableAbilities.add("fireball - Fireball");
+            availableAbilities.add("heal - Healing Light");
+            availableAbilities.add("teleport - Teleportation");
+            availableAbilities.add("shield - Magic Shield");
+            System.out.println("COI Client: Added " + availableAbilities.size() + " test abilities");
+        }
+    }
 
     @Override
     public void onInitializeClient() {
@@ -285,211 +488,6 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             }
         } else if (!key.isDown()) {
             keyPressed[index] = false;
-        }
-    }
-
-    private static void useAbility(String abilityIdWithName) {
-        if (abilityIdWithName == null) return;
-
-        String abilityId = AbilityInfo.extractId(abilityIdWithName);
-        String action = AbilityInfo.extractAction(abilityIdWithName);
-
-        ClientPlayNetworking.send(new AbilityUsePayload(abilityId, action));
-
-        AbilityInfo info = getAbilityInfo(abilityId);
-        String displayName = info != null ? info.englishName() : AbilityInfo.extractDisplayName(abilityIdWithName);
-        Minecraft client = Minecraft.getInstance();
-        if (client.player != null && AbilityInfo.ACTION_EXECUTE.equals(action)) {
-            client.player.sendOverlayMessage(Component.translatable("notification.coi.ability_used", displayName));
-        }
-    }
-
-    public static void handleAbilityData(String data) {
-        availableAbilities.clear();
-
-        if (data.isEmpty()) {
-            System.out.println("COI Client: Received empty ability data");
-            return;
-        }
-
-        System.out.println("COI Client: Received ability data: " + data);
-
-        abilityInfoMap.clear();
-        String[] abilities = data.split(";");
-        for (String ability : abilities) {
-            if (!ability.isEmpty()) {
-                String[] parts = ability.split("\\|");
-                if (parts.length >= 2) {
-                    String id = parts[0];
-                    String localizedName = parts[1];
-                    String englishName = parts.length > 2 ? parts[2] : localizedName;
-                    String category = parts.length > 3 ? parts[3] : "uncategorized";
-                    boolean hasLeftClick = parts.length >= 5 && Boolean.parseBoolean(parts[4]);
-
-                    String formatted = AbilityInfo.formatStored(id, englishName, AbilityInfo.ACTION_EXECUTE);
-                    availableAbilities.add(formatted);
-                    if (hasLeftClick) {
-                        availableAbilities.add(AbilityInfo.formatStored(id, englishName + " (Left Click)", AbilityInfo.ACTION_LEFT_CLICK));
-                    }
-                    abilityInfoMap.put(id, new AbilityInfo(id, localizedName, englishName, category, hasLeftClick));
-                    System.out.println("COI Client: Added ability: " + formatted);
-                }
-            }
-        }
-
-        System.out.println("COI Client: Total abilities loaded: " + availableAbilities.size());
-        updateHudWithCurrentBindings();
-    }
-
-    public static void handleCooldownData(String abilityId, int cooldownTicks) {
-        AbilityHudOverlay.setCooldown(abilityId, cooldownTicks);
-    }
-
-    private static void updateHudWithCurrentBindings() {
-        validateBoundAbilities();
-
-        for (int i = 0; i < MAX_ABILITIES; i++) {
-            AbilityHudOverlay.updateAbilitySlot(i, boundAbilities[i]);
-        }
-    }
-
-    private static void validateBoundAbilities() {
-        boolean needsSave = false;
-
-        for (int i = 0; i < MAX_ABILITIES; i++) {
-            if (boundAbilities[i] == null) continue;
-
-            String freshEntry = findFreshAbilityEntry(boundAbilities[i]);
-
-            if (freshEntry == null) {
-                System.out.println("COI Client: Clearing invalid bound ability: " + boundAbilities[i]);
-                boundAbilities[i] = null;
-                needsSave = true;
-            } else if (!freshEntry.equals(boundAbilities[i])) {
-                boundAbilities[i] = freshEntry;
-                needsSave = true;
-            }
-        }
-
-        for (int i = 0; i < MAX_WHEEL_SIZE; i++) {
-            if (wheelAbilities[i] == null) continue;
-
-            String freshEntry = findFreshAbilityEntry(wheelAbilities[i]);
-
-            if (freshEntry == null) {
-                System.out.println("COI Client: Clearing invalid wheel ability: " + wheelAbilities[i]);
-                wheelAbilities[i] = null;
-                needsSave = true;
-            } else if (!freshEntry.equals(wheelAbilities[i])) {
-                wheelAbilities[i] = freshEntry;
-                needsSave = true;
-            }
-        }
-
-        if (needsSave) {
-            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
-        }
-    }
-
-    private static String findFreshAbilityEntry(String storedAbility) {
-        String boundId = AbilityInfo.extractId(storedAbility);
-        String boundAction = AbilityInfo.extractAction(storedAbility);
-        return availableAbilities.stream()
-                .filter(a -> Objects.equals(AbilityInfo.extractId(a), boundId))
-                .filter(a -> Objects.equals(AbilityInfo.extractAction(a), boundAction))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public static List<String> getAvailableAbilities() {
-        return new ArrayList<>(availableAbilities);
-    }
-
-    public static AbilityInfo getAbilityInfo(String abilityId) {
-        return abilityInfoMap.get(abilityId);
-    }
-
-    public static boolean hasLeftClick(String abilityIdWithName) {
-        AbilityInfo info = getAbilityInfo(AbilityInfo.extractId(abilityIdWithName));
-        return info != null && info.hasLeftClick();
-    }
-
-    public static String getBoundAbility(int slot) {
-        return boundAbilities[slot];
-    }
-
-    public static void setBoundAbility(int slot, String abilityId) {
-        if (slot >= 0 && slot < MAX_ABILITIES) {
-            boundAbilities[slot] = abilityId;
-            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
-            AbilityHudOverlay.updateAbilitySlot(slot, abilityId);
-        }
-    }
-
-    public static String getWheelAbility(int slot) {
-        if (slot >= 0 && slot < MAX_WHEEL_SIZE) {
-            return wheelAbilities[slot];
-        }
-        return null;
-    }
-
-    public static void setWheelAbility(int slot, String abilityId) {
-        if (slot >= 0 && slot < MAX_WHEEL_SIZE) {
-            wheelAbilities[slot] = abilityId;
-            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
-        }
-    }
-
-    public static int getWheelSize() {
-        return HudConfig.getSettings().wheelSlots;
-    }
-
-    public static boolean isKeyDown(KeyMapping keyBinding) {
-        if (keyBinding == null || keyBinding.isUnbound()) return false;
-
-        Minecraft client = Minecraft.getInstance();
-        if (client.getWindow() == null) return false;
-
-        long window = client.getWindow().handle();
-        InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(keyBinding);
-
-        if (key.getType() == InputConstants.Type.KEYSYM) {
-            return GLFW.glfwGetKey(window, key.getValue()) != GLFW.GLFW_RELEASE;
-        } else if (key.getType() == InputConstants.Type.MOUSE) {
-            return GLFW.glfwGetMouseButton(window, key.getValue()) != GLFW.GLFW_RELEASE;
-        }
-
-        return false;
-    }
-
-    public static void useAbilityById(String abilityIdWithName) {
-        useAbility(abilityIdWithName);
-    }
-
-    public static int getMaxAbilities() {
-        return MAX_ABILITIES;
-    }
-
-    private static String formatPathwayName(String pathway) {
-        return Character.toUpperCase(pathway.charAt(0)) + pathway.substring(1);
-    }
-
-    public static void requestAbilitiesFromServer() {
-        Minecraft client = Minecraft.getInstance();
-        if (client.player != null) {
-            System.out.println("COI Client: Requesting abilities from server...");
-            ClientPlayNetworking.send(AbilityRequestPayload.INSTANCE);
-        }
-    }
-
-    public static void addTestAbilities() {
-        if (availableAbilities.isEmpty()) {
-            System.out.println("COI Client: Adding test abilities for debugging...");
-            availableAbilities.add("fireball - Fireball");
-            availableAbilities.add("heal - Healing Light");
-            availableAbilities.add("teleport - Teleportation");
-            availableAbilities.add("shield - Magic Shield");
-            System.out.println("COI Client: Added " + availableAbilities.size() + " test abilities");
         }
     }
 }

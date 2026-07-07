@@ -16,6 +16,7 @@ public class EffectManager {
 
     private static final Map<String, Supplier<VisualEffect>> REGISTRY = new LinkedHashMap<>();
     private static final List<VisualEffect> activeEffects = new ArrayList<>();
+    private static final Set<String> PHOTOSENSITIVE_EFFECTS = Set.of(FlashEffect.ID, GlitchEffect.ID, HeartbeatEffect.ID);
 
     public static void initialize() {
         register(CracksEffect.ID, CracksEffect::new);
@@ -37,8 +38,6 @@ public class EffectManager {
     public static void register(String id, Supplier<VisualEffect> factory) {
         REGISTRY.put(id, factory);
     }
-
-    private static final Set<String> PHOTOSENSITIVE_EFFECTS = Set.of(FlashEffect.ID, GlitchEffect.ID, HeartbeatEffect.ID);
 
     /**
      * Trigger an effect by id. Special cases:

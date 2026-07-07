@@ -1,9 +1,9 @@
 package dev.ua.ikeepcalm.coi.mixin;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.renderer.texture.MipmapStrategy;
 import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
-import net.minecraft.client.renderer.texture.MipmapStrategy;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,8 +25,8 @@ public class LoadingOverlayMixin {
         try (InputStream stream = LoadingOverlayMixin.class.getResourceAsStream(CUSTOM_LOGO_PATH)) {
             if (stream == null) return;
             cir.setReturnValue(new TextureContents(
-                NativeImage.read(stream),
-                new TextureMetadataSection(true, true, MipmapStrategy.MEAN, 0.0F)
+                    NativeImage.read(stream),
+                    new TextureMetadataSection(true, true, MipmapStrategy.MEAN, 0.0F)
             ));
         } catch (IOException ignored) {
         }

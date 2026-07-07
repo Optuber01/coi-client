@@ -22,29 +22,32 @@ Triggering an effect that is already active replaces it (restarts from scratch).
 ## Effect Reference
 
 ### `vignette`
-Darkens screen edges. Good for: cursed zones, low sanity, death proximity.
+Darkens screen edges with a smooth gradient falloff and a slow breathing pulse. Fades in over 350ms. Good for: cursed zones, low sanity, death proximity.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
 | `intensity` | float 0–1 | `0.7` | Darkness and width of the vignette |
+| `color` | hex RGB (no `#`) | `000000` | Vignette tint — pathway-colored vignettes work well |
 | `duration` | long ms | `-1` | How long to show. `-1` = persistent until stopped |
 
 **Examples:**
 ```
 effect("vignette", "intensity=0.5,duration=10000")   // mild, 10 seconds
 effect("vignette", "intensity=1.0")                  // maximum, persistent
+effect("vignette", "intensity=0.8,color=2A0038")     // purple Fool-tinted edges
 effect("vignette", "stop")                           // remove
 ```
 
 ---
 
 ### `heartbeat`
-Vignette that pulses with a realistic lub-DUB rhythm. Good for: high tension, near-death, possessed states.
+Vignette that pulses with a smooth lub-DUB rhythm: a constant dark edge surges on each beat, with a blood-colored inner glow and a faint whole-screen flush at the DUB peak. Good for: high tension, near-death, possessed states.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
 | `intensity` | float 0–1 | `0.85` | Peak darkness per beat |
 | `bpm` | float | `75` | Beats per minute |
+| `color` | hex RGB (no `#`) | `8A0000` | Color of the pulsing inner glow |
 | `duration` | long ms | `-1` | Persistent by default |
 
 **Examples:**
@@ -56,7 +59,7 @@ effect("heartbeat", "intensity=1.0,bpm=50")                  // slow, ominous
 ---
 
 ### `cracks`
-Branching fracture lines grow from screen corners toward center. At high intensity the cracks pulse red. Good for: reality breaking, max madness, catastrophic events.
+Branching fracture lines shatter inward from screen corners with an initial impact flash, each crack growing along its own length. Cracks render as glassy strokes (dark outline + bright core) over a damage vignette; with `pulse` they glow red rhythmically. Good for: reality breaking, max madness, catastrophic events.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -76,7 +79,7 @@ effect("cracks", "intensity=0.8,pulse=true,duration=8000") // timed
 ---
 
 ### `eyes`
-Creepy eyes open from the darkness of the screen, stare, then close. Eyes are distributed evenly across the screen in a grid (up to 3 columns). Good for: being watched, high madness, cursed locations.
+Creepy eyes open from the darkness of the screen, stare, then close. The screen darkens while they watch; each eye has a pulsing red halo, bobs slowly, pops in slightly under-sized, and trembles just before shutting. Eyes are distributed evenly across the screen in a grid (up to 3 columns). Good for: being watched, high madness, cursed locations.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -99,17 +102,18 @@ effect("eyes", "count=6")                  // six eyes, default 8s
 ---
 
 ### `glitch`
-VHS-style horizontal distortion lines strobing in bursts. Lines flicker ~12×/second (not every frame). Good for: teleportation, reality corruption, spell side-effects, wrong-place warnings.
+VHS-style corruption strobing in bursts, with a tracking bar that rolls down the screen continuously between them. Artifacts flicker ~12×/second (not every frame). Good for: teleportation, reality corruption, spell side-effects, wrong-place warnings.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
-| `intensity` | float 0–1 | `0.7` | Number of lines, alpha, burst frequency |
+| `intensity` | float 0–1 | `0.7` | Artifact count, alpha, burst frequency |
 | `duration` | long ms | `3000` | Auto-expires by default |
 
-Line types (randomly mixed each burst):
-- Dark horizontal scan band
-- White flash band
+Burst artifacts (randomly mixed):
+- Dark / white horizontal bands, full-width or torn partial
 - RGB chromatic fringe (red above / cyan below)
+- Corrupted blocks with red/cyan RGB split
+- Static noise specks and faint scanlines
 - Horizontal split block
 
 **Examples:**
@@ -124,7 +128,7 @@ effect("glitch", "intensity=0.3,duration=500")    // quick flicker
 ---
 
 ### `bloodrain`
-Dark red streaks fall down the screen. Each drop has a random speed and alpha. Good for: combat, rituals, curses, death proximity.
+Tapered red streaks fall down the screen in two depth layers (dim slow background, bold fast foreground), while slow smears run down the "glass" with hanging droplets. A red edge tint frames the screen. Good for: combat, rituals, curses, death proximity.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -140,7 +144,7 @@ effect("bloodrain", "intensity=1.0")                 // heavy, persistent
 ---
 
 ### `frost`
-Ice crystals grow inward from screen edges with a blue-white tint. Combines icy gradient overlays with branching crystal lines. Good for: frozen spells, cold zones, ice pathway abilities.
+Fern-like ice crystals grow inward from screen edges — thick bright trunks with side needles — over a layered icy blue-white haze. Twinkling glints appear along grown crystals. Good for: frozen spells, cold zones, ice pathway abilities.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -156,7 +160,7 @@ effect("frost", "intensity=1.0")                    // heavy frost, persistent
 ---
 
 ### `whispers`
-Cryptic text phrases fade in and out at random positions across the screen. Spawn rate scales with intensity. Good for: high madness, haunted locations, Fool/Door pathways, forbidden knowledge.
+Cryptic text phrases fade in and out around the screen periphery, drifting slowly upward with a ghost double-image and candle-like flicker. Each whisper has a random size and tilt; SHOUTED phrases are tinted blood red. Spawn rate scales with intensity. Good for: high madness, haunted locations, Fool/Door pathways, forbidden knowledge.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -176,7 +180,7 @@ effect("whispers", "duration=15000,text=the rite begins|do not resist")
 ---
 
 ### `tunnel`
-Circular vignette that closes inward, leaving only a shrinking oval of visibility. Rendered via scanline fill (~80 draw calls per frame). Good for: exhaustion, confusion, extreme madness, near-death.
+Circular vignette that closes inward, leaving only a shrinking oval of visibility with a soft gradient edge. The closing is eased, and the hole breathes and drifts slightly off-center. Rendered via scanline fill (a few hundred draw calls per frame while closed). Good for: exhaustion, confusion, extreme madness, near-death.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
@@ -194,13 +198,14 @@ effect("tunnel", "intensity=0.4,duration=3000,closeDuration=500")    // quick fl
 ---
 
 ### `flash`
-Instant full-screen color wash that rises quickly and fades out. 1 fill call per frame. Good for: ability activation feedback, pathway-colored casts, heals, explosions.
+Full-screen color wash with a sharp attack, quadratic decay, a brighter center bloom, and a brief dark afterimage as the eyes readjust. Can re-strike multiple times like lightning. Good for: ability activation feedback, pathway-colored casts, heals, explosions.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
 | `color` | hex RGB (no `#`) | `FFFFFF` | Flash color |
 | `intensity` | float 0–1 | `0.6` | Peak opacity |
-| `duration` | long ms | `500` | Total fade time |
+| `duration` | long ms | `500` | Total fade time (afterimage adds ~60% on top) |
+| `flashes` | int | `1` | Number of re-strikes within `duration`, each weaker |
 
 Pathway color reference: `8B00FF` (Fool/purple), `0055FF` (Door/blue), `FFDD00` (Sun/yellow), `00CCCC` (Tyrant/cyan), `FF2200` (Demoness/red), `FF8800` (Priest/orange).
 
@@ -210,6 +215,7 @@ effect("flash", "color=FF2200,intensity=0.7,duration=400")   // Demoness red bur
 effect("flash", "color=FFFFFF,intensity=0.9,duration=600")   // Priest holy light
 effect("flash", "color=00CCCC,intensity=0.5,duration=300")   // Tyrant ability hit
 effect("flash", "color=000000,intensity=0.8,duration=800")   // darkness flash
+effect("flash", "color=FFFFFF,intensity=0.8,duration=700,flashes=3")  // lightning triple-strike
 ```
 
 ---

@@ -2,11 +2,16 @@ package dev.ua.ikeepcalm.coi.client.mcf;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
+import dev.ua.ikeepcalm.coi.client.effects.impl.ImpactFrameEffect;
 import dev.ua.ikeepcalm.coi.client.mcf.forms.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.world.phys.Vec3;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,13 +46,13 @@ public class MythicalFormManager {
     public static void register(MythicalCreatureForm form) {
         String name = form.getPathwayName().toLowerCase();
         REGISTERED_FORMS.put(name, form);
-        
+
         // Also register normalized variants for robustness
         String spaceRemoved = name.replace(" ", "");
         String underscoreRemoved = name.replace("_", "");
         String spaceToUnderscore = name.replace(" ", "_");
         String underscoreToSpace = name.replace("_", " ");
-        
+
         REGISTERED_FORMS.put(spaceRemoved, form);
         REGISTERED_FORMS.put(underscoreRemoved, form);
         REGISTERED_FORMS.put(spaceToUnderscore, form);
@@ -66,11 +71,69 @@ public class MythicalFormManager {
         }
         String pathwayName = parts[0].toLowerCase();
         String action = parts[2].toLowerCase();
+        String previous = uuidForms.get(targetUuid);
         if ("stop".equals(action)) {
             uuidForms.remove(targetUuid);
+            if (previous != null) {
+                triggerTransformVfx(targetUuid, previous, false);
+            }
         } else {
             uuidForms.put(targetUuid, pathwayName);
+            if (!pathwayName.equals(previous)) {
+                triggerTransformVfx(targetUuid, pathwayName, true);
+            }
         }
+    }
+
+    /**
+     * World-space burst at the transforming player, plus a brief tinted
+     * screen flash if it's the local player. Reverting plays a softer ripple.
+     */
+    private static void triggerTransformVfx(String targetUuid, String pathway, boolean starting) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.level == null) return;
+
+        for (AbstractClientPlayer player : client.level.players()) {
+            if (!player.getUUID().toString().equals(targetUuid)) continue;
+
+            Vec3 pos = player.position();
+            String hex = String.format("%06X", formAccentColor(pathway));
+            String params = String.format(Locale.ROOT,
+                    "style=%s,scope=world,x=%.2f,y=%.2f,z=%.2f,color=FFFFFF,accent=%s,intensity=0.9,radius=1.7,duration=850",
+                    starting ? "burst" : "ripple", pos.x, pos.y + 0.1, pos.z, hex);
+            EffectManager.trigger(ImpactFrameEffect.ID, params);
+
+            if (player == client.player) {
+                EffectManager.trigger("flash", "color=" + hex + ",intensity=0.3,duration=350");
+            }
+            return;
+        }
+    }
+
+    private static int formAccentColor(String pathway) {
+        return switch (pathway.toLowerCase().replace("_", " ")) {
+            case "fool" -> 0xB347CC;
+            case "door" -> 0x5B7FE6;
+            case "sun" -> 0xFFE55C;
+            case "tyrant" -> 0x4AA3FF;
+            case "demoness" -> 0xB22222;
+            case "priest" -> 0xFF6B35;
+            case "error" -> 0x999999;
+            case "tower" -> 0x7788AA;
+            case "visionary" -> 0x44CCBB;
+            case "hanged" -> 0x3A6E4F;
+            case "darkness" -> 0x4A1A6E;
+            case "death" -> 0xC8D0E8;
+            case "giant" -> 0xC08840;
+            case "paragon" -> 0xE8E8FF;
+            case "hermit" -> 0x8855CC;
+            case "fortune" -> 0xFFD700;
+            case "chained" -> 0x666677;
+            case "abyss" -> 0x551133;
+            case "justiciar" -> 0xEEDD88;
+            case "emperor" -> 0xDD9922;
+            default -> 0xCCCCFF;
+        };
     }
 
     public static boolean isTransformed(AbstractClientPlayer player) {

@@ -61,6 +61,16 @@ public class AbilityHudOverlay {
         }
     }
 
+    public static void onAbilityCast(String abilityId) {
+        if (abilitySlots == null) return;
+        for (AbilitySlotWidget abilitySlot : abilitySlots) {
+            if (abilitySlot.hasAbility(abilityId)) {
+                abilitySlot.triggerCastAnimation();
+                break;
+            }
+        }
+    }
+
     public static void updateAbilitySlot(int slot, String abilityId) {
         if (abilitySlots != null && slot >= 0 && slot < abilitySlots.length) {
             abilitySlots[slot].setAbility(abilityId);

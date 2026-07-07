@@ -48,7 +48,7 @@ public class ErrorForm implements MythicalCreatureForm {
     }
 
     private void drawClockDial(PoseStack.Pose pose, VertexConsumer consumer,
-                                float cx, float cy, float cz, float radius, float angle, int light, int seed) {
+                               float cx, float cy, float cz, float radius, float angle, int light, int seed) {
         java.util.Random rand = new java.util.Random(seed * 9991L);
 
         // Central hub
