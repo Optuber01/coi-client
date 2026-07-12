@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repository.
 
 ## Project Overview
 
-COI Client is a client-only Minecraft Fabric mod implementing a customizable ability system with HUD overlay. Players bind up to **6 abilities** to keybindings (Z/X/C/V/B/N), use them in-game, and can customize the HUD visually. The mod communicates with a server-side Paper plugin via **Fabric custom payloads** (plugin messaging).
+COI Client is a client-only Minecraft Fabric mod implementing a customizable ability system with HUD overlay. Players bind up to **10 abilities** to keybindings (slots 1–6 default Z/X/C/V/B/N, slots 7–10 default unbound), use them in-game, and can customize the HUD visually. The player-facing slot count is the `activeAbilitySlots` HUD setting (1–10, default 6); `MAX_ABILITIES = 10` is a hard ceiling because keymappings can only be registered once at init. Lowering the count hides bindings without deleting them. The mod communicates with a server-side Paper plugin via **Fabric custom payloads** (plugin messaging).
 
 **Environment:** Client-only
 **Java:** 21 | **MC:** 1.21.11 | **Fabric Loader:** 0.18.4 | **Fabric API:** 0.141.3+1.21.11
@@ -91,6 +91,7 @@ Available effects: `vignette`, `heartbeat`, `cracks`, `eyes`, `glitch`, `bloodra
 | Key | Action |
 |-----|--------|
 | Z–N (6 keys) | Ability slots 1–6 |
+| *(unbound)* | Ability slots 7–10 — assign in vanilla Controls, activate via `activeAbilitySlots` |
 | K | Open Ability Binding screen |
 | F8 *(dev only)* | Open Effect Debug screen |
 
@@ -102,7 +103,7 @@ Extracted from first segment of ability ID (before first `-`):
 ## Config Files
 
 `config/coi_abilities.json` — bound ability ids per slot
-`config/coi_hud.json` — HUD settings (position/size/scale, display toggles, epilepsy mode, madness bar, `effectSoundVolume`, `enableHallucinations`)
+`config/coi_hud.json` — HUD settings (position/size/scale, display toggles, epilepsy mode, madness bar, `effectSoundVolume`, `enableHallucinations`, `activeAbilitySlots`, `wheelSlots`)
 
 ## Localization
 

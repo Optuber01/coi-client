@@ -41,8 +41,10 @@ import java.util.*;
 
 public class CircleOfImaginationClient implements ClientModInitializer {
 
-    // Configurable maximum number of abilities (change this to support more abilities)
-    public static final int MAX_ABILITIES = 6;
+    // Hard ceiling for key-bound ability slots. Keymappings can only be registered
+    // once at init, so all MAX_ABILITIES are registered up front and the player-facing
+    // count is HudConfig.activeAbilitySlots (see getActiveAbilitySlots()).
+    public static final int MAX_ABILITIES = 10;
     public static final int MAX_WHEEL_SIZE = 16;
 
     private static final List<String> availableAbilities = new ArrayList<>();
@@ -154,7 +156,9 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     private static void validateBoundAbilities() {
         boolean needsSave = false;
 
-        for (int i = 0; i < MAX_ABILITIES; i++) {
+        // Only active slots are validated — hidden slots keep their bindings
+        // untouched so they reappear intact when the count is raised again.
+        for (int i = 0; i < getActiveAbilitySlots(); i++) {
             if (boundAbilities[i] == null) continue;
 
             String freshEntry = findFreshAbilityEntry(boundAbilities[i]);
@@ -266,6 +270,10 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
     public static int getMaxAbilities() {
         return MAX_ABILITIES;
+    }
+
+    public static int getActiveAbilitySlots() {
+        return Math.clamp(HudConfig.getSettings().activeAbilitySlots, 1, MAX_ABILITIES);
     }
 
     private static String formatPathwayName(String pathway) {
@@ -409,7 +417,8 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     private void registerKeybindings() {
         KeyMapping.Category category = KeyMapping.Category.register(Identifier.parse("category.coi.abilities"));
 
-        // Default keybindings for first 6 abilities: Z, X, C, V, B, N
+        // Default keybindings for first 6 abilities: Z, X, C, V, B, N.
+        // Slots 7+ default unbound — the player assigns keys in vanilla Controls.
         int[] defaultKeys = {
                 GLFW.GLFW_KEY_Z,
                 GLFW.GLFW_KEY_X,
@@ -420,7 +429,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         };
 
         for (int i = 0; i < MAX_ABILITIES; i++) {
-            int defaultKey = defaultKeys[i];
+            int defaultKey = i < defaultKeys.length ? defaultKeys[i] : GLFW.GLFW_KEY_UNKNOWN;
             abilityKeys[i] = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                     "key.coi.ability" + (i + 1),
                     InputConstants.Type.KEYSYM,
@@ -459,7 +468,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
             if (client.player == null) return;
 
-            for (int i = 0; i < MAX_ABILITIES; i++) {
+            for (int i = 0; i < getActiveAbilitySlots(); i++) {
                 handleKeyPress(i, abilityKeys[i], client);
             }
 

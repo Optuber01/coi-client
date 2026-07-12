@@ -1,5 +1,6 @@
 package dev.ua.ikeepcalm.coi.client.screen;
 
+import dev.ua.ikeepcalm.coi.client.CircleOfImaginationClient;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -36,6 +37,7 @@ public class HudSettingsScreen extends Screen {
     private EditBox slotSizeField;
     private EditBox slotSpacingField;
     private EditBox hudScaleField;
+    private EditBox activeSlotsField;
     private EditBox wheelSlotsField;
     private EditBox madnessXOffsetField;
     private EditBox madnessYOffsetField;
@@ -62,6 +64,7 @@ public class HudSettingsScreen extends Screen {
         to.showGlowEffect = from.showGlowEffect;
         to.hudScale = from.hudScale;
         to.wheelSlots = from.wheelSlots;
+        to.activeAbilitySlots = from.activeAbilitySlots;
         to.epilepsyMode = from.epilepsyMode;
         to.showMadnessBar = from.showMadnessBar;
         to.madnessXOffset = from.madnessXOffset;
@@ -181,14 +184,15 @@ public class HudSettingsScreen extends Screen {
                 .build();
         this.addRenderableWidget(enabledCheckbox);
         int leftY = layout.topY + 24;
-        int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 6 + SECTION_GAP;
+        int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 7 + SECTION_GAP;
 
         hudXField = addIntSliderField(layout.leftX, leftY, layout, "X", Component.translatable("screen.coi.hud_x_field"), 0, 500, settings.hudX, value -> settings.hudX = value);
         hudYOffsetField = addIntSliderField(layout.leftX, leftY + ROW_SPACING, layout, "Y Offset", Component.translatable("screen.coi.hud_y_offset_field"), 0, 200, settings.hudYOffset, value -> settings.hudYOffset = value);
         slotSizeField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 2, layout, "Slot Size", Component.translatable("screen.coi.slot_size_field"), 20, 100, settings.slotSize, value -> settings.slotSize = value);
         slotSpacingField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 3, layout, "Spacing", Component.translatable("screen.coi.slot_spacing_field"), 30, 100, settings.slotSpacing, value -> settings.slotSpacing = value);
         hudScaleField = addDecimalSliderField(layout.leftX, leftY + ROW_SPACING * 4, layout, "Scale", Component.translatable("screen.coi.hud_scale_field"), 0.5, 2.0, settings.hudScale, value -> settings.hudScale = (float) value);
-        wheelSlotsField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 5, layout, "Wheel Slots", Component.translatable("screen.coi.wheel_slots_field"), 2, 16, settings.wheelSlots, value -> settings.wheelSlots = value);
+        activeSlotsField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 5, layout, "Key Slots", Component.translatable("screen.coi.key_slots_field"), 1, CircleOfImaginationClient.MAX_ABILITIES, settings.activeAbilitySlots, value -> settings.activeAbilitySlots = value);
+        wheelSlotsField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 6, layout, "Wheel Slots", Component.translatable("screen.coi.wheel_slots_field"), 2, 16, settings.wheelSlots, value -> settings.wheelSlots = value);
 
         madnessXOffsetField = addIntSliderField(layout.rightX, rightY, layout, "Madness X", Component.translatable("screen.coi.madness_x_offset_field"), -500, 500, settings.madnessXOffset, value -> settings.madnessXOffset = value);
         madnessYOffsetField = addIntSliderField(layout.rightX, rightY + ROW_SPACING, layout, "Madness Y", Component.translatable("screen.coi.madness_y_offset_field"), 0, 200, settings.madnessYOffset, value -> settings.madnessYOffset = value);
@@ -214,7 +218,7 @@ public class HudSettingsScreen extends Screen {
                 .build();
         this.addRenderableWidget(showMadnessBarCheckbox);
 
-        int displayY = Math.max(leftY + ROW_SPACING * 6, rightY + ROW_SPACING * 4) + SECTION_GAP;
+        int displayY = Math.max(leftY + ROW_SPACING * 7, rightY + ROW_SPACING * 4) + SECTION_GAP;
         int displayLeftX = layout.leftX;
         int displayRightX = layout.twoColumns ? layout.rightX : layout.leftX;
         int displayColumnYOffset = layout.twoColumns ? 0 : 24;
@@ -371,6 +375,7 @@ public class HudSettingsScreen extends Screen {
         slotSizeField.setValue(String.valueOf(settings.slotSize));
         slotSpacingField.setValue(String.valueOf(settings.slotSpacing));
         hudScaleField.setValue(String.format("%.1f", settings.hudScale));
+        activeSlotsField.setValue(String.valueOf(settings.activeAbilitySlots));
         wheelSlotsField.setValue(String.valueOf(settings.wheelSlots));
         madnessXOffsetField.setValue(String.valueOf(settings.madnessXOffset));
         madnessYOffsetField.setValue(String.valueOf(settings.madnessYOffset));
@@ -401,8 +406,8 @@ public class HudSettingsScreen extends Screen {
 
         SettingsLayout layout = createLayout();
         int leftY = layout.topY + 24;
-        int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 6 + SECTION_GAP;
-        int displayY = Math.max(leftY + ROW_SPACING * 6, rightY + ROW_SPACING * 4) + SECTION_GAP;
+        int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 7 + SECTION_GAP;
+        int displayY = Math.max(leftY + ROW_SPACING * 7, rightY + ROW_SPACING * 4) + SECTION_GAP;
 
         drawSection(graphics, "Ability HUD", layout.leftX, leftY - 24);
         drawSettingLabels(graphics, layout.leftX, leftY,
@@ -411,6 +416,7 @@ public class HudSettingsScreen extends Screen {
                 Component.translatable("screen.coi.slot_size"),
                 Component.translatable("screen.coi.slot_spacing"),
                 Component.translatable("screen.coi.hud_scale"),
+                Component.translatable("screen.coi.key_slots"),
                 Component.translatable("screen.coi.wheel_slots"));
 
         drawSection(graphics, "Madness HUD", layout.rightX, rightY - 24);

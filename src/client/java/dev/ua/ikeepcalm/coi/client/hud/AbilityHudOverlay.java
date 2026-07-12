@@ -42,11 +42,12 @@ public class AbilityHudOverlay {
         int startY = (int) ((screenHeight - settings.hudYOffset) / settings.hudScale);
         int hudX = (int) (settings.hudX / settings.hudScale);
 
-        // Only render slots that have abilities bound to them
+        // Only render active slots that have abilities bound to them
+        int activeSlots = CircleOfImaginationClient.getActiveAbilitySlots();
         List<AbilitySlotWidget> visible = new ArrayList<>();
         List<Integer> visibleIndices = new ArrayList<>();
         for (AbilitySlotWidget abilitySlot : abilitySlots) {
-            if (!abilitySlot.isEmpty()) {
+            if (abilitySlot.getSlotIndex() < activeSlots && !abilitySlot.isEmpty()) {
                 visible.add(abilitySlot);
                 visibleIndices.add(abilitySlot.getSlotIndex());
             }

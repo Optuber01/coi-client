@@ -47,6 +47,7 @@ public class AbilityBindingScreen extends Screen {
         }
 
         int maxAbilities = CircleOfImaginationClient.getMaxAbilities();
+        int activeSlots = CircleOfImaginationClient.getActiveAbilitySlots();
         int wheelSize = CircleOfImaginationClient.getWheelSize();
         int totalItems = showingWheel ? wheelSize : maxAbilities;
         int totalPages = (totalItems + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
@@ -65,8 +66,10 @@ public class AbilityBindingScreen extends Screen {
         int startIdx = currentPage * ITEMS_PER_PAGE;
         int endIdx = Math.min(startIdx + ITEMS_PER_PAGE, totalItems);
 
-        // Create dropdowns for current page
+        // Create dropdowns for current page (inactive key slots get no dropdown —
+        // they render grayed out with a hint instead)
         for (int i = startIdx; i < endIdx; i++) {
+            if (!showingWheel && i >= activeSlots) continue;
             final int slot = i;
             int y = topMargin + ((i - startIdx) * spacing);
 
@@ -118,7 +121,7 @@ public class AbilityBindingScreen extends Screen {
                             CircleOfImaginationClient.setWheelAbility(i, null);
                         }
                     } else {
-                        for (int i = 0; i < maxAbilities; i++) {
+                        for (int i = 0; i < activeSlots; i++) {
                             CircleOfImaginationClient.setBoundAbility(i, null);
                         }
                     }
@@ -220,10 +223,16 @@ public class AbilityBindingScreen extends Screen {
     }
 
     private void renderSlotInfo(GuiGraphicsExtractor graphics, int slot, int x, int y, Component key, boolean isWheel) {
+        boolean inactive = !isWheel && slot >= CircleOfImaginationClient.getActiveAbilitySlots();
         Component label = Component.translatable(isWheel ? "screen.coi.wheel_slot" : "screen.coi.ability" + (slot + 1) + "_label");
         if (isWheel) label = label.copy().append(" " + (slot + 1));
 
-        graphics.text(this.font, label, x, y, 0xFFA0A0A0);
+        graphics.text(this.font, label, x, y, inactive ? 0xFF606060 : 0xFFA0A0A0);
+
+        if (inactive) {
+            graphics.text(this.font, Component.translatable("screen.coi.slot_inactive"), x + this.font.width(label) + 5, y, 0xFF606060);
+            return;
+        }
 
         if (!isWheel) {
             graphics.text(this.font, "Use [" + key.tryCollapseToString() + "]", x + this.font.width(label) + 5, y, 0xFFFFFF55);

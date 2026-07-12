@@ -3,6 +3,7 @@ package dev.ua.ikeepcalm.coi.client.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import dev.ua.ikeepcalm.coi.client.CircleOfImaginationClient;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
@@ -34,6 +35,8 @@ public class HudConfig {
                 settings.showGlowEffect = !json.has("showGlowEffect") || json.get("showGlowEffect").getAsBoolean();
                 settings.hudScale = json.has("hudScale") ? json.get("hudScale").getAsFloat() : 1.0f;
                 settings.wheelSlots = json.has("wheelSlots") ? json.get("wheelSlots").getAsInt() : 8;
+                settings.activeAbilitySlots = json.has("activeAbilitySlots")
+                        ? Math.clamp(json.get("activeAbilitySlots").getAsInt(), 1, CircleOfImaginationClient.MAX_ABILITIES) : 6;
                 settings.epilepsyMode = json.has("epilepsyMode") && json.get("epilepsyMode").getAsBoolean();
                 settings.showMadnessBar = !json.has("showMadnessBar") || json.get("showMadnessBar").getAsBoolean();
                 settings.madnessXOffset = json.has("madnessXOffset") ? json.get("madnessXOffset").getAsInt() : 0;
@@ -61,6 +64,7 @@ public class HudConfig {
         json.addProperty("showGlowEffect", settings.showGlowEffect);
         json.addProperty("hudScale", settings.hudScale);
         json.addProperty("wheelSlots", settings.wheelSlots);
+        json.addProperty("activeAbilitySlots", settings.activeAbilitySlots);
         json.addProperty("epilepsyMode", settings.epilepsyMode);
         json.addProperty("showMadnessBar", settings.showMadnessBar);
         json.addProperty("madnessXOffset", settings.madnessXOffset);
@@ -101,6 +105,7 @@ public class HudConfig {
         public boolean showGlowEffect = true;
         public float hudScale = 1.0f;
         public int wheelSlots = 8;
+        public int activeAbilitySlots = 6;
         public boolean epilepsyMode = false;
         public boolean showMadnessBar = true;
         public int madnessXOffset = 0;
