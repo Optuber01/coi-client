@@ -308,6 +308,8 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             requestAbilitiesFromServer();
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            // Remember how mad we were — the title screen holds a grudge
+            ClientStateStore.setLastMadness(ClientBeyonderState.getMadness());
             ClientBeyonderState.reset();
             EffectManager.stopAll();
         });

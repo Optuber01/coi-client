@@ -11,6 +11,14 @@ import net.minecraft.resources.Identifier;
 
 import java.util.Random;
 
+/**
+ * The title screen remembers. Corruption (the higher of madness / permanent
+ * madness at last disconnect, persisted via {@link ClientStateStore}) drives
+ * a vignette, occasional eye apparitions, and whisper splash lines. Even a
+ * clean player gets Lord of the Mysteries flavor splashes. Slow fades only —
+ * nothing flashes. Haunting respects the hallucinations toggle; the flavor
+ * splashes do not, since they are branding rather than horror.
+ */
 public class TitleScreenHaunt {
 
     private static final Random RANDOM = new Random();
@@ -22,7 +30,8 @@ public class TitleScreenHaunt {
         }
     }
 
-    private static final int SPLASH_LINES = 5;
+    private static final int HAUNT_SPLASH_LINES = 5;
+    private static final int LOTM_SPLASH_LINES = 7;
     private static final long EYE_DURATION_MS = 3200;
     private static final long EYE_FADE_MS = 900;
 
@@ -35,26 +44,35 @@ public class TitleScreenHaunt {
     private static boolean splashDecided = false;
     private static SplashRenderer hauntedSplash = null;
 
-    /** 0 when clean (or hallucinations disabled), creeping to 1 at 100 permanent madness. */
+    /**
+     * 0 when clean (or hallucinations disabled), creeping to 1 at corruption
+     * 100. Corruption is whichever of madness / permanent madness was higher
+     * when the player was last seen — debug-screen madness counts too, since
+     * it is persisted at disconnect like any other.
+     */
     private static float intensity() {
         if (!HudConfig.getSettings().enableHallucinations) return 0f;
-        double perm = ClientStateStore.getLastPermanentMadness();
-        if (perm < 10.0) return 0f;
-        return (float) Math.min(1.0, (perm - 10.0) / 90.0);
+        double corruption = ClientStateStore.getCorruption();
+        if (corruption < 10.0) return 0f;
+        return (float) Math.min(1.0, (corruption - 10.0) / 90.0);
     }
 
     /**
-     * Whisper splash line, or null to leave vanilla's. Rolled once per game
-     * launch so window resizes don't re-roll it.
+     * Splash line for the title screen, rolled once per game launch so
+     * window resizes don't re-roll it. A corrupted player may get a whisper;
+     * everyone else gets Lord of the Mysteries flavor instead of vanilla.
      */
     public static SplashRenderer hauntedSplash() {
         if (!splashDecided) {
             splashDecided = true;
             float level = intensity();
-            if (level > 0 && ClientStateStore.getLastPermanentMadness() >= 25.0
+            if (level > 0 && ClientStateStore.getCorruption() >= 25.0
                     && RANDOM.nextDouble() < 0.25 + 0.5 * level) {
                 hauntedSplash = new SplashRenderer(
-                        Component.translatable("title.coi.haunt_splash." + RANDOM.nextInt(SPLASH_LINES)));
+                        Component.translatable("title.coi.haunt_splash." + RANDOM.nextInt(HAUNT_SPLASH_LINES)));
+            } else {
+                hauntedSplash = new SplashRenderer(
+                        Component.translatable("title.coi.splash." + RANDOM.nextInt(LOTM_SPLASH_LINES)));
             }
         }
         return hauntedSplash;

@@ -75,7 +75,7 @@ Available effects: `vignette`, `heartbeat`, `cracks`, `eyes`, `glitch`, `bloodra
 
 **Madness hallucinations** — `HallucinationManager` (client tick) fires phantom positional sounds and visual flickers once `ClientBeyonderState` madness ≥ 25, scaling with stages 25/50/75; darkness/night makes events up to ~2.5x more frequent. Server can force one via the `hallucination` pseudo-effect (`event=footsteps|whisper|cave|block|flicker|random`). Toggle: `enableHallucinations` HUD setting, which also gates:
 - **HUD gaslighting** (`hud/HudGaslight`) — at madness ≥ 75 the HUD briefly lies: wrong cooldown numbers, glitched keybind glyphs, two slots trading places.
-- **Title screen haunting** (`screen/TitleScreenHaunt` + `TitleScreenMixin`) — permanent madness is persisted to `config/coi_client_state.json` (`ClientStateStore`); the main menu shows a scaled vignette, occasional eye apparitions, and whisper splash lines (`title.coi.haunt_splash.*`).
+- **Title screen haunting** (`screen/TitleScreenHaunt` + `TitleScreenMixin`) — corruption (max of madness at disconnect and permanent madness, incl. debug-screen values) is persisted to `config/coi_client_state.json` (`ClientStateStore`); the main menu shows a scaled vignette, occasional eye apparitions, and whisper splash lines (`title.coi.haunt_splash.*`). Clean players always get LOTM flavor splashes (`title.coi.splash.*`) — not gated by the hallucinations toggle.
 
 **Debug screen** (dev environment only, F8): lists all registered effects with Test/Stop buttons and a params input field. `shouldPause()` returns false so effects are visible while the screen is open.
 

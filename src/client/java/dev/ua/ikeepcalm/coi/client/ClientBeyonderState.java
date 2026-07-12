@@ -3,6 +3,7 @@ package dev.ua.ikeepcalm.coi.client;
 import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
 
 public class ClientBeyonderState {
+
     private static double madness = 0.0;
     private static double permanentMadness = 0.0;
     private static int freezeStacks = 0;
