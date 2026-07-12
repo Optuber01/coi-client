@@ -44,6 +44,8 @@ public class HudConfig {
                 settings.madnessAnchor = json.has("madnessAnchor") ? json.get("madnessAnchor").getAsString() : "TOP_LEFT";
                 settings.effectSoundVolume = json.has("effectSoundVolume") ? json.get("effectSoundVolume").getAsFloat() : 1.0f;
                 settings.enableHallucinations = !json.has("enableHallucinations") || json.get("enableHallucinations").getAsBoolean();
+                settings.enableDiscordPresence = !json.has("enableDiscordPresence") || json.get("enableDiscordPresence").getAsBoolean();
+                settings.presenceShowMadness = !json.has("presenceShowMadness") || json.get("presenceShowMadness").getAsBoolean();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -72,6 +74,8 @@ public class HudConfig {
         json.addProperty("madnessAnchor", settings.madnessAnchor);
         json.addProperty("effectSoundVolume", settings.effectSoundVolume);
         json.addProperty("enableHallucinations", settings.enableHallucinations);
+        json.addProperty("enableDiscordPresence", settings.enableDiscordPresence);
+        json.addProperty("presenceShowMadness", settings.presenceShowMadness);
 
         try {
             Files.writeString(CONFIG_PATH, GSON.toJson(json));
@@ -113,5 +117,7 @@ public class HudConfig {
         public String madnessAnchor = "TOP_LEFT";
         public float effectSoundVolume = 1.0f;
         public boolean enableHallucinations = true;
+        public boolean enableDiscordPresence = true;
+        public boolean presenceShowMadness = true;
     }
 }

@@ -11,6 +11,7 @@ import dev.ua.ikeepcalm.coi.client.hud.AbilityHudOverlay;
 import dev.ua.ikeepcalm.coi.client.hud.MadnessHudOverlay;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
 import dev.ua.ikeepcalm.coi.client.network.*;
+import dev.ua.ikeepcalm.coi.client.presence.DiscordPresenceManager;
 import dev.ua.ikeepcalm.coi.client.resources.IngredientInfo;
 import dev.ua.ikeepcalm.coi.client.resources.ResourceLoader;
 import dev.ua.ikeepcalm.coi.client.screen.AbilityBindingScreen;
@@ -18,6 +19,7 @@ import dev.ua.ikeepcalm.coi.client.screen.AbilityWheelScreen;
 import dev.ua.ikeepcalm.coi.client.screen.EffectDebugScreen;
 import dev.ua.ikeepcalm.coi.client.screen.TourScreen;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -284,6 +286,14 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         return Math.clamp(HudConfig.getSettings().activeAbilitySlots, 1, MAX_ABILITIES);
     }
 
+    public static String[] getBoundAbilitiesSnapshot() {
+        return boundAbilities.clone();
+    }
+
+    public static String[] getWheelAbilitiesSnapshot() {
+        return wheelAbilities.clone();
+    }
+
     private static String formatPathwayName(String pathway) {
         return Character.toUpperCase(pathway.charAt(0)) + pathway.substring(1);
     }
@@ -322,14 +332,23 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             requestAbilitiesFromServer();
+            var server = client.getCurrentServer();
+            DiscordPresenceManager.onServerJoin(
+                    server != null ? server.name : "Singleplayer",
+                    server != null ? server.ip : null
+            );
         });
+
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             // Remember how mad we were — the title screen holds a grudge
             ClientStateStore.setLastMadness(ClientBeyonderState.getMadness());
             ClientBeyonderState.reset();
             EffectManager.stopAll();
             tourPendingAt = 0;
+            DiscordPresenceManager.onDisconnect();
         });
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> DiscordPresenceManager.shutdown());
 
         net.fabricmc.fabric.api.resource.v1.ResourceLoader.get(PackType.CLIENT_RESOURCES)
                 .registerReloadListener(Identifier.fromNamespaceAndPath("coi-client", "client_json_loader"), CLIENT_DATA_LOADER);
@@ -474,6 +493,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     private void registerTickHandler() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             HallucinationManager.tick(client);
+            DiscordPresenceManager.tick();
 
             if (client.player == null) return;
 

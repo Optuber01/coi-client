@@ -77,6 +77,8 @@
   "screen.coi.madness_y_offset_field": "Madness Y",
   "screen.coi.enable_hallucinations": "Madness Hallucinations",
   "screen.coi.effect_sound_volume": "Effect Sounds",
+  "screen.coi.enable_discord_presence": "Discord Rich Presence",
+  "screen.coi.presence_show_madness": "Show Madness on Discord",
   "screen.coi.show_tour": "Show Tour Again",
   "screen.coi.tour_title": "Welcome, Beyonder",
   "screen.coi.tour_next": "Next",

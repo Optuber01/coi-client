@@ -33,6 +33,8 @@ public class HudSettingsScreen extends Screen {
     private Checkbox epilepsyModeCheckbox;
     private Checkbox showMadnessBarCheckbox;
     private Checkbox hallucinationsCheckbox;
+    private Checkbox discordPresenceCheckbox;
+    private Checkbox presenceMadnessCheckbox;
     private EditBox hudXField;
     private EditBox hudYOffsetField;
     private EditBox slotSizeField;
@@ -73,6 +75,8 @@ public class HudSettingsScreen extends Screen {
         to.madnessAnchor = from.madnessAnchor;
         to.effectSoundVolume = from.effectSoundVolume;
         to.enableHallucinations = from.enableHallucinations;
+        to.enableDiscordPresence = from.enableDiscordPresence;
+        to.presenceShowMadness = from.presenceShowMadness;
     }
 
     private SettingsLayout createLayout() {
@@ -282,6 +286,20 @@ public class HudSettingsScreen extends Screen {
         };
         this.addRenderableWidget(soundVolumeSlider);
 
+        int displayFourthRowY = layout.twoColumns ? displayY + 72 : displayY + 144;
+
+        discordPresenceCheckbox = Checkbox.builder(Component.translatable("screen.coi.enable_discord_presence"), Minecraft.getInstance().font)
+                .pos(displayLeftX, displayFourthRowY)
+                .maxWidth(layout.columnWidth).onValueChange((_, checked) -> settings.enableDiscordPresence = checked).selected(settings.enableDiscordPresence)
+                .build();
+        this.addRenderableWidget(discordPresenceCheckbox);
+
+        presenceMadnessCheckbox = Checkbox.builder(Component.translatable("screen.coi.presence_show_madness"), Minecraft.getInstance().font)
+                .pos(displayRightX, displayFourthRowY + displayColumnYOffset)
+                .maxWidth(layout.columnWidth).onValueChange((_, checked) -> settings.presenceShowMadness = checked).selected(settings.presenceShowMadness)
+                .build();
+        this.addRenderableWidget(presenceMadnessCheckbox);
+
         int buttonY = layout.buttonY;
         int buttonWidth = Math.min(100, this.width / 8);
         int smallButtonWidth = Math.min(90, this.width / 9);
@@ -403,6 +421,8 @@ public class HudSettingsScreen extends Screen {
         settings.epilepsyMode = epilepsyModeCheckbox.selected();
         settings.showMadnessBar = showMadnessBarCheckbox.selected();
         settings.enableHallucinations = hallucinationsCheckbox.selected();
+        settings.enableDiscordPresence = discordPresenceCheckbox.selected();
+        settings.presenceShowMadness = presenceMadnessCheckbox.selected();
 
         HudConfig.setSettings(settings);
     }

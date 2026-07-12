@@ -30,6 +30,10 @@ CircleOfImaginationClient   — entry point, singleton state, payload registrati
   │   ├── VisualEffect         — interface (start/render/isFinished/stop)
   │   └── impl/                — CracksEffect, EyesEffect, VignetteEffect,
   │                               HeartbeatEffect, GlitchEffect
+  ├── presence/
+  │   └── DiscordPresenceManager — Discord Rich Presence via discord-game-sdk4j
+  │                                (pure-Java IPC, bundled jar-in-jar); lazy connect
+  │                                on first join, APP_ID = 0 disables it entirely
   ├── network/
   │   ├── AbilityUsePayload    C→S  coi-client:use
   │   ├── AbilityRequestPayload C→S  coi-client:request
@@ -105,7 +109,7 @@ Extracted from first segment of ability ID (before first `-`):
 ## Config Files
 
 `config/coi_abilities.json` — bound ability ids per slot
-`config/coi_hud.json` — HUD settings (position/size/scale, display toggles, epilepsy mode, madness bar, `effectSoundVolume`, `enableHallucinations`, `activeAbilitySlots`, `wheelSlots`)
+`config/coi_hud.json` — HUD settings (position/size/scale, display toggles, epilepsy mode, madness bar, `effectSoundVolume`, `enableHallucinations`, `activeAbilitySlots`, `wheelSlots`, `enableDiscordPresence`, `presenceShowMadness`)
 `config/coi_client_state.json` — persistent state, not preferences (`ClientStateStore`): last madness values for title haunting, `tourCompleted` for the first-join tour (survives HUD config resets)
 
 ## Localization

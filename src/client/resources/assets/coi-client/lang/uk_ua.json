@@ -76,6 +76,8 @@
   "screen.coi.madness_x_offset_field": "Madness X",
   "screen.coi.enable_hallucinations": "Галюцинації Божевілля",
   "screen.coi.effect_sound_volume": "Звуки Ефектів",
+  "screen.coi.enable_discord_presence": "Discord Rich Presence",
+  "screen.coi.presence_show_madness": "Показувати Божевілля в Discord",
   "screen.coi.show_tour": "Показати Тур Знову",
   "screen.coi.tour_title": "Вітаємо, Потойбічний",
   "screen.coi.tour_next": "Далі",
