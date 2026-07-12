@@ -62,5 +62,7 @@
   "screen.coi.madness_y_offset": "Вертикальна Позиція Божевілля",
   "screen.coi.madness_y_offset_field": "Зсув Божевілля Y",
   "screen.coi.madness_x_offset": "Madness Horizontal Position",
-  "screen.coi.madness_x_offset_field": "Madness X"
+  "screen.coi.madness_x_offset_field": "Madness X",
+  "screen.coi.enable_hallucinations": "Галюцинації Божевілля",
+  "screen.coi.effect_sound_volume": "Звуки Ефектів"
 }

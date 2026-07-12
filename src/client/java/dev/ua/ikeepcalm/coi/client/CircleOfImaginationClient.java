@@ -5,6 +5,7 @@ import dev.ua.ikeepcalm.coi.client.config.AbilityConfig;
 import dev.ua.ikeepcalm.coi.client.config.AbilityInfo;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
+import dev.ua.ikeepcalm.coi.client.effects.HallucinationManager;
 import dev.ua.ikeepcalm.coi.client.hud.AbilityHudOverlay;
 import dev.ua.ikeepcalm.coi.client.hud.MadnessHudOverlay;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
@@ -450,6 +451,8 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
     private void registerTickHandler() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            HallucinationManager.tick(client);
+
             if (client.player == null) return;
 
             for (int i = 0; i < MAX_ABILITIES; i++) {

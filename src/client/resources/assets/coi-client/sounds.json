@@ -1,0 +1,30 @@
+{
+  "effect.heartbeat": {
+    "category": "ambient",
+    "sounds": [{"name": "coi-client:heartbeat", "stream": true}]
+  },
+  "effect.whispers": {
+    "category": "ambient",
+    "sounds": [{"name": "coi-client:whispers", "stream": true}]
+  },
+  "effect.tunnel": {
+    "category": "ambient",
+    "sounds": [{"name": "coi-client:tunnel", "stream": true}]
+  },
+  "effect.cracks": {
+    "category": "ambient",
+    "sounds": ["coi-client:cracks"]
+  },
+  "effect.frost": {
+    "category": "ambient",
+    "sounds": ["coi-client:frost"]
+  },
+  "effect.glitch": {
+    "category": "ambient",
+    "sounds": ["coi-client:glitch"]
+  },
+  "hallucination.whisper": {
+    "category": "ambient",
+    "sounds": ["coi-client:whisper_distant"]
+  }
+}

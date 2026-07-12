@@ -30,6 +30,7 @@ public class EffectManager {
         register(TunnelEffect.ID, TunnelEffect::new);
         register(FlashEffect.ID, FlashEffect::new);
         register(ImpactFrameEffect.ID, ImpactFrameEffect::new);
+        register(HallucinationEffect.ID, HallucinationEffect::new);
         ImpactFrameEffect.initializeWorldRenderer();
 
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, Identifier.fromNamespaceAndPath("coi-client", "effects"), EffectManager::render);
@@ -79,6 +80,7 @@ public class EffectManager {
         VisualEffect effect = factory.get();
         effect.start(params);
         activeEffects.add(effect);
+        EffectSounds.onEffectStart(effectId);
     }
 
     public static void stopEffect(String effectId) {
@@ -90,12 +92,14 @@ public class EffectManager {
                 .filter(e -> e.getId().equals(effectId))
                 .forEach(VisualEffect::stop);
         activeEffects.removeIf(e -> e.getId().equals(effectId));
+        EffectSounds.onEffectStop(effectId);
     }
 
     public static void stopAll() {
         ImpactFrameEffect.clearWorldImpacts();
         activeEffects.forEach(VisualEffect::stop);
         activeEffects.clear();
+        EffectSounds.stopAll();
     }
 
     public static boolean isActive(String effectId) {
@@ -114,7 +118,14 @@ public class EffectManager {
         int h = client.getWindow().getGuiScaledHeight();
         float tickDelta = 1.0f;
 
-        activeEffects.removeIf(VisualEffect::isFinished);
+        Iterator<VisualEffect> it = activeEffects.iterator();
+        while (it.hasNext()) {
+            VisualEffect effect = it.next();
+            if (effect.isFinished()) {
+                EffectSounds.onEffectStop(effect.getId());
+                it.remove();
+            }
+        }
 
         for (VisualEffect effect : new ArrayList<>(activeEffects)) {
             effect.render(ctx, w, h, tickDelta);

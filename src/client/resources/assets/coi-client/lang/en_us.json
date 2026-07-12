@@ -63,5 +63,7 @@
   "screen.coi.madness_x_offset": "Madness Horizontal Position",
   "screen.coi.madness_x_offset_field": "Madness X",
   "screen.coi.madness_y_offset": "Madness Vertical Position",
-  "screen.coi.madness_y_offset_field": "Madness Y"
+  "screen.coi.madness_y_offset_field": "Madness Y",
+  "screen.coi.enable_hallucinations": "Madness Hallucinations",
+  "screen.coi.effect_sound_volume": "Effect Sounds"
 }

@@ -30,6 +30,7 @@ public class HudSettingsScreen extends Screen {
     private Checkbox showGlowEffectCheckbox;
     private Checkbox epilepsyModeCheckbox;
     private Checkbox showMadnessBarCheckbox;
+    private Checkbox hallucinationsCheckbox;
     private EditBox hudXField;
     private EditBox hudYOffsetField;
     private EditBox slotSizeField;
@@ -66,6 +67,8 @@ public class HudSettingsScreen extends Screen {
         to.madnessXOffset = from.madnessXOffset;
         to.madnessYOffset = from.madnessYOffset;
         to.madnessAnchor = from.madnessAnchor;
+        to.effectSoundVolume = from.effectSoundVolume;
+        to.enableHallucinations = from.enableHallucinations;
     }
 
     private SettingsLayout createLayout() {
@@ -241,6 +244,31 @@ public class HudSettingsScreen extends Screen {
                 .build();
         this.addRenderableWidget(epilepsyModeCheckbox);
 
+        int displayThirdRowY = layout.twoColumns ? displayY + 48 : displayY + 96;
+
+        hallucinationsCheckbox = Checkbox.builder(Component.translatable("screen.coi.enable_hallucinations"), Minecraft.getInstance().font)
+                .pos(displayLeftX, displayThirdRowY)
+                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.enableHallucinations = checked).selected(settings.enableHallucinations)
+                .build();
+        this.addRenderableWidget(hallucinationsCheckbox);
+
+        int initialVolume = Math.round(Math.clamp(settings.effectSoundVolume, 0f, 1f) * 100);
+        AbstractSliderButton soundVolumeSlider = new AbstractSliderButton(displayRightX, displayThirdRowY + displayColumnYOffset, layout.columnWidth, 20,
+                Component.translatable("screen.coi.effect_sound_volume").append(": " + initialVolume + "%"), initialVolume / 100.0) {
+            @Override
+            protected void updateMessage() {
+                int value = (int) Math.round(this.value * 100);
+                settings.effectSoundVolume = value / 100f;
+                this.setMessage(Component.translatable("screen.coi.effect_sound_volume").append(": " + value + "%"));
+            }
+
+            @Override
+            protected void applyValue() {
+                updateMessage();
+            }
+        };
+        this.addRenderableWidget(soundVolumeSlider);
+
         int buttonY = layout.buttonY;
         int buttonWidth = Math.min(100, this.width / 8);
         int smallButtonWidth = Math.min(90, this.width / 9);
@@ -360,6 +388,7 @@ public class HudSettingsScreen extends Screen {
         settings.showGlowEffect = showGlowEffectCheckbox.selected();
         settings.epilepsyMode = epilepsyModeCheckbox.selected();
         settings.showMadnessBar = showMadnessBarCheckbox.selected();
+        settings.enableHallucinations = hallucinationsCheckbox.selected();
 
         HudConfig.setSettings(settings);
     }

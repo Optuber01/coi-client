@@ -270,6 +270,30 @@ When tested from the debug screen without params, the client uses a longer `styl
 
 ---
 
+### `hallucination`
+Fires a single madness-hallucination event and finishes immediately — no visual of its own. Phantom positional audio (footsteps sneaking up behind the player, whispers over the shoulder, cave ambience, doors/chests nobody touched) or a brief visual flicker (single eye / short glitch). These events also fire autonomously on the client once madness passes 25, scaling in frequency and boldness with the madness stages (25/50/75); this effect id lets the server force one at any time.
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `event` | `footsteps`, `whisper`, `cave`, `block`, `flicker`, `random` | `random` | Which hallucination to fire |
+
+**Examples:**
+```
+effect("hallucination", "event=footsteps")  // steps approaching from behind
+effect("hallucination", "event=whisper")    // whisper just over the shoulder
+effect("hallucination", "event=flicker")    // brief eye/glitch glimpse
+```
+
+Players can disable autonomous hallucinations ("Madness Hallucinations" in HUD Settings); the server-triggered pseudo-effect still works. The `flicker` variant respects epilepsy mode via the normal glitch guard.
+
+---
+
+## Effect Sounds
+
+Effects with audio companions play them automatically: `heartbeat`, `whispers`, `tunnel` loop for the effect's lifetime and stop with it; `cracks`, `frost`, `glitch` play a one-shot on trigger. Volume is controlled by the "Effect Sounds" slider in HUD Settings (0% mutes all effect and hallucination audio). No server-side action is needed.
+
+---
+
 ## Combining Effects
 
 Effects are independent layers — multiple can be active simultaneously:

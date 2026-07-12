@@ -69,7 +69,11 @@ Effects are triggered server-side via `VisualEffectPayload(effectId, params)`.
 `EffectManager` maintains the active list and renders all effects via `HudRenderCallback`.
 Effects support `params = "stop"` to remove, `effectId = "all"` to clear all.
 
-Available effects: `vignette`, `heartbeat`, `cracks`, `eyes`, `glitch`, `bloodrain`, `frost`, `whispers`, `tunnel`, `flash`
+Available effects: `vignette`, `heartbeat`, `cracks`, `eyes`, `glitch`, `bloodrain`, `frost`, `whispers`, `tunnel`, `flash`, `impact`, `hallucination`
+
+**Sound layer** — `EffectSounds` plays audio companions for effects (loops for `heartbeat`/`whispers`/`tunnel`, one-shots for `cracks`/`frost`/`glitch`); assets in `assets/coi-client/sounds/` + `sounds.json`. Volume via `effectSoundVolume` HUD setting.
+
+**Madness hallucinations** — `HallucinationManager` (client tick) fires phantom positional sounds and visual flickers once `ClientBeyonderState` madness ≥ 25, scaling with stages 25/50/75. Server can force one via the `hallucination` pseudo-effect (`event=footsteps|whisper|cave|block|flicker|random`). Toggle: `enableHallucinations` HUD setting.
 
 **Debug screen** (dev environment only, F8): lists all registered effects with Test/Stop buttons and a params input field. `shouldPause()` returns false so effects are visible while the screen is open.
 
@@ -96,7 +100,7 @@ Extracted from first segment of ability ID (before first `-`):
 ## Config Files
 
 `config/coi_abilities.json` — bound ability ids per slot
-`config/coi_hud.json` — 8 HUD settings (x, yOffset, slotSize, slotSpacing, scale, enabled, showKeybinds, showAbilityNames, showGlowEffect)
+`config/coi_hud.json` — HUD settings (position/size/scale, display toggles, epilepsy mode, madness bar, `effectSoundVolume`, `enableHallucinations`)
 
 ## Localization
 

@@ -39,6 +39,8 @@ public class HudConfig {
                 settings.madnessXOffset = json.has("madnessXOffset") ? json.get("madnessXOffset").getAsInt() : 0;
                 settings.madnessYOffset = json.has("madnessYOffset") ? json.get("madnessYOffset").getAsInt() : 55;
                 settings.madnessAnchor = json.has("madnessAnchor") ? json.get("madnessAnchor").getAsString() : "TOP_LEFT";
+                settings.effectSoundVolume = json.has("effectSoundVolume") ? json.get("effectSoundVolume").getAsFloat() : 1.0f;
+                settings.enableHallucinations = !json.has("enableHallucinations") || json.get("enableHallucinations").getAsBoolean();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -64,6 +66,8 @@ public class HudConfig {
         json.addProperty("madnessXOffset", settings.madnessXOffset);
         json.addProperty("madnessYOffset", settings.madnessYOffset);
         json.addProperty("madnessAnchor", settings.madnessAnchor);
+        json.addProperty("effectSoundVolume", settings.effectSoundVolume);
+        json.addProperty("enableHallucinations", settings.enableHallucinations);
 
         try {
             Files.writeString(CONFIG_PATH, GSON.toJson(json));
@@ -102,5 +106,7 @@ public class HudConfig {
         public int madnessXOffset = 0;
         public int madnessYOffset = 55;
         public String madnessAnchor = "TOP_LEFT";
+        public float effectSoundVolume = 1.0f;
+        public boolean enableHallucinations = true;
     }
 }
