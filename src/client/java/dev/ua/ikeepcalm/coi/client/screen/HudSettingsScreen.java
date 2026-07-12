@@ -1,6 +1,7 @@
 package dev.ua.ikeepcalm.coi.client.screen;
 
 import dev.ua.ikeepcalm.coi.client.CircleOfImaginationClient;
+import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -183,6 +184,14 @@ public class HudSettingsScreen extends Screen {
                 .maxWidth(200)
                 .build();
         this.addRenderableWidget(enabledCheckbox);
+
+        this.addRenderableWidget(Button.builder(Component.translatable("screen.coi.show_tour"),
+                _ -> {
+                    ClientStateStore.setTourCompleted(false);
+                    if (this.minecraft.player != null) {
+                        this.minecraft.setScreen(new TourScreen());
+                    }
+                }).bounds(this.width - 130, 10, 120, 20).build());
         int leftY = layout.topY + 24;
         int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 7 + SECTION_GAP;
 

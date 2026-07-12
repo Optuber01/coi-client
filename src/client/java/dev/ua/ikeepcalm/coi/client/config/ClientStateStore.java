@@ -11,8 +11,9 @@ import java.nio.file.Path;
 
 /**
  * Small persistent scratch state that survives sessions — the last-known
- * madness values, so the title screen remembers how corrupted the player
- * was when they logged off.
+ * madness values (so the title screen remembers how corrupted the player
+ * was when they logged off) and whether the first-join tour has been shown.
+ * State, not preference: it deliberately survives resets of coi_hud.json.
  */
 public class ClientStateStore {
 
@@ -23,6 +24,7 @@ public class ClientStateStore {
 
     private static double lastPermanentMadness = 0.0;
     private static double lastMadness = 0.0;
+    private static boolean tourCompleted = false;
 
     public static void load() {
         if (!Files.exists(STATE_PATH)) return;
@@ -34,6 +36,9 @@ public class ClientStateStore {
             }
             if (json.has("lastMadness")) {
                 lastMadness = json.get("lastMadness").getAsDouble();
+            }
+            if (json.has("tourCompleted")) {
+                tourCompleted = json.get("tourCompleted").getAsBoolean();
             }
         } catch (Exception e) {
             System.err.println("COI Client: Failed to read client state");
@@ -75,10 +80,21 @@ public class ClientStateStore {
         return Math.max(lastMadness, lastPermanentMadness);
     }
 
+    public static boolean isTourCompleted() {
+        return tourCompleted;
+    }
+
+    public static void setTourCompleted(boolean value) {
+        if (tourCompleted == value) return;
+        tourCompleted = value;
+        save();
+    }
+
     private static void save() {
         JsonObject json = new JsonObject();
         json.addProperty("lastPermanentMadness", lastPermanentMadness);
         json.addProperty("lastMadness", lastMadness);
+        json.addProperty("tourCompleted", tourCompleted);
         try {
             Files.writeString(STATE_PATH, GSON.toJson(json));
         } catch (IOException e) {

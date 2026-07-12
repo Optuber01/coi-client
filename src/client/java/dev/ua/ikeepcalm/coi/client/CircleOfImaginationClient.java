@@ -16,6 +16,7 @@ import dev.ua.ikeepcalm.coi.client.resources.ResourceLoader;
 import dev.ua.ikeepcalm.coi.client.screen.AbilityBindingScreen;
 import dev.ua.ikeepcalm.coi.client.screen.AbilityWheelScreen;
 import dev.ua.ikeepcalm.coi.client.screen.EffectDebugScreen;
+import dev.ua.ikeepcalm.coi.client.screen.TourScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -86,6 +87,9 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     public static KeyMapping effectDebugMenu; // null when not in dev environment
     private static String[] boundAbilities = new String[MAX_ABILITIES];
     private static String[] wheelAbilities = new String[MAX_WHEEL_SIZE];
+    // When > 0, the first-join tour opens at this timestamp (set on the first
+    // non-empty abilities payload; the delay lets the world render first)
+    private static long tourPendingAt = 0;
 
     private static void useAbility(String abilityIdWithName) {
         if (abilityIdWithName == null) return;
@@ -139,6 +143,10 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
         System.out.println("COI Client: Total abilities loaded: " + availableAbilities.size());
         updateHudWithCurrentBindings();
+
+        if (!availableAbilities.isEmpty() && !ClientStateStore.isTourCompleted() && tourPendingAt == 0) {
+            tourPendingAt = System.currentTimeMillis() + 3000;
+        }
     }
 
     public static void handleCooldownData(String abilityId, int cooldownTicks) {
@@ -320,6 +328,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             ClientStateStore.setLastMadness(ClientBeyonderState.getMadness());
             ClientBeyonderState.reset();
             EffectManager.stopAll();
+            tourPendingAt = 0;
         });
 
         net.fabricmc.fabric.api.resource.v1.ResourceLoader.get(PackType.CLIENT_RESOURCES)
@@ -467,6 +476,15 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             HallucinationManager.tick(client);
 
             if (client.player == null) return;
+
+            // First-join tour: opens once the delay has passed and no other
+            // screen is in the way (stays pending until the way is clear)
+            if (tourPendingAt > 0 && System.currentTimeMillis() >= tourPendingAt && client.screen == null) {
+                tourPendingAt = 0;
+                if (!ClientStateStore.isTourCompleted()) {
+                    client.setScreen(new TourScreen());
+                }
+            }
 
             for (int i = 0; i < getActiveAbilitySlots(); i++) {
                 handleKeyPress(i, abilityKeys[i], client);

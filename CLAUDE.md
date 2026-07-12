@@ -44,6 +44,8 @@ CircleOfImaginationClient   — entry point, singleton state, payload registrati
       ├── AbilityBindingScreen — bind abilities to slots (opened with K)
       ├── AbilityDropdownWidget — scrollable dropdown, uses method references
       ├── HudSettingsScreen    — HUD customization (sliders, 4 presets)
+      ├── TourScreen           — first-join walkthrough: spotlight cutouts + text cards,
+      │                          movement stays enabled; re-run via "Show Tour Again"
       └── EffectDebugScreen    — dev-only (F8), test visual effects without server
 ```
 
@@ -104,6 +106,7 @@ Extracted from first segment of ability ID (before first `-`):
 
 `config/coi_abilities.json` — bound ability ids per slot
 `config/coi_hud.json` — HUD settings (position/size/scale, display toggles, epilepsy mode, madness bar, `effectSoundVolume`, `enableHallucinations`, `activeAbilitySlots`, `wheelSlots`)
+`config/coi_client_state.json` — persistent state, not preferences (`ClientStateStore`): last madness values for title haunting, `tourCompleted` for the first-join tour (survives HUD config resets)
 
 ## Localization
 
