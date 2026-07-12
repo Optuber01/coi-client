@@ -65,5 +65,10 @@
   "screen.coi.madness_y_offset": "Madness Vertical Position",
   "screen.coi.madness_y_offset_field": "Madness Y",
   "screen.coi.enable_hallucinations": "Madness Hallucinations",
-  "screen.coi.effect_sound_volume": "Effect Sounds"
+  "screen.coi.effect_sound_volume": "Effect Sounds",
+  "title.coi.haunt_splash.0": "he is still watching",
+  "title.coi.haunt_splash.1": "it followed you home",
+  "title.coi.haunt_splash.2": "the fog remembers you",
+  "title.coi.haunt_splash.3": "don't trust the mirrors",
+  "title.coi.haunt_splash.4": "you never really logged off"
 }

@@ -86,12 +86,25 @@ public class HallucinationManager {
     /**
      * Average interval shrinks as madness climbs: ~75s at stage 1 down to
      * ~20s at 100, with ±40% jitter so events never feel scheduled.
+     * Darkness makes it worse — see {@link #darknessFactor()}.
      */
     private static long nextDelayMs(double madness) {
         double t = Math.min(1.0, (madness - TIER_1) / (100.0 - TIER_1));
         double base = 75_000 - t * 55_000;
         double jitter = 0.6 + RANDOM.nextDouble() * 0.8;
-        return (long) (base * jitter);
+        return (long) (base * jitter * darknessFactor());
+    }
+
+    /**
+     * Fear of the dark: hallucinations come up to ~2.5x as often in pitch
+     * black (unlit caves, night in the open) as in full light. Uses the
+     * time-of-day-aware local brightness, so night counts as dark.
+     */
+    private static double darknessFactor() {
+        Minecraft client = Minecraft.getInstance();
+        if (client.player == null || client.level == null) return 1.0;
+        int light = client.level.getMaxLocalRawBrightness(client.player.blockPosition());
+        return 0.4 + 0.6 * (Math.clamp(light, 0, 15) / 15.0);
     }
 
     private static void triggerRandom(double madness) {

@@ -271,7 +271,7 @@ When tested from the debug screen without params, the client uses a longer `styl
 ---
 
 ### `hallucination`
-Fires a single madness-hallucination event and finishes immediately — no visual of its own. Phantom positional audio (footsteps sneaking up behind the player, whispers over the shoulder, cave ambience, doors/chests nobody touched) or a brief visual flicker (single eye / short glitch). These events also fire autonomously on the client once madness passes 25, scaling in frequency and boldness with the madness stages (25/50/75); this effect id lets the server force one at any time.
+Fires a single madness-hallucination event and finishes immediately — no visual of its own. Phantom positional audio (footsteps sneaking up behind the player, whispers over the shoulder, cave ambience, doors/chests nobody touched) or a brief visual flicker (single eye / short glitch). These events also fire autonomously on the client once madness passes 25, scaling in frequency and boldness with the madness stages (25/50/75) — and up to ~2.5x more often in darkness or at night; this effect id lets the server force one at any time. At madness ≥ 75 the ability HUD itself occasionally lies for a few hundred ms (wrong cooldown number, glitched keybind, two slots trading places), and permanent madness persists locally to haunt the title screen (vignette, eye apparitions, whisper splash lines) until it is cured.
 
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|

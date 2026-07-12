@@ -233,6 +233,11 @@ public class AbilitySlotWidget {
             cooldownText = String.format("%.1f", seconds);
         }
 
+        String fake = HudGaslight.cooldownOverride(slotIndex);
+        if (fake != null) {
+            cooldownText = fake;
+        }
+
         int textWidth = textRenderer.width(cooldownText);
         int textX = x + (size - textWidth) / 2;
         int textY = y + size / 2 - 4;
@@ -281,6 +286,7 @@ public class AbilitySlotWidget {
         if (keyText.length() > 3) {
             keyText = keyText.substring(0, 3);
         }
+        keyText = HudGaslight.corruptKeybind(slotIndex, keyText);
 
         int textWidth = textRenderer.width(keyText);
         int padding = 2;
@@ -333,5 +339,9 @@ public class AbilitySlotWidget {
 
     public boolean isOnCooldown() {
         return cooldownTicks > 0;
+    }
+
+    public int getSlotIndex() {
+        return slotIndex;
     }
 }

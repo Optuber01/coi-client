@@ -9,6 +9,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AbilityHudOverlay {
 
     private static final Identifier ABILITY_LAYER = Identifier.fromNamespaceAndPath("coi-client", "abilities");
@@ -40,13 +43,29 @@ public class AbilityHudOverlay {
         int hudX = (int) (settings.hudX / settings.hudScale);
 
         // Only render slots that have abilities bound to them
-        int renderedCount = 0;
+        List<AbilitySlotWidget> visible = new ArrayList<>();
+        List<Integer> visibleIndices = new ArrayList<>();
         for (AbilitySlotWidget abilitySlot : abilitySlots) {
             if (!abilitySlot.isEmpty()) {
-                int x = hudX + (renderedCount * settings.slotSpacing);
-                abilitySlot.render(context, x, startY, settings.slotSize, tickDelta);
-                renderedCount++;
+                visible.add(abilitySlot);
+                visibleIndices.add(abilitySlot.getSlotIndex());
             }
+        }
+
+        HudGaslight.update(visibleIndices);
+
+        int renderedCount = 0;
+        for (AbilitySlotWidget abilitySlot : visible) {
+            // At high madness two slots may briefly trade places
+            AbilitySlotWidget toDraw = abilitySlot;
+            int swapped = HudGaslight.swappedWith(abilitySlot.getSlotIndex());
+            if (swapped >= 0 && swapped < abilitySlots.length && !abilitySlots[swapped].isEmpty()) {
+                toDraw = abilitySlots[swapped];
+            }
+
+            int x = hudX + (renderedCount * settings.slotSpacing);
+            toDraw.render(context, x, startY, settings.slotSize, tickDelta);
+            renderedCount++;
         }
     }
 

@@ -1,5 +1,7 @@
 package dev.ua.ikeepcalm.coi.client;
 
+import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
+
 public class ClientBeyonderState {
     private static double madness = 0.0;
     private static double permanentMadness = 0.0;
@@ -50,6 +52,7 @@ public class ClientBeyonderState {
         lastMadness = madness;
         madness = madnessVal;
         permanentMadness = permMadnessVal;
+        ClientStateStore.setPermanentMadness(permMadnessVal);
         freezeStacks = freezeVal;
         mentalPressure = pressureVal;
         tiredness = tirednessVal;

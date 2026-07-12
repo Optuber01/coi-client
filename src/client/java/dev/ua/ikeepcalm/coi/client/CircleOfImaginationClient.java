@@ -3,6 +3,7 @@ package dev.ua.ikeepcalm.coi.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ua.ikeepcalm.coi.client.config.AbilityConfig;
 import dev.ua.ikeepcalm.coi.client.config.AbilityInfo;
+import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
 import dev.ua.ikeepcalm.coi.client.effects.HallucinationManager;
@@ -293,6 +294,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         HudConfig.load();
+        ClientStateStore.load();
         boundAbilities = AbilityConfig.loadBindings();
         wheelAbilities = AbilityConfig.loadWheelBindings();
         registerPayloads();

@@ -64,5 +64,10 @@
   "screen.coi.madness_x_offset": "Madness Horizontal Position",
   "screen.coi.madness_x_offset_field": "Madness X",
   "screen.coi.enable_hallucinations": "Галюцинації Божевілля",
-  "screen.coi.effect_sound_volume": "Звуки Ефектів"
+  "screen.coi.effect_sound_volume": "Звуки Ефектів",
+  "title.coi.haunt_splash.0": "він досі спостерігає",
+  "title.coi.haunt_splash.1": "воно пішло за тобою додому",
+  "title.coi.haunt_splash.2": "туман пам'ятає тебе",
+  "title.coi.haunt_splash.3": "не довіряй дзеркалам",
+  "title.coi.haunt_splash.4": "ти так і не вийшов з гри"
 }

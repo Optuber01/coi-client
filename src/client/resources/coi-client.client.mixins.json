@@ -10,7 +10,8 @@
     "JoinMultiplayerScreenMixin",
     "LoadingOverlayMixin",
     "PlayerRendererMixin",
-    "OnlineServerEntryMixin"
+    "OnlineServerEntryMixin",
+    "TitleScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
