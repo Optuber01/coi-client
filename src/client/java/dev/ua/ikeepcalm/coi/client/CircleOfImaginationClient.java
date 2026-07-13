@@ -7,6 +7,8 @@ import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
 import dev.ua.ikeepcalm.coi.client.effects.HallucinationManager;
+import dev.ua.ikeepcalm.coi.client.gesture.GestureScreen;
+import dev.ua.ikeepcalm.coi.client.gesture.GestureType;
 import dev.ua.ikeepcalm.coi.client.hud.AbilityHudOverlay;
 import dev.ua.ikeepcalm.coi.client.hud.MadnessHudOverlay;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
@@ -86,9 +88,11 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     public static KeyMapping[] abilityKeys = new KeyMapping[MAX_ABILITIES];
     public static KeyMapping abilityMenu;
     public static KeyMapping abilityWheel;
+    public static KeyMapping gestureCast;
     public static KeyMapping effectDebugMenu; // null when not in dev environment
     private static String[] boundAbilities = new String[MAX_ABILITIES];
     private static String[] wheelAbilities = new String[MAX_WHEEL_SIZE];
+    private static String[] gestureAbilities = new String[GestureType.values().length];
     // When > 0, the first-join tour opens at this timestamp (set on the first
     // non-empty abilities payload; the delay lets the world render first)
     private static long tourPendingAt = 0;
@@ -198,8 +202,23 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             }
         }
 
+        for (int i = 0; i < gestureAbilities.length; i++) {
+            if (gestureAbilities[i] == null) continue;
+
+            String freshEntry = findFreshAbilityEntry(gestureAbilities[i]);
+
+            if (freshEntry == null) {
+                System.out.println("COI Client: Clearing invalid gesture ability: " + gestureAbilities[i]);
+                gestureAbilities[i] = null;
+                needsSave = true;
+            } else if (!freshEntry.equals(gestureAbilities[i])) {
+                gestureAbilities[i] = freshEntry;
+                needsSave = true;
+            }
+        }
+
         if (needsSave) {
-            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
+            AbilityConfig.saveBindings(boundAbilities, wheelAbilities, gestureAbilities);
         }
     }
 
@@ -233,7 +252,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     public static void setBoundAbility(int slot, String abilityId) {
         if (slot >= 0 && slot < MAX_ABILITIES) {
             boundAbilities[slot] = abilityId;
-            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
+            AbilityConfig.saveBindings(boundAbilities, wheelAbilities, gestureAbilities);
             AbilityHudOverlay.updateAbilitySlot(slot, abilityId);
         }
     }
@@ -248,8 +267,33 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     public static void setWheelAbility(int slot, String abilityId) {
         if (slot >= 0 && slot < MAX_WHEEL_SIZE) {
             wheelAbilities[slot] = abilityId;
-            AbilityConfig.saveBindings(boundAbilities, wheelAbilities);
+            AbilityConfig.saveBindings(boundAbilities, wheelAbilities, gestureAbilities);
         }
+    }
+
+    public static String getGestureAbility(GestureType type) {
+        return gestureAbilities[type.ordinal()];
+    }
+
+    public static String getGestureAbility(int slot) {
+        if (slot >= 0 && slot < gestureAbilities.length) {
+            return gestureAbilities[slot];
+        }
+        return null;
+    }
+
+    public static void setGestureAbility(int slot, String abilityId) {
+        if (slot >= 0 && slot < gestureAbilities.length) {
+            gestureAbilities[slot] = abilityId;
+            AbilityConfig.saveBindings(boundAbilities, wheelAbilities, gestureAbilities);
+        }
+    }
+
+    public static boolean hasAnyGestureBound() {
+        for (String ability : gestureAbilities) {
+            if (ability != null) return true;
+        }
+        return false;
     }
 
     public static int getWheelSize() {
@@ -323,6 +367,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         ClientStateStore.load();
         boundAbilities = AbilityConfig.loadBindings();
         wheelAbilities = AbilityConfig.loadWheelBindings();
+        gestureAbilities = AbilityConfig.loadGestureBindings();
         registerPayloads();
         registerKeybindings();
         registerTickHandler();
@@ -480,6 +525,13 @@ public class CircleOfImaginationClient implements ClientModInitializer {
                 category
         ));
 
+        gestureCast = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.coi.gesture",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_LEFT_ALT,
+                category
+        ));
+
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             effectDebugMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                     "screen.coi.effect_debug",
@@ -520,6 +572,11 @@ public class CircleOfImaginationClient implements ClientModInitializer {
                 if (client.screen == null) {
                     client.setScreen(new AbilityWheelScreen());
                 }
+            }
+
+            // Gesture casting: inert until at least one gesture has an ability bound
+            if (gestureCast.isDown() && client.screen == null && hasAnyGestureBound()) {
+                client.setScreen(new GestureScreen());
             }
         });
     }

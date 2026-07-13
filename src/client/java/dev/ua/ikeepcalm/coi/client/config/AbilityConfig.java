@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import dev.ua.ikeepcalm.coi.client.CircleOfImaginationClient;
+import dev.ua.ikeepcalm.coi.client.gesture.GestureType;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
@@ -17,13 +18,17 @@ public class AbilityConfig {
             .getConfigDir()
             .resolve("coi_abilities.json");
 
-    public static void saveBindings(String[] abilities, String[] wheelAbilities) {
+    public static void saveBindings(String[] abilities, String[] wheelAbilities, String[] gestureAbilities) {
         JsonObject json = new JsonObject();
         for (int i = 0; i < abilities.length; i++) {
             json.addProperty("ability" + (i + 1), abilities[i]);
         }
         for (int i = 0; i < wheelAbilities.length; i++) {
             json.addProperty("wheel" + (i + 1), wheelAbilities[i]);
+        }
+        GestureType[] gestures = GestureType.values();
+        for (int i = 0; i < gestureAbilities.length; i++) {
+            json.addProperty("gesture_" + gestures[i].id(), gestureAbilities[i]);
         }
 
         try {
@@ -75,5 +80,27 @@ public class AbilityConfig {
         }
 
         return wheelAbilities;
+    }
+
+    public static String[] loadGestureBindings() {
+        GestureType[] gestures = GestureType.values();
+        String[] gestureAbilities = new String[gestures.length];
+
+        if (Files.exists(CONFIG_PATH)) {
+            try {
+                String content = Files.readString(CONFIG_PATH);
+                JsonObject json = GSON.fromJson(content, JsonObject.class);
+
+                for (int i = 0; i < gestures.length; i++) {
+                    String key = "gesture_" + gestures[i].id();
+                    gestureAbilities[i] = json.has(key) && !json.get(key).isJsonNull() ?
+                            json.get(key).getAsString() : null;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return gestureAbilities;
     }
 }
