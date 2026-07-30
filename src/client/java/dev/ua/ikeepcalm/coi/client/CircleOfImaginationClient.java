@@ -168,58 +168,23 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     }
 
     private static void validateBoundAbilities() {
-        boolean needsSave = false;
-
-        // Only active slots are validated — hidden slots keep their bindings
-        // untouched so they reappear intact when the count is raised again.
         for (int i = 0; i < getActiveAbilitySlots(); i++) {
-            if (boundAbilities[i] == null) continue;
-
-            String freshEntry = findFreshAbilityEntry(boundAbilities[i]);
-
-            if (freshEntry == null) {
-                System.out.println("COI Client: Clearing invalid bound ability: " + boundAbilities[i]);
-                boundAbilities[i] = null;
-                needsSave = true;
-            } else if (!freshEntry.equals(boundAbilities[i])) {
-                boundAbilities[i] = freshEntry;
-                needsSave = true;
-            }
+            boundAbilities[i] = refreshAbilityEntry(boundAbilities[i]);
         }
 
         for (int i = 0; i < MAX_WHEEL_SIZE; i++) {
-            if (wheelAbilities[i] == null) continue;
-
-            String freshEntry = findFreshAbilityEntry(wheelAbilities[i]);
-
-            if (freshEntry == null) {
-                System.out.println("COI Client: Clearing invalid wheel ability: " + wheelAbilities[i]);
-                wheelAbilities[i] = null;
-                needsSave = true;
-            } else if (!freshEntry.equals(wheelAbilities[i])) {
-                wheelAbilities[i] = freshEntry;
-                needsSave = true;
-            }
+            wheelAbilities[i] = refreshAbilityEntry(wheelAbilities[i]);
         }
 
         for (int i = 0; i < gestureAbilities.length; i++) {
-            if (gestureAbilities[i] == null) continue;
-
-            String freshEntry = findFreshAbilityEntry(gestureAbilities[i]);
-
-            if (freshEntry == null) {
-                System.out.println("COI Client: Clearing invalid gesture ability: " + gestureAbilities[i]);
-                gestureAbilities[i] = null;
-                needsSave = true;
-            } else if (!freshEntry.equals(gestureAbilities[i])) {
-                gestureAbilities[i] = freshEntry;
-                needsSave = true;
-            }
+            gestureAbilities[i] = refreshAbilityEntry(gestureAbilities[i]);
         }
+    }
 
-        if (needsSave) {
-            AbilityConfig.saveBindings(boundAbilities, wheelAbilities, gestureAbilities);
-        }
+    private static String refreshAbilityEntry(String stored) {
+        if (stored == null) return null;
+        String freshEntry = findFreshAbilityEntry(stored);
+        return freshEntry != null ? freshEntry : stored;
     }
 
     private static String findFreshAbilityEntry(String storedAbility) {
