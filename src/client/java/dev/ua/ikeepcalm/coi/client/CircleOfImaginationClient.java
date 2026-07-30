@@ -269,7 +269,6 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         if (keyBinding == null || keyBinding.isUnbound()) return false;
 
         Minecraft client = Minecraft.getInstance();
-        if (client.getWindow() == null) return false;
 
         long window = client.getWindow().handle();
         InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(keyBinding);
@@ -353,6 +352,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             // Remember how mad we were — the title screen holds a grudge
             ClientStateStore.setLastMadness(ClientBeyonderState.getMadness());
             ClientBeyonderState.reset();
+            ClientAppearanceState.reset();
             EffectManager.stopAll();
             tourPendingAt = 0;
             DiscordPresenceManager.onDisconnect();
@@ -438,6 +438,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(VisualEffectPayload.ID, VisualEffectPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(MythicalFormPayload.ID, MythicalFormPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ConditionsPayload.ID, ConditionsPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(AppearancePayload.ID, AppearancePayload.CODEC);
 
         // S2C receivers
         ClientPlayNetworking.registerGlobalReceiver(AbilitiesPayload.ID,
@@ -450,6 +451,8 @@ public class CircleOfImaginationClient implements ClientModInitializer {
                 (payload, context) -> context.client().execute(() -> MythicalFormManager.handlePacket(payload.targetUuid(), payload.params())));
         ClientPlayNetworking.registerGlobalReceiver(ConditionsPayload.ID,
                 (payload, context) -> context.client().execute(() -> ClientBeyonderState.parseAndUpdate(payload.data())));
+        ClientPlayNetworking.registerGlobalReceiver(AppearancePayload.ID,
+                (payload, context) -> context.client().execute(() -> ClientAppearanceState.handlePacket(payload.targetUuid(), payload.traits())));
     }
 
     private void registerKeybindings() {

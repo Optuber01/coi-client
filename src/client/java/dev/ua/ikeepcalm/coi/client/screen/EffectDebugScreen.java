@@ -151,7 +151,7 @@ public class EffectDebugScreen extends Screen {
 
         int formY = y;
         java.util.List<String> forms = MythicalFormManager.getRegisteredPathwayNames();
-        String currentForm = (minecraft != null && minecraft.player != null) ? MythicalFormManager.getForm(minecraft.player.getName().getString()) : null;
+        String currentForm = minecraft.player != null ? MythicalFormManager.getForm(minecraft.player.getName().getString()) : null;
         final int[] activeIndex = {-1};
         if (currentForm != null) {
             for (int i = 0; i < forms.size(); i++) {
@@ -164,7 +164,7 @@ public class EffectDebugScreen extends Screen {
 
         String label = activeIndex[0] == -1 ? "Form: None (Click to cycle)" : "Form: " + forms.get(activeIndex[0]);
         Button formCycleBtn = Button.builder(Component.literal(label), btn -> {
-            if (minecraft == null || minecraft.player == null || forms.isEmpty()) return;
+            if (minecraft.player == null || forms.isEmpty()) return;
             String uuid = minecraft.player.getUUID().toString();
             activeIndex[0] = (activeIndex[0] + 1) % forms.size();
             String selected = forms.get(activeIndex[0]);
@@ -174,13 +174,19 @@ public class EffectDebugScreen extends Screen {
         addRenderableWidget(formCycleBtn);
 
         addRenderableWidget(Button.builder(Component.literal("Clear Form").withStyle(ChatFormatting.YELLOW), btn -> {
-            if (minecraft != null && minecraft.player != null) {
+            if (minecraft.player != null) {
                 MythicalFormManager.handlePacket(minecraft.player.getUUID().toString(), ":true:stop");
                 activeIndex[0] = -1;
                 formCycleBtn.setMessage(Component.literal("Form: None (Click to cycle)"));
             }
         }).bounds(panelX + PANEL_W / 2 + 2, formY, PANEL_W / 2 - 2, 20).build());
 
+        y += 26;
+
+        addRenderableWidget(Button.builder(
+                Component.literal("Appearance Traits — Local Preview").withStyle(ChatFormatting.AQUA),
+                btn -> minecraft.setScreen(new AppearanceDebugScreen(this))
+        ).bounds(panelX, y, PANEL_W, 20).build());
         y += 26;
 
         // Stop All
@@ -195,7 +201,7 @@ public class EffectDebugScreen extends Screen {
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         // Semi-transparent panel behind controls (no blur — world is still rendering)
         int panelX = (this.width - PANEL_W) / 2;
-        int panelH = 50 + EffectManager.getRegistry().size() * ROW_H + 34 + 26 + 26;
+        int panelH = 50 + EffectManager.getRegistry().size() * ROW_H + 34 + 26 + 26 + 26;
         graphics.fill(panelX - 8, 8, panelX + PANEL_W + 8, 8 + panelH, 0xCC000000);
 
         super.extractRenderState(graphics, mouseX, mouseY, a);
