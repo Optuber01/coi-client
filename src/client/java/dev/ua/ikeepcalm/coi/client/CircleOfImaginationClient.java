@@ -11,6 +11,7 @@ import dev.ua.ikeepcalm.coi.client.gesture.GestureScreen;
 import dev.ua.ikeepcalm.coi.client.gesture.GestureType;
 import dev.ua.ikeepcalm.coi.client.hud.AbilityHudOverlay;
 import dev.ua.ikeepcalm.coi.client.hud.MadnessHudOverlay;
+import dev.ua.ikeepcalm.coi.client.mcf.CoiModelLayers;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
 import dev.ua.ikeepcalm.coi.client.network.*;
 import dev.ua.ikeepcalm.coi.client.presence.DiscordPresenceManager;
@@ -338,6 +339,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         AbilityHudOverlay.initialize();
         MadnessHudOverlay.initialize();
         EffectManager.initialize();
+        CoiModelLayers.register();
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             requestAbilitiesFromServer();
@@ -354,6 +356,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             ClientBeyonderState.reset();
             ClientAppearanceState.reset();
             EffectManager.stopAll();
+            MythicalFormManager.clearAll();
             tourPendingAt = 0;
             DiscordPresenceManager.onDisconnect();
         });

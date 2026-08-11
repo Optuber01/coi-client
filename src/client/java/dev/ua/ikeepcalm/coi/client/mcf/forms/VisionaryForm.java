@@ -2,7 +2,9 @@ package dev.ua.ikeepcalm.coi.client.mcf.forms;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.ua.ikeepcalm.coi.client.mcf.CoiModelLayers;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalCreatureForm;
+import dev.ua.ikeepcalm.coi.client.mcf.PartialFormSpec;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 
 import java.util.Random;
@@ -15,7 +17,14 @@ public class VisionaryForm implements MythicalCreatureForm {
     }
 
     @Override
+    public PartialFormSpec partialForm() {
+        return CoiModelLayers.VISIONARY_LOWER_SPEC;
+    }
+
+    @Override
     public void render(AvatarRenderState state, PoseStack.Pose pose, VertexConsumer consumer) {
+        // Superseded by the baked model in partialForm() — kept as a fallback in case the
+        // model/texture fails to load, so the pathway still renders something.
         float time = state.ageInTicks;
         int light = state.lightCoords;
 

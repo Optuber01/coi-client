@@ -7,9 +7,11 @@
     "AvatarRendererMixin",
     "AvatarRenderStateMixin",
     "EntityRendererAccessor",
+    "HumanoidArmorLayerMixin",
     "LivingEntityRendererAccessor",
     "JoinMultiplayerScreenMixin",
     "LoadingOverlayMixin",
+    "PlayerModelMixin",
     "PlayerRendererMixin",
     "OnlineServerEntryMixin",
     "TitleScreenMixin"

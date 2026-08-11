@@ -151,7 +151,7 @@ public class EffectDebugScreen extends Screen {
 
         int formY = y;
         java.util.List<String> forms = MythicalFormManager.getRegisteredPathwayNames();
-        String currentForm = minecraft.player != null ? MythicalFormManager.getForm(minecraft.player.getName().getString()) : null;
+        String currentForm = minecraft.player != null ? MythicalFormManager.getForm(minecraft.player.getUUID().toString()) : null;
         final int[] activeIndex = {-1};
         if (currentForm != null) {
             for (int i = 0; i < forms.size(); i++) {

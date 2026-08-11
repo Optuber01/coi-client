@@ -40,6 +40,13 @@ CircleOfImaginationClient   — entry point, singleton state, payload registrati
   │   └── DiscordPresenceManager — Discord Rich Presence via discord-game-sdk4j
   │                                (pure-Java IPC, bundled jar-in-jar); lazy connect
   │                                on first join, APP_ID = 0 disables it entirely
+  ├── mcf/                     — mythical creature forms (see below)
+  │   ├── MythicalFormManager  — uuid → pathway map, fed by coi-client:form
+  │   ├── MythicalCreatureForm — per-pathway form; forms/ holds all 20
+  │   ├── PartialFormSpec      — placement/scale of a baked lower-body model
+  │   ├── PartialForms         — shared resolve + carrier-transform helpers
+  │   ├── PartialFormLayer     — draws the baked model as a player render layer
+  │   └── model/               — Blockbench exports (VisionaryLowerModel/Animations)
   ├── network/
   │   ├── AbilityUsePayload    C→S  coi-client:use
   │   ├── AbilityRequestPayload C→S  coi-client:request
@@ -69,6 +76,9 @@ Summary:
 - S→C `coi-client:abilities` — pipe/semicolon delimited ability data
 - S→C `coi-client:cooldown` — ability id + ticks
 - S→C `coi-client:effect` — trigger/stop a visual effect
+- S→C `coi-client:mythical` — transform a player into a pathway form (see Mythical Creature Forms)
+- S→C `coi-client:conditions` — beyonder state (madness etc.) for the local player
+- S→C `coi-client:appearance` — appearance traits per player UUID
 
 Ability wire format: `id|localizedName|englishName|category` per entry, `;` separated.
 In-memory format: `"id - englishName"`.
@@ -90,6 +100,38 @@ Available effects: `vignette`, `heartbeat`, `cracks`, `eyes`, `glitch`, `bloodra
 - **Title screen haunting** (`screen/TitleScreenHaunt` + `TitleScreenMixin`) — corruption (max of madness at disconnect and permanent madness, incl. debug-screen values) is persisted to `config/coi_client_state.json` (`ClientStateStore`); the main menu shows a scaled vignette, occasional eye apparitions, and whisper splash lines (`title.coi.haunt_splash.*`). Clean players always get LOTM flavor splashes (`title.coi.splash.*`) — not gated by the hallucinations toggle.
 
 **Debug screen** (dev environment only, F8): lists all registered effects with Test/Stop buttons and a params input field. `shouldPause()` returns false so effects are visible while the screen is open.
+
+## Mythical Creature Forms (`mcf/`)
+
+S→C `coi-client:mythical` (`MythicalFormPayload`, `targetUuid` + `pathway:<unused>:start|stop`) marks
+a player's UUID as transformed into a pathway's form. Two kinds:
+
+- **Full forms** — the vanilla player render is cancelled outright (`PlayerRendererMixin` at HEAD)
+  and replaced with procedural geometry drawn from `Coi3dPrimitives`. 19 of the 20 pathways.
+- **Partial forms** — a baked Blockbench model stands in for the *lower body* while the player's own
+  head/torso/arms keep rendering. Currently Visionary only (`CoiModelLayers.VISIONARY_LOWER_SPEC`).
+
+Partial forms are assembled from four pieces that all have to agree:
+
+| Piece | Job |
+|-------|-----|
+| `PlayerModelMixin` (`setupAnim` TAIL) | hides leg parts; must run in `setupAnim`, since submission is deferred |
+| `HumanoidArmorLayerMixin` | hides leggings/boots, which draw from their own model set |
+| `PlayerRendererMixin` | `hipRaise` push (world space, at HEAD) + **carrier transform** push (model space) |
+| `PartialFormLayer` | draws the baked model, undoing the carrier transform it inherits |
+
+**The carrier transform** is what makes the halves read as one body. The rig's torso bone (its
+"carrier") both rotates and translates during the walk cycle, around a pivot that is over a block
+away from the player's waist. `CoiFormModel#carrierDelta` hands out that bone's full rigid motion,
+`PartialForms#carrierTransform` converts it into player space, and the renderer mixin pushes it onto
+the pose stack just before the model is submitted — so the player *and* every layer above it (armor,
+held items, cape, appearance traits) ride the torso exactly. Copying the rotation angle alone is not
+enough and looks like shearing: same tilt, wrong pivot, no translation.
+
+Placement knobs live in `CoiModelLayers`; read the comment there before touching one. `hipRaise` and
+the carrier push sit in different coordinate spaces on purpose — see `PlayerRendererMixin`.
+
+**Dev testing** (no server needed): F8 → *Form: None (Click to cycle)* applies a form to yourself.
 
 ## Key Patterns
 

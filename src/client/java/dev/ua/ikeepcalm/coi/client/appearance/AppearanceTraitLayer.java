@@ -6,7 +6,8 @@ import dev.ua.ikeepcalm.coi.client.appearance.renderers.FemaleTraitsRenderer;
 import dev.ua.ikeepcalm.coi.client.appearance.renderers.HornsTraitRenderer;
 import dev.ua.ikeepcalm.coi.client.appearance.renderers.MushroomTraitRenderer;
 import dev.ua.ikeepcalm.coi.client.mcf.AvatarRenderStateAccessor;
-import dev.ua.ikeepcalm.coi.client.mcf.MythicalFormManager;
+import dev.ua.ikeepcalm.coi.client.mcf.MythicalCreatureForm;
+import dev.ua.ikeepcalm.coi.client.mcf.PartialForms;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -31,9 +32,14 @@ public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerM
     @Override
     public void submit(@NonNull PoseStack poseStack, @NonNull SubmitNodeCollector collector, int light, AvatarRenderState state, float yRot, float xRot) {
         String playerUuid = ((AvatarRenderStateAccessor) state).coi$getPlayerUuid();
-        if (playerUuid == null
-                || state.isInvisible
-                || MythicalFormManager.getForm(playerUuid) != null) {
+        if (playerUuid == null || state.isInvisible) {
+            return;
+        }
+        // Partial forms keep the player's own head and torso, and every trait hangs off one of those,
+        // so a character's horns shouldn't disappear the moment they grow a dragon's lower half.
+        // Full forms replace the body outright and have nothing left to attach to.
+        MythicalCreatureForm form = PartialForms.form(state);
+        if (form != null && form.partialForm() == null) {
             return;
         }
 

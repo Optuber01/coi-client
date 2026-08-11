@@ -6,11 +6,14 @@ import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
 import dev.ua.ikeepcalm.coi.client.effects.impl.ImpactFrameEffect;
 import dev.ua.ikeepcalm.coi.client.mcf.forms.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -143,6 +146,26 @@ public class MythicalFormManager {
 
     public static String getForm(String playerUuid) {
         return uuidForms.get(playerUuid);
+    }
+
+    public static MythicalCreatureForm getRegisteredForm(String pathway) {
+        return pathway == null ? null : REGISTERED_FORMS.get(pathway.toLowerCase());
+    }
+
+    /**
+     * Distinct partial-form specs across all registered forms, keyed by {@link PartialFormSpec#layer()}.
+     * {@link #register(MythicalCreatureForm)} stores each form under several normalized key
+     * variants, so this dedupes by layer identity rather than iterating the raw map.
+     */
+    public static Map<ModelLayerLocation, PartialFormSpec> getPartialForms() {
+        Map<ModelLayerLocation, PartialFormSpec> result = new HashMap<>();
+        for (MythicalCreatureForm form : new HashSet<>(REGISTERED_FORMS.values())) {
+            PartialFormSpec spec = form.partialForm();
+            if (spec != null) {
+                result.put(spec.layer(), spec);
+            }
+        }
+        return result;
     }
 
     public static java.util.List<String> getRegisteredPathwayNames() {

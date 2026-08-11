@@ -2,6 +2,7 @@ package dev.ua.ikeepcalm.coi.mixin;
 
 import dev.ua.ikeepcalm.coi.client.appearance.AppearanceTraitLayer;
 import dev.ua.ikeepcalm.coi.client.mcf.AvatarRenderStateAccessor;
+import dev.ua.ikeepcalm.coi.client.mcf.PartialFormLayer;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -22,6 +23,7 @@ public class AvatarRendererMixin {
         RenderLayerParent<AvatarRenderState, PlayerModel> parent =
                 (RenderLayerParent<AvatarRenderState, PlayerModel>) (Object) this;
         ((LivingEntityRendererAccessor) this).coi$addLayer(new AppearanceTraitLayer(parent));
+        ((LivingEntityRendererAccessor) this).coi$addLayer(new PartialFormLayer(parent, context));
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))

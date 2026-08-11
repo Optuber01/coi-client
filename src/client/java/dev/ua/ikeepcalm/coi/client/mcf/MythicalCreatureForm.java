@@ -10,4 +10,12 @@ public interface MythicalCreatureForm extends Coi3dPrimitives {
 
     void render(AvatarRenderState state, PoseStack.Pose pose, VertexConsumer consumer);
 
+    /**
+     * Non-null when this form renders a baked model beside the vanilla player instead of
+     * replacing it outright. When present, {@link #render} is not called.
+     */
+    default PartialFormSpec partialForm() {
+        return null;
+    }
+
 }
