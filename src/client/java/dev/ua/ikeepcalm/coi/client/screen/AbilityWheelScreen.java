@@ -3,20 +3,15 @@ package dev.ua.ikeepcalm.coi.client.screen;
 import dev.ua.ikeepcalm.coi.client.CircleOfImaginationClient;
 import dev.ua.ikeepcalm.coi.client.config.AbilityInfo;
 import dev.ua.ikeepcalm.coi.client.effects.impl.EffectPaint;
+import dev.ua.ikeepcalm.coi.util.AbilityIcons;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
 
 public class AbilityWheelScreen extends Screen {
-
-    private static final int WHEEL_RADIUS = 80;
-    private static final int SLOT_RADIUS = 25;
-    private static final int INNER_RADIUS = 30;
 
     private static final long OPEN_MS = 200;
     private static final long SLOT_STAGGER_MS = 22;
@@ -26,6 +21,24 @@ public class AbilityWheelScreen extends Screen {
 
     public AbilityWheelScreen() {
         super(Component.literal("Ability Wheel"));
+    }
+
+    /**
+     * Wheel geometry scales with the gui-scaled screen so the wheel reads the
+     * same at every gui scale: ~15% of the smaller screen dimension, matching
+     * the old fixed 80px radius at the common 2x-on-1080p setup.
+     */
+    private int wheelRadius() {
+        int base = Math.min(this.width, this.height);
+        return Math.clamp(base * 15L / 100, 60, 140);
+    }
+
+    private int slotRadius() {
+        return Math.max(16, wheelRadius() * 25 / 80);
+    }
+
+    private int innerRadius() {
+        return wheelRadius() * 30 / 80;
     }
 
     /**
@@ -41,10 +54,7 @@ public class AbilityWheelScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        if (this.minecraft != null) {
-            // Force release mouse
-            this.minecraft.mouseHandler.releaseMouse();
-        }
+        this.minecraft.mouseHandler.releaseMouse();
     }
 
     @Override
@@ -82,12 +92,12 @@ public class AbilityWheelScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent event) {
         return super.mouseReleased(event);
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick) {
         return super.mouseClicked(event, doubleClick);
     }
 
@@ -114,7 +124,7 @@ public class AbilityWheelScreen extends Screen {
         double dy = mouseY - centerY;
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance > INNER_RADIUS) {
+        if (distance > innerRadius()) {
             double rawAngle = Math.toDegrees(Math.atan2(dy, dx)) + 90;
             if (rawAngle < 0) rawAngle += 360;
             selectedSlot = (int) ((rawAngle + (360.0 / wheelSize / 2)) % 360) / (360 / wheelSize);
@@ -138,8 +148,8 @@ public class AbilityWheelScreen extends Screen {
             float ease = easeOutBack(slotP);
 
             double angle = Math.toRadians(i * (360.0 / wheelSize) - 90);
-            int x = centerX + (int) (Math.cos(angle) * WHEEL_RADIUS * ease);
-            int y = centerY + (int) (Math.sin(angle) * WHEEL_RADIUS * ease);
+            int x = centerX + (int) (Math.cos(angle) * wheelRadius() * ease);
+            int y = centerY + (int) (Math.sin(angle) * wheelRadius() * ease);
 
             boolean isSelected = i == selectedSlot;
             String abilityIdWithName = CircleOfImaginationClient.getWheelAbility(i);
@@ -148,7 +158,7 @@ public class AbilityWheelScreen extends Screen {
                     : 0x777777;
 
             // The hovered slot leans toward the cursor: slightly larger, pathway-colored
-            int r = Math.round(SLOT_RADIUS * (isSelected ? 1.15f : 1f) * (0.75f + 0.25f * ease));
+            int r = Math.round(slotRadius() * (isSelected ? 1.15f : 1f) * (0.75f + 0.25f * ease));
             int alpha = (int) (255 * slotP);
 
             int bgColor = isSelected
@@ -171,7 +181,8 @@ public class AbilityWheelScreen extends Screen {
             }
 
             if (abilityIdWithName != null) {
-                renderAbilityIcon(graphics, abilityIdWithName, x, y, r * 2 - 10, alpha);
+                int iconSize = r * 2 - 10;
+                AbilityIcons.draw(graphics, abilityIdWithName, x - iconSize / 2, y - iconSize / 2, iconSize, alpha);
             } else if (alpha >= 8) {
                 graphics.centeredText(this.font, Component.literal("+"), x, y - 4, EffectPaint.argb(0x555555, alpha));
             }
@@ -194,22 +205,6 @@ public class AbilityWheelScreen extends Screen {
         } else {
             graphics.centeredText(this.font, Component.translatable("screen.coi.select_ability"), centerX, centerY - 10, EffectPaint.argb(0xFFFFFF, alpha));
         }
-    }
-
-    private void renderAbilityIcon(GuiGraphicsExtractor context, String abilityIdWithName, int x, int y, int size, int alpha) {
-        String id = AbilityInfo.extractId(abilityIdWithName);
-        AbilityInfo info = CircleOfImaginationClient.getAbilityInfo(id);
-
-        int iconX = x - size / 2;
-        int iconY = y - size / 2;
-
-        int pathwayColor = AbilityInfo.pathwayColor(id);
-        context.fill(iconX, iconY, iconX + size, iconY + size, EffectPaint.argb(pathwayColor, alpha / 2));
-
-        String category = info != null ? info.category() : "uncategorized";
-        String tier = AbilityInfo.tierOf(id);
-        Identifier texture = Identifier.fromNamespaceAndPath("coi-client", "textures/icons/" + category.toLowerCase() + "/" + tier + ".png");
-        context.blit(RenderPipelines.GUI_TEXTURED, texture, iconX, iconY, 0, 0, size, size, size, size, EffectPaint.argb(0xFFFFFF, alpha));
     }
 
     @Override

@@ -3,51 +3,59 @@ package dev.ua.ikeepcalm.coi.client.screen;
 import dev.ua.ikeepcalm.coi.client.CircleOfImaginationClient;
 import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
+import dev.ua.ikeepcalm.coi.util.CoiStyle;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 
+/**
+ * HUD settings in the mod's dark/gold card style: three tabs (Ability HUD,
+ * Madness, Display) over a scrollable content card, so the screen stays usable
+ * at every gui scale — rows that don't fit simply scroll. Settings edit a
+ * working copy; Done persists it, Cancel discards.
+ */
 public class HudSettingsScreen extends Screen {
 
     private static final String[] PRESETS = {"Default", "Compact", "Large", "Minimal"};
     private static final String[] ANCHORS = {"TOP_LEFT", "TOP_CENTER", "BOTTOM_LEFT", "BOTTOM_CENTER"};
-    private static final int ROW_SPACING = 35;
+    private static final int TAB_H = 22;
+    private static final int ROW_STRIDE = 26;
     private static final int FIELD_WIDTH = 52;
-    private static final int SECTION_GAP = 24;
+
+    private enum Tab {HUD, MADNESS, DISPLAY}
+
+    /**
+     * A widget inside the scrollable card with its Y offset from the viewport top.
+     */
+    private record ContentWidget(AbstractWidget widget, int baseY) {
+    }
+
     private final Screen parent;
     private HudConfig.HudSettings settings;
-    private Checkbox enabledCheckbox;
-    private Checkbox showKeybindsCheckbox;
-    private Checkbox showAbilityNamesCheckbox;
-    private Checkbox showGlowEffectCheckbox;
-    private Checkbox epilepsyModeCheckbox;
-    private Checkbox showMadnessBarCheckbox;
-    private Checkbox hallucinationsCheckbox;
-    private Checkbox discordPresenceCheckbox;
-    private Checkbox presenceMadnessCheckbox;
-    private EditBox hudXField;
-    private EditBox hudYOffsetField;
-    private EditBox slotSizeField;
-    private EditBox slotSpacingField;
-    private EditBox hudScaleField;
-    private EditBox activeSlotsField;
-    private EditBox wheelSlotsField;
-    private EditBox madnessXOffsetField;
-    private EditBox madnessYOffsetField;
-    private Button resetButton;
-    private Button presetButton;
-    private Button madnessAnchorButton;
+    private Tab currentTab = Tab.HUD;
+    private double scrollOffset = 0;
     private int currentPreset = 0;
+
+    private final List<ContentWidget> contentWidgets = new ArrayList<>();
+    private int rowCursor;
+    private int contentX, contentW, viewportTop, viewportBottom, tabContentH, buttonY;
+    private Button presetButton;
+    private Button resetButton;
 
     public HudSettingsScreen(Screen parent) {
         super(Component.translatable("screen.coi.hud_settings"));
@@ -79,138 +87,124 @@ public class HudSettingsScreen extends Screen {
         to.presenceShowMadness = from.presenceShowMadness;
     }
 
-    private SettingsLayout createLayout() {
-        int buttonY = this.height - Math.max(40, this.height / 10);
-        boolean twoColumns = this.width >= 560;
-        int contentWidth = Math.min(this.width - 40, twoColumns ? 560 : 280);
-        int gap = twoColumns ? SECTION_GAP : 0;
-        int columnWidth = twoColumns ? (contentWidth - gap) / 2 : contentWidth;
-        int leftX = (this.width - contentWidth) / 2;
-        int rightX = twoColumns ? leftX + columnWidth + gap : leftX;
-        int sliderWidth = Math.max(118, columnWidth - FIELD_WIDTH - 8);
-        int topY = Math.max(58, this.height / 8);
-
-        return new SettingsLayout(twoColumns, leftX, rightX, columnWidth, sliderWidth, buttonY, topY);
+    private boolean compact() {
+        return this.height < 300;
     }
 
-    private EditBox addIntSliderField(int x, int y, SettingsLayout layout, String label, Component fieldLabel,
-                                      int min, int max, int initialValue, IntConsumer setter) {
-        final EditBox[] fieldRef = new EditBox[1];
-        int clampedInitial = Math.clamp(initialValue, min, max);
-        double sliderValue = (clampedInitial - min) / (double) (max - min);
-
-        AbstractSliderButton slider = new AbstractSliderButton(x, y, layout.sliderWidth, 20, Component.literal(label + ": " + clampedInitial), sliderValue) {
-            @Override
-            protected void updateMessage() {
-                int value = min + (int) Math.round(this.value * (max - min));
-                setter.accept(value);
-                this.setMessage(Component.literal(label + ": " + value));
-                if (fieldRef[0] != null) {
-                    fieldRef[0].setValue(String.valueOf(value));
-                }
-            }
-
-            @Override
-            protected void applyValue() {
-                updateMessage();
-            }
-        };
-        this.addRenderableWidget(slider);
-
-        EditBox field = new EditBox(this.font, x + layout.sliderWidth + 8, y, FIELD_WIDTH, 20, fieldLabel);
-        field.setValue(String.valueOf(clampedInitial));
-        field.setResponder(text -> {
-            try {
-                setter.accept(Math.clamp(Integer.parseInt(text), min, max));
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        fieldRef[0] = field;
-        this.addRenderableWidget(field);
-        return field;
-    }
-
-    private EditBox addDecimalSliderField(int x, int y, SettingsLayout layout, String label, Component fieldLabel,
-                                          double min, double max, double initialValue, DoubleConsumer setter) {
-        final EditBox[] fieldRef = new EditBox[1];
-        double clampedInitial = Math.clamp(initialValue, min, max);
-        double sliderValue = (clampedInitial - min) / (max - min);
-
-        AbstractSliderButton slider = new AbstractSliderButton(x, y, layout.sliderWidth, 20, Component.literal(label + ": " + String.format("%.1f", clampedInitial)), sliderValue) {
-            @Override
-            protected void updateMessage() {
-                double value = min + this.value * (max - min);
-                value = Math.round(value * 10.0) / 10.0;
-                setter.accept(value);
-                this.setMessage(Component.literal(label + ": " + String.format("%.1f", value)));
-                if (fieldRef[0] != null) {
-                    fieldRef[0].setValue(String.format("%.1f", value));
-                }
-            }
-
-            @Override
-            protected void applyValue() {
-                updateMessage();
-            }
-        };
-        this.addRenderableWidget(slider);
-
-        EditBox field = new EditBox(this.font, x + layout.sliderWidth + 8, y, FIELD_WIDTH, 20, fieldLabel);
-        field.setValue(String.format("%.1f", clampedInitial));
-        field.setResponder(text -> {
-            try {
-                setter.accept(Math.clamp(Double.parseDouble(text), min, max));
-            } catch (NumberFormatException ignored) {
-            }
-        });
-        fieldRef[0] = field;
-        this.addRenderableWidget(field);
-        return field;
-    }
-
-    private void drawSection(GuiGraphicsExtractor graphics, String title, int x, int y) {
-        graphics.text(this.font, Component.literal(title).withStyle(ChatFormatting.GRAY), x, y, 0xFFA0A0A0);
-    }
-
-    private void drawSettingLabels(GuiGraphicsExtractor graphics, int x, int firstY, Component... labels) {
-        for (int i = 0; i < labels.length; i++) {
-            graphics.text(this.font, labels[i], x, firstY + i * ROW_SPACING - 12, 0xFFA0A0A0);
-        }
+    private int tabY() {
+        return compact() ? 18 : 30;
     }
 
     @Override
     protected void init() {
-        SettingsLayout layout = createLayout();
-        int centerX = this.width / 2;
+        this.clearWidgets();
+        contentWidgets.clear();
+        rowCursor = 0;
 
-        enabledCheckbox = Checkbox.builder(Component.translatable("screen.coi.hud_enabled"), Minecraft.getInstance().font)
-                .pos(layout.leftX, Math.max(32, layout.topY - 34)).selected(settings.enabled)
-                .maxWidth(200)
-                .build();
-        this.addRenderableWidget(enabledCheckbox);
+        contentW = Math.clamp(this.width - 80, 300, 440);
+        contentX = (this.width - contentW) / 2;
+        viewportTop = tabY() + TAB_H + 6 + 8;
 
-        this.addRenderableWidget(Button.builder(Component.translatable("screen.coi.show_tour"),
-                _ -> {
-                    ClientStateStore.setTourCompleted(false);
-                    if (this.minecraft.player != null) {
-                        this.minecraft.setScreen(new TourScreen());
-                    }
-                }).bounds(this.width - 130, 10, 120, 20).build());
-        int leftY = layout.topY + 24;
-        int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 7 + SECTION_GAP;
+        int tabW = (contentW - 8) / 3;
+        addTab(contentX, tabW, Tab.HUD, "screen.coi.settings_tab_hud", (g, x, y, size, color) -> {
+            // Ability slot glyph: outlined square with a dot inside
+            g.outline(x, y, size, size, color);
+            g.fill(x + 3, y + 3, x + size - 3, y + size - 3, color);
+        });
+        addTab(contentX + tabW + 4, tabW, Tab.MADNESS, "screen.coi.settings_tab_madness", (g, x, y, size, color) -> {
+            // Madness bar glyph: outlined bar, partially filled
+            g.outline(x, y + 2, size, size - 4, color);
+            g.fill(x + 2, y + 4, x + size - 4, y + size - 4, color);
+        });
+        addTab(contentX + (tabW + 4) * 2, tabW, Tab.DISPLAY, "screen.coi.settings_tab_display", (g, x, y, size, color) -> {
+            // Display glyph: three stacked lines
+            g.fill(x, y + 1, x + size, y + 2, color);
+            g.fill(x, y + 4, x + size, y + 5, color);
+            g.fill(x, y + 7, x + size - 3, y + 8, color);
+        });
 
-        hudXField = addIntSliderField(layout.leftX, leftY, layout, "X", Component.translatable("screen.coi.hud_x_field"), 0, 500, settings.hudX, value -> settings.hudX = value);
-        hudYOffsetField = addIntSliderField(layout.leftX, leftY + ROW_SPACING, layout, "Y Offset", Component.translatable("screen.coi.hud_y_offset_field"), 0, 200, settings.hudYOffset, value -> settings.hudYOffset = value);
-        slotSizeField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 2, layout, "Slot Size", Component.translatable("screen.coi.slot_size_field"), 20, 100, settings.slotSize, value -> settings.slotSize = value);
-        slotSpacingField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 3, layout, "Spacing", Component.translatable("screen.coi.slot_spacing_field"), 30, 100, settings.slotSpacing, value -> settings.slotSpacing = value);
-        hudScaleField = addDecimalSliderField(layout.leftX, leftY + ROW_SPACING * 4, layout, "Scale", Component.translatable("screen.coi.hud_scale_field"), 0.5, 2.0, settings.hudScale, value -> settings.hudScale = (float) value);
-        activeSlotsField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 5, layout, "Key Slots", Component.translatable("screen.coi.key_slots_field"), 1, CircleOfImaginationClient.MAX_ABILITIES, settings.activeAbilitySlots, value -> settings.activeAbilitySlots = value);
-        wheelSlotsField = addIntSliderField(layout.leftX, leftY + ROW_SPACING * 6, layout, "Wheel Slots", Component.translatable("screen.coi.wheel_slots_field"), 2, 16, settings.wheelSlots, value -> settings.wheelSlots = value);
+        switch (currentTab) {
+            case MADNESS -> buildMadnessTab();
+            case DISPLAY -> buildDisplayTab();
+            default -> buildHudTab();
+        }
+        tabContentH = Math.max(0, rowCursor - (ROW_STRIDE - 20));
 
-        madnessXOffsetField = addIntSliderField(layout.rightX, rightY, layout, "Madness X", Component.translatable("screen.coi.madness_x_offset_field"), -500, 500, settings.madnessXOffset, value -> settings.madnessXOffset = value);
-        madnessYOffsetField = addIntSliderField(layout.rightX, rightY + ROW_SPACING, layout, "Madness Y", Component.translatable("screen.coi.madness_y_offset_field"), 0, 200, settings.madnessYOffset, value -> settings.madnessYOffset = value);
+        // The card shrinks to fit its content on tall screens; on short ones the
+        // rows scroll inside it
+        viewportBottom = Math.min(this.height - (compact() ? 34 : 44), viewportTop + tabContentH);
+        buttonY = Math.min(this.height - (compact() ? 24 : 30), viewportBottom + 14);
 
-        madnessAnchorButton = Button.builder(Component.literal("Anchor: " + settings.madnessAnchor),
+        int buttonW = (contentW - 12) / 4;
+        presetButton = Button.builder(presetLabel(),
+                button -> {
+                    currentPreset = (currentPreset + 1) % PRESETS.length;
+                    applyPreset(currentPreset);
+                    this.init();
+                }).bounds(contentX, buttonY, buttonW, 20).build();
+        this.addRenderableWidget(presetButton);
+
+        resetButton = Button.builder(Component.translatable("screen.coi.reset_defaults"),
+                button -> {
+                    settings = new HudConfig.HudSettings();
+                    currentPreset = 0;
+                    this.init();
+                }).bounds(contentX + buttonW + 4, buttonY, buttonW, 20).build();
+        this.addRenderableWidget(resetButton);
+
+        this.addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> this.onClose())
+                .bounds(contentX + (buttonW + 4) * 2, buttonY, buttonW, 20).build());
+
+        this.addRenderableWidget(Button.builder(Component.translatable("gui.done"),
+                button -> {
+                    HudConfig.setSettings(settings);
+                    this.onClose();
+                }).bounds(contentX + (buttonW + 4) * 3, buttonY, buttonW, 20).build());
+
+        applyScroll();
+    }
+
+    private Component presetLabel() {
+        return Component.translatable("screen.coi.preset").append(": " + PRESETS[currentPreset]);
+    }
+
+    private void addTab(int x, int tabW, Tab tab, String labelKey, CoiTabButton.IconPainter icon) {
+        this.addRenderableWidget(new CoiTabButton(x, tabY(), tabW, TAB_H,
+                Component.translatable(labelKey), icon,
+                () -> currentTab == tab,
+                () -> {
+                    currentTab = tab;
+                    scrollOffset = 0;
+                    this.init();
+                }));
+    }
+
+    // --- Tab content ---
+
+    private void buildHudTab() {
+        addCheckboxRow(Component.translatable("screen.coi.hud_enabled"), settings.enabled,
+                checked -> settings.enabled = checked);
+        addIntRow(Component.translatable("screen.coi.hud_x"), Component.translatable("screen.coi.hud_x_field"),
+                0, 500, settings.hudX, value -> settings.hudX = value);
+        addIntRow(Component.translatable("screen.coi.hud_y_offset"), Component.translatable("screen.coi.hud_y_offset_field"),
+                0, 200, settings.hudYOffset, value -> settings.hudYOffset = value);
+        addIntRow(Component.translatable("screen.coi.slot_size"), Component.translatable("screen.coi.slot_size_field"),
+                20, 100, settings.slotSize, value -> settings.slotSize = value);
+        addIntRow(Component.translatable("screen.coi.slot_spacing"), Component.translatable("screen.coi.slot_spacing_field"),
+                30, 100, settings.slotSpacing, value -> settings.slotSpacing = value);
+        addDecimalRow(Component.translatable("screen.coi.hud_scale"), Component.translatable("screen.coi.hud_scale_field"),
+                0.5, 2.0, settings.hudScale, value -> settings.hudScale = (float) value);
+        addIntRow(Component.translatable("screen.coi.key_slots"), Component.translatable("screen.coi.key_slots_field"),
+                1, CircleOfImaginationClient.MAX_ABILITIES, settings.activeAbilitySlots, value -> settings.activeAbilitySlots = value);
+        addIntRow(Component.translatable("screen.coi.wheel_slots"), Component.translatable("screen.coi.wheel_slots_field"),
+                2, 16, settings.wheelSlots, value -> settings.wheelSlots = value);
+    }
+
+    private void buildMadnessTab() {
+        addCheckboxRow(Component.translatable("screen.coi.show_madness_bar"), settings.showMadnessBar,
+                checked -> settings.showMadnessBar = checked);
+
+        Button anchorButton = Button.builder(anchorLabel(),
                 button -> {
                     int idx = 0;
                     for (int i = 0; i < ANCHORS.length; i++) {
@@ -219,58 +213,35 @@ public class HudSettingsScreen extends Screen {
                             break;
                         }
                     }
-                    int nextIdx = (idx + 1) % ANCHORS.length;
-                    settings.madnessAnchor = ANCHORS[nextIdx];
-                    button.setMessage(Component.literal("Anchor: " + settings.madnessAnchor));
-                }).bounds(layout.rightX, rightY + ROW_SPACING * 2, layout.columnWidth, 20).build();
-        this.addRenderableWidget(madnessAnchorButton);
+                    settings.madnessAnchor = ANCHORS[(idx + 1) % ANCHORS.length];
+                    button.setMessage(anchorLabel());
+                }).bounds(contentX + 10, 0, contentW - 20, 20).build();
+        addContentRow(anchorButton);
 
-        showMadnessBarCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_madness_bar"), Minecraft.getInstance().font)
-                .pos(layout.rightX, rightY + ROW_SPACING * 3)
-                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.showMadnessBar = checked).selected(settings.showMadnessBar)
-                .build();
-        this.addRenderableWidget(showMadnessBarCheckbox);
+        addIntRow(Component.translatable("screen.coi.madness_x_offset"), Component.translatable("screen.coi.madness_x_offset_field"),
+                -500, 500, settings.madnessXOffset, value -> settings.madnessXOffset = value);
+        addIntRow(Component.translatable("screen.coi.madness_y_offset"), Component.translatable("screen.coi.madness_y_offset_field"),
+                0, 200, settings.madnessYOffset, value -> settings.madnessYOffset = value);
+    }
 
-        int displayY = Math.max(leftY + ROW_SPACING * 7, rightY + ROW_SPACING * 4) + SECTION_GAP;
-        int displayLeftX = layout.leftX;
-        int displayRightX = layout.twoColumns ? layout.rightX : layout.leftX;
-        int displayColumnYOffset = layout.twoColumns ? 0 : 24;
-        int displaySecondRowY = layout.twoColumns ? displayY + 24 : displayY + 48;
+    private Component anchorLabel() {
+        return Component.translatable("screen.coi.madness_anchor").copy().append(": " + settings.madnessAnchor);
+    }
 
-        showKeybindsCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_keybinds"), Minecraft.getInstance().font)
-                .pos(displayLeftX, displayY)
-                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.showKeybinds = checked).selected(settings.showKeybinds)
-                .build();
-        this.addRenderableWidget(showKeybindsCheckbox);
-
-        showAbilityNamesCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_ability_names"), Minecraft.getInstance().font)
-                .pos(displayRightX, displayY + displayColumnYOffset)
-                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.showAbilityNames = checked).selected(settings.showAbilityNames)
-                .build();
-        this.addRenderableWidget(showAbilityNamesCheckbox);
-
-        showGlowEffectCheckbox = Checkbox.builder(Component.translatable("screen.coi.show_glow_effect"), Minecraft.getInstance().font)
-                .pos(displayLeftX, displaySecondRowY)
-                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.showGlowEffect = checked).selected(settings.showGlowEffect)
-                .build();
-        this.addRenderableWidget(showGlowEffectCheckbox);
-
-        epilepsyModeCheckbox = Checkbox.builder(Component.translatable("screen.coi.epilepsy_mode"), Minecraft.getInstance().font)
-                .pos(displayRightX, displaySecondRowY + displayColumnYOffset)
-                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.epilepsyMode = checked).selected(settings.epilepsyMode)
-                .build();
-        this.addRenderableWidget(epilepsyModeCheckbox);
-
-        int displayThirdRowY = layout.twoColumns ? displayY + 48 : displayY + 96;
-
-        hallucinationsCheckbox = Checkbox.builder(Component.translatable("screen.coi.enable_hallucinations"), Minecraft.getInstance().font)
-                .pos(displayLeftX, displayThirdRowY)
-                .maxWidth(layout.columnWidth).onValueChange((checkbox, checked) -> settings.enableHallucinations = checked).selected(settings.enableHallucinations)
-                .build();
-        this.addRenderableWidget(hallucinationsCheckbox);
+    private void buildDisplayTab() {
+        addCheckboxRow(Component.translatable("screen.coi.show_keybinds"), settings.showKeybinds,
+                checked -> settings.showKeybinds = checked);
+        addCheckboxRow(Component.translatable("screen.coi.show_ability_names"), settings.showAbilityNames,
+                checked -> settings.showAbilityNames = checked);
+        addCheckboxRow(Component.translatable("screen.coi.show_glow_effect"), settings.showGlowEffect,
+                checked -> settings.showGlowEffect = checked);
+        addCheckboxRow(Component.translatable("screen.coi.epilepsy_mode"), settings.epilepsyMode,
+                checked -> settings.epilepsyMode = checked);
+        addCheckboxRow(Component.translatable("screen.coi.enable_hallucinations"), settings.enableHallucinations,
+                checked -> settings.enableHallucinations = checked);
 
         int initialVolume = Math.round(Math.clamp(settings.effectSoundVolume, 0f, 1f) * 100);
-        AbstractSliderButton soundVolumeSlider = new AbstractSliderButton(displayRightX, displayThirdRowY + displayColumnYOffset, layout.columnWidth, 20,
+        AbstractSliderButton volumeSlider = new AbstractSliderButton(contentX + 10, 0, contentW - 20, 20,
                 Component.translatable("screen.coi.effect_sound_volume").append(": " + initialVolume + "%"), initialVolume / 100.0) {
             @Override
             protected void updateMessage() {
@@ -284,48 +255,147 @@ public class HudSettingsScreen extends Screen {
                 updateMessage();
             }
         };
-        this.addRenderableWidget(soundVolumeSlider);
+        addContentRow(volumeSlider);
 
-        int displayFourthRowY = layout.twoColumns ? displayY + 72 : displayY + 144;
+        addCheckboxRow(Component.translatable("screen.coi.enable_discord_presence"), settings.enableDiscordPresence,
+                checked -> settings.enableDiscordPresence = checked);
+        addCheckboxRow(Component.translatable("screen.coi.presence_show_madness"), settings.presenceShowMadness,
+                checked -> settings.presenceShowMadness = checked);
 
-        discordPresenceCheckbox = Checkbox.builder(Component.translatable("screen.coi.enable_discord_presence"), Minecraft.getInstance().font)
-                .pos(displayLeftX, displayFourthRowY)
-                .maxWidth(layout.columnWidth).onValueChange((_, checked) -> settings.enableDiscordPresence = checked).selected(settings.enableDiscordPresence)
+        addContentRow(Button.builder(Component.translatable("screen.coi.show_tour"),
+                _ -> {
+                    ClientStateStore.setTourCompleted(false);
+                    if (this.minecraft.player != null) {
+                        this.minecraft.setScreen(new TourScreen());
+                    }
+                }).bounds(contentX + 10, 0, contentW - 20, 20).build());
+    }
+
+    // --- Row builders ---
+
+    private void addContentRow(AbstractWidget widget) {
+        contentWidgets.add(new ContentWidget(widget, rowCursor));
+        this.addRenderableWidget(widget);
+        rowCursor += ROW_STRIDE;
+    }
+
+    private void addCheckboxRow(Component label, boolean selected, Consumer<Boolean> setter) {
+        Checkbox checkbox = Checkbox.builder(label, Minecraft.getInstance().font)
+                .pos(contentX + 10, 0)
+                .maxWidth(contentW - 20)
+                .onValueChange((box, checked) -> setter.accept(checked))
+                .selected(selected)
                 .build();
-        this.addRenderableWidget(discordPresenceCheckbox);
+        addContentRow(checkbox);
+    }
 
-        presenceMadnessCheckbox = Checkbox.builder(Component.translatable("screen.coi.presence_show_madness"), Minecraft.getInstance().font)
-                .pos(displayRightX, displayFourthRowY + displayColumnYOffset)
-                .maxWidth(layout.columnWidth).onValueChange((_, checked) -> settings.presenceShowMadness = checked).selected(settings.presenceShowMadness)
-                .build();
-        this.addRenderableWidget(presenceMadnessCheckbox);
+    private void addIntRow(Component label, Component fieldLabel, int min, int max, int initialValue, IntConsumer setter) {
+        final EditBox[] fieldRef = new EditBox[1];
+        int clampedInitial = Math.clamp(initialValue, min, max);
+        double sliderValue = (clampedInitial - min) / (double) (max - min);
+        int sliderW = contentW - 20 - FIELD_WIDTH - 6;
 
-        int buttonY = layout.buttonY;
-        int buttonWidth = Math.min(100, this.width / 8);
-        int smallButtonWidth = Math.min(90, this.width / 9);
+        AbstractSliderButton slider = new AbstractSliderButton(contentX + 10, 0, sliderW, 20,
+                label.copy().append(": " + clampedInitial), sliderValue) {
+            @Override
+            protected void updateMessage() {
+                int value = min + (int) Math.round(this.value * (max - min));
+                setter.accept(value);
+                this.setMessage(label.copy().append(": " + value));
+                if (fieldRef[0] != null) {
+                    fieldRef[0].setValue(String.valueOf(value));
+                }
+            }
 
-        presetButton = Button.builder(Component.translatable("screen.coi.preset").append(": " + PRESETS[currentPreset]),
-                button -> {
-                    currentPreset = (currentPreset + 1) % PRESETS.length;
-                    button.setMessage(Component.translatable("screen.coi.preset").append(": " + PRESETS[currentPreset]));
-                    applyPreset(currentPreset);
-                }).bounds(centerX - Math.min(205, this.width / 3), buttonY, buttonWidth, 20).build();
-        this.addRenderableWidget(presetButton);
+            @Override
+            protected void applyValue() {
+                updateMessage();
+            }
+        };
 
-        resetButton = Button.builder(Component.translatable("screen.coi.reset_defaults"),
-                button -> {
-                    resetToDefaults();
-                    this.init();
-                }).bounds(centerX - buttonWidth, buttonY, smallButtonWidth, 20).build();
-        this.addRenderableWidget(resetButton);
+        EditBox field = new EditBox(this.font, contentX + 10 + sliderW + 6, 0, FIELD_WIDTH, 20, fieldLabel);
+        field.setValue(String.valueOf(clampedInitial));
+        field.setResponder(text -> {
+            try {
+                setter.accept(Math.clamp(Integer.parseInt(text), min, max));
+            } catch (NumberFormatException ignored) {
+            }
+        });
+        fieldRef[0] = field;
 
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> this.onClose()).bounds(centerX - 5, buttonY, smallButtonWidth, 20).build());
+        contentWidgets.add(new ContentWidget(slider, rowCursor));
+        this.addRenderableWidget(slider);
+        addContentRow(field); // advances rowCursor for the pair
+    }
 
-        this.addRenderableWidget(Button.builder(Component.translatable("gui.done"),
-                button -> {
-                    saveSettings();
-                    this.onClose();
-                }).bounds(centerX + Math.min(100, this.width / 10), buttonY, smallButtonWidth, 20).build());
+    private void addDecimalRow(Component label, Component fieldLabel, double min, double max, double initialValue, DoubleConsumer setter) {
+        final EditBox[] fieldRef = new EditBox[1];
+        double clampedInitial = Math.clamp(initialValue, min, max);
+        double sliderValue = (clampedInitial - min) / (max - min);
+        int sliderW = contentW - 20 - FIELD_WIDTH - 6;
+
+        AbstractSliderButton slider = new AbstractSliderButton(contentX + 10, 0, sliderW, 20,
+                label.copy().append(": " + String.format("%.1f", clampedInitial)), sliderValue) {
+            @Override
+            protected void updateMessage() {
+                double value = min + this.value * (max - min);
+                value = Math.round(value * 10.0) / 10.0;
+                setter.accept(value);
+                this.setMessage(label.copy().append(": " + String.format("%.1f", value)));
+                if (fieldRef[0] != null) {
+                    fieldRef[0].setValue(String.format("%.1f", value));
+                }
+            }
+
+            @Override
+            protected void applyValue() {
+                updateMessage();
+            }
+        };
+
+        EditBox field = new EditBox(this.font, contentX + 10 + sliderW + 6, 0, FIELD_WIDTH, 20, fieldLabel);
+        field.setValue(String.format("%.1f", clampedInitial));
+        field.setResponder(text -> {
+            try {
+                setter.accept(Math.clamp(Double.parseDouble(text), min, max));
+            } catch (NumberFormatException ignored) {
+            }
+        });
+        fieldRef[0] = field;
+
+        contentWidgets.add(new ContentWidget(slider, rowCursor));
+        this.addRenderableWidget(slider);
+        addContentRow(field);
+    }
+
+    // --- Scrolling ---
+
+    private double maxScroll() {
+        return Math.max(0, tabContentH - (viewportBottom - viewportTop));
+    }
+
+    /**
+     * Positions content widgets by scroll offset and hides the ones that don't
+     * fully fit the viewport — hidden widgets neither render nor take clicks,
+     * which stands in for scissor clipping of live widgets.
+     */
+    private void applyScroll() {
+        scrollOffset = Mth.clamp(scrollOffset, 0, maxScroll());
+        for (ContentWidget content : contentWidgets) {
+            int y = viewportTop + content.baseY - (int) scrollOffset;
+            content.widget.setY(y);
+            content.widget.visible = y >= viewportTop - 2 && y + content.widget.getHeight() <= viewportBottom + 2;
+        }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) {
+            return true;
+        }
+        scrollOffset = Mth.clamp(scrollOffset - verticalAmount * ROW_STRIDE, 0, maxScroll());
+        applyScroll();
+        return true;
     }
 
     private void applyPreset(int preset) {
@@ -387,97 +457,41 @@ public class HudSettingsScreen extends Screen {
                 settings.madnessAnchor = "TOP_LEFT";
                 break;
         }
-        refreshWidgets();
-    }
-
-    private void resetToDefaults() {
-        settings = new HudConfig.HudSettings();
-        currentPreset = 0;
-        refreshWidgets();
-    }
-
-    private void refreshWidgets() {
-        hudXField.setValue(String.valueOf(settings.hudX));
-        hudYOffsetField.setValue(String.valueOf(settings.hudYOffset));
-        slotSizeField.setValue(String.valueOf(settings.slotSize));
-        slotSpacingField.setValue(String.valueOf(settings.slotSpacing));
-        hudScaleField.setValue(String.format("%.1f", settings.hudScale));
-        activeSlotsField.setValue(String.valueOf(settings.activeAbilitySlots));
-        wheelSlotsField.setValue(String.valueOf(settings.wheelSlots));
-        madnessXOffsetField.setValue(String.valueOf(settings.madnessXOffset));
-        madnessYOffsetField.setValue(String.valueOf(settings.madnessYOffset));
-        if (madnessAnchorButton != null) {
-            madnessAnchorButton.setMessage(Component.literal("Anchor: " + settings.madnessAnchor));
-        }
-
-        presetButton.setMessage(Component.translatable("screen.coi.preset").append(": " + PRESETS[currentPreset]));
-    }
-
-    private void saveSettings() {
-        settings.enabled = enabledCheckbox.selected();
-        settings.showKeybinds = showKeybindsCheckbox.selected();
-        settings.showAbilityNames = showAbilityNamesCheckbox.selected();
-        settings.showGlowEffect = showGlowEffectCheckbox.selected();
-        settings.epilepsyMode = epilepsyModeCheckbox.selected();
-        settings.showMadnessBar = showMadnessBarCheckbox.selected();
-        settings.enableHallucinations = hallucinationsCheckbox.selected();
-        settings.enableDiscordPresence = discordPresenceCheckbox.selected();
-        settings.presenceShowMadness = presenceMadnessCheckbox.selected();
-
-        HudConfig.setSettings(settings);
     }
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        graphics.fill(0, 0, this.width, this.height, 0x90000000);
+        graphics.centeredText(this.font, this.title, this.width / 2, compact() ? 5 : 12, CoiStyle.ACCENT);
+
+        int cardTop = tabY() + TAB_H + 6;
+        CoiStyle.drawCard(graphics, contentX, cardTop, contentW, viewportBottom + 8 - cardTop);
+
         super.extractRenderState(graphics, mouseX, mouseY, a);
 
-        graphics.centeredText(this.font, this.title, this.width / 2, 20, 0xFFFFFFFF);
-
-        SettingsLayout layout = createLayout();
-        int leftY = layout.topY + 24;
-        int rightY = layout.twoColumns ? leftY : leftY + ROW_SPACING * 7 + SECTION_GAP;
-        int displayY = Math.max(leftY + ROW_SPACING * 7, rightY + ROW_SPACING * 4) + SECTION_GAP;
-
-        drawSection(graphics, "Ability HUD", layout.leftX, leftY - 24);
-        drawSettingLabels(graphics, layout.leftX, leftY,
-                Component.translatable("screen.coi.hud_x"),
-                Component.translatable("screen.coi.hud_y_offset"),
-                Component.translatable("screen.coi.slot_size"),
-                Component.translatable("screen.coi.slot_spacing"),
-                Component.translatable("screen.coi.hud_scale"),
-                Component.translatable("screen.coi.key_slots"),
-                Component.translatable("screen.coi.wheel_slots"));
-
-        drawSection(graphics, "Madness HUD", layout.rightX, rightY - 24);
-        drawSettingLabels(graphics, layout.rightX, rightY,
-                Component.translatable("screen.coi.madness_x_offset"),
-                Component.translatable("screen.coi.madness_y_offset"),
-                Component.literal("Madness Anchor"));
-
-        drawSection(graphics, "Display", layout.leftX, displayY - 14);
+        if (maxScroll() > 0) {
+            int viewportH = viewportBottom - viewportTop;
+            int trackX = contentX + contentW + 4;
+            graphics.fill(trackX, viewportTop, trackX + 3, viewportBottom, CoiStyle.SCROLL_TRACK);
+            int thumbH = Math.max(16, viewportH * viewportH / tabContentH);
+            int thumbY = viewportTop + (int) ((viewportH - thumbH) * (scrollOffset / maxScroll()));
+            graphics.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, CoiStyle.BORDER);
+        }
 
         if (!settings.enabled) {
             graphics.centeredText(this.font, Component.translatable("screen.coi.hud_disabled_warning").withStyle(ChatFormatting.RED),
-                    this.width / 2, this.height - 80, 0xFFFF5555);
+                    this.width / 2, buttonY - 11, 0xFFFF5555);
         }
 
-        renderTooltips(graphics, mouseX, mouseY);
-    }
-
-    private void renderTooltips(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         if (resetButton.isHovered()) {
-            context.setTooltipForNextFrame(this.font, Component.translatable("screen.coi.reset_defaults.tooltip"), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.coi.reset_defaults.tooltip"), mouseX, mouseY);
         } else if (presetButton.isHovered()) {
-            context.setTooltipForNextFrame(this.font, Component.translatable("screen.coi.preset.tooltip"), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(this.font, Component.translatable("screen.coi.preset.tooltip"), mouseX, mouseY);
         }
     }
 
     @Override
     public void onClose() {
         this.minecraft.setScreen(this.parent);
-    }
-
-    private record SettingsLayout(boolean twoColumns, int leftX, int rightX, int columnWidth, int sliderWidth,
-                                  int buttonY, int topY) {
     }
 }

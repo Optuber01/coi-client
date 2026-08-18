@@ -41,9 +41,14 @@ CircleOfImaginationClient   — entry point, singleton state, payload registrati
   │   ├── HudConfig            — persists HUD settings  → config/coi_hud.json
   │   └── AbilityInfo          — in-memory ability metadata record
   └── screen/
-      ├── AbilityBindingScreen — bind abilities to slots (opened with K)
-      ├── AbilityDropdownWidget — scrollable dropdown, uses method references
-      ├── HudSettingsScreen    — HUD customization (sliders, 4 presets)
+      ├── AbilityBindingScreen — bind abilities to slots (opened with K); tabbed
+      │                          (hotkeys/wheel/gestures) with per-tab how-to banner
+      ├── AbilityPickerOverlay — modal ability chooser: search box, icon rows, Unbind
+      ├── AbilityIcons         — shared category/tier icon renderer (pathway-tinted)
+      ├── CoiStyle             — shared dark/gold palette + card chrome (from TourScreen)
+      ├── CoiTabButton         — hand-drawn tab widget used by binding + settings screens
+      ├── HudSettingsScreen    — HUD customization: 3 tabs (Ability HUD/Madness/Display),
+      │                          scrollable rows so it fits any gui scale, 4 presets
       └── EffectDebugScreen    — dev-only (F8), test visual effects without server
 ```
 
