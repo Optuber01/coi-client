@@ -115,7 +115,7 @@ public final class UniquenessParticleManager {
         if ((tickCounter & 1) == 1) {
             return; // half tick rate
         }
-        AppearanceConfig.AppearanceSettings settings = AppearanceConfig.getSettings();
+        AppearanceConfig.Settings settings = AppearanceConfig.get();
         if (!settings.enableUniquenessEffects) {
             return;
         }

@@ -20,7 +20,7 @@ import java.util.Set;
  *     <li>Eyes: dragon → glowing → red → iron-black → black</li>
  *     <li>Wings: devil → darkness → natural bat; Scales: dragon → water</li>
  *     <li>Physique: giant → masculine; Chained: werewolf → wraith → zombie;
- *         Claws: corrosive → predator</li>
+ *         Claws: corrosive → predator; Skin: devil → chitin → stone → wood → pale</li>
  * </ul>
  *
  * <p>Trait ids are the opaque strings the COI server sends via {@code coi-client:appearance};
@@ -50,9 +50,15 @@ public final class AppearanceTraits {
             List.of("werewolf_traits", "wraith_traits", "zombie_traits"));
     public static final Family CLAWS = new Family("claws",
             List.of("corrosive_claws", "predator_mutation"));
+    public static final Family SKIN = new Family("skin",
+            List.of("devil_skin", "chitin_mutation", "stone_skin", "wood_skin", "pale_skin"));
+
+    /** Families gated by the "Body enhancements" visibility switch. */
+    public static final Set<String> BODY_ALTERING_FAMILIES = Set.of(
+            BODY.id(), SKIN.id(), SCALES.id(), PHYSIQUE.id(), CHAINED.id());
 
     public static final List<Family> FAMILIES = List.of(
-            BODY, HAIR, EYES, WINGS, SCALES, PHYSIQUE, CHAINED, CLAWS);
+            BODY, HAIR, EYES, WINGS, SCALES, PHYSIQUE, CHAINED, CLAWS, SKIN);
 
     private static final Map<String, Family> FAMILY_BY_TRAIT = new HashMap<>();
 
@@ -85,11 +91,11 @@ public final class AppearanceTraits {
             new TraitInfo("fangs", "Fangs", null),
             new TraitInfo("dragon_scales", "Dragon Scales", SCALES),
             new TraitInfo("water_scales", "Water Scales", SCALES),
-            new TraitInfo("pale_skin", "Pale Skin", null),
-            new TraitInfo("devil_skin", "Devil Armor Skin", null),
-            new TraitInfo("wood_skin", "Wood Skin", null),
-            new TraitInfo("stone_skin", "Stone Skin", null),
-            new TraitInfo("chitin_mutation", "Chitin Mutation", null),
+            new TraitInfo("pale_skin", "Pale Skin", SKIN),
+            new TraitInfo("devil_skin", "Devil Armor Skin", SKIN),
+            new TraitInfo("wood_skin", "Wood Skin", SKIN),
+            new TraitInfo("stone_skin", "Stone Skin", SKIN),
+            new TraitInfo("chitin_mutation", "Chitin Mutation", SKIN),
             new TraitInfo("regrowth_mutation", "Regrowth Vines", null),
             new TraitInfo("werewolf_traits", "Werewolf Traits", CHAINED),
             new TraitInfo("wraith_traits", "Wraith Traits", CHAINED),
@@ -107,10 +113,10 @@ public final class AppearanceTraits {
     );
 
     private static final List<AppearanceTraitRenderer> RENDERERS = List.of(
-            new MotherTraitsRenderer(),
-            new MoonTraitsRenderer(),
-            new ChaosTraitsRenderer(),
-            new FemaleTraitsRenderer(),
+            new FemaleTraitsRenderer("mother_traits", 1.38f),
+            new FemaleTraitsRenderer("moon_traits", 1.28f),
+            new FemaleTraitsRenderer("chaos_traits", 1.18f),
+            new FemaleTraitsRenderer("female_traits", 1.08f),
             new DemonessEarsRenderer(),
             new HairTraitRenderer("long_brown_hair", HairTraitRenderer.Style.LONG, 0.25f, 0.11f, 0.045f),
             new HairTraitRenderer("long_black_hair", HairTraitRenderer.Style.LONG, 0.025f, 0.018f, 0.03f),
@@ -118,34 +124,42 @@ public final class AppearanceTraits {
             new HairTraitRenderer("red_hair", HairTraitRenderer.Style.SHORT, 0.58f, 0.025f, 0.025f),
             new HairTraitRenderer("blue_hair", HairTraitRenderer.Style.SHORT, 0.035f, 0.23f, 0.62f),
             new HairTraitRenderer("black_hair", HairTraitRenderer.Style.SHORT, 0.018f, 0.014f, 0.025f),
-            new DragonIrisesRenderer(),
-            new GlowingEyesRenderer(),
-            new RedEyesRenderer(),
-            new IronBlackEyesRenderer(),
-            new BlackEyesRenderer(),
+            new EyeTraitRenderer("dragon_irises", EyeTraitRenderer.Style.SLIT, 0.88f, 0.67f, 0.12f, true),
+            new EyeTraitRenderer("glowing_eyes", EyeTraitRenderer.Style.NORMAL, 0.66f, 0.16f, 0.92f, true),
+            new EyeTraitRenderer("red_eyes", EyeTraitRenderer.Style.NORMAL, 0.92f, 0.025f, 0.035f, true),
+            new EyeTraitRenderer("iron_black_eyes", EyeTraitRenderer.Style.NORMAL, 0.025f, 0.018f, 0.018f, false),
+            new EyeTraitRenderer("black_eyes", EyeTraitRenderer.Style.NORMAL, 0.005f, 0.005f, 0.008f, false),
             new FangsRenderer(),
-            new DragonScalesRenderer(),
-            new WaterScalesRenderer(),
-            new PaleSkinRenderer(),
-            new DevilSkinRenderer(),
-            new WoodSkinRenderer(),
-            new StoneSkinRenderer(),
-            new ChitinMutationRenderer(),
-            new RegrowthMutationRenderer(),
-            new WerewolfTraitsRenderer(),
-            new WraithTraitsRenderer(),
-            new ZombieTraitsRenderer(),
-            new DevilWingsRenderer(),
-            new DarknessWingsRenderer(),
-            new BatMutationRenderer(),
-            new CorrosiveClawsRenderer(),
-            new PredatorMutationRenderer(),
-            new GiantPhysiqueRenderer(),
-            new MasculineTraitsRenderer(),
-            new LifelessAuraRenderer(),
+            new ScaleTraitRenderer("dragon_scales", ScaleTraitRenderer.Style.DRAGON),
+            new ScaleTraitRenderer("water_scales", ScaleTraitRenderer.Style.WATER),
+            new SkinTraitRenderer("pale_skin", SkinTraitRenderer.Style.PALE),
+            new SkinTraitRenderer("devil_skin", SkinTraitRenderer.Style.DEVIL_ARMOR),
+            new SkinTraitRenderer("wood_skin", SkinTraitRenderer.Style.WOOD),
+            new SkinTraitRenderer("stone_skin", SkinTraitRenderer.Style.STONE),
+            new SkinTraitRenderer("chitin_mutation", SkinTraitRenderer.Style.CHITIN),
+            new SkinTraitRenderer("regrowth_mutation", SkinTraitRenderer.Style.REGROWTH),
+            new BeastTraitRenderer("werewolf_traits"),
+            new SkinTraitRenderer("wraith_traits", SkinTraitRenderer.Style.WRAITH),
+            new SkinTraitRenderer("zombie_traits", SkinTraitRenderer.Style.ZOMBIE),
+            new WingTraitRenderer("devil_wings", WingTraitRenderer.Style.DEVIL),
+            new WingTraitRenderer("darkness_wings", WingTraitRenderer.Style.ILLUSORY),
+            new WingTraitRenderer("bat_mutation", WingTraitRenderer.Style.NATURAL),
+            new ClawTraitRenderer("corrosive_claws", ClawTraitRenderer.Style.CORROSIVE),
+            new ClawTraitRenderer("predator_mutation", ClawTraitRenderer.Style.PREDATOR),
+            new PhysiqueTraitRenderer("giant_physique", PhysiqueTraitRenderer.Style.GIANT),
+            new PhysiqueTraitRenderer("masculine_traits", PhysiqueTraitRenderer.Style.MASCULINE),
+            new AuraTraitRenderer("lifeless_aura"),
             new HornsTraitRenderer(),
             new MushroomTraitRenderer()
     );
+
+    private static final Map<String, AppearanceTraitRenderer> RENDERER_BY_TRAIT = new HashMap<>();
+
+    static {
+        for (AppearanceTraitRenderer renderer : RENDERERS) {
+            RENDERER_BY_TRAIT.put(renderer.traitId(), renderer);
+        }
+    }
 
     private AppearanceTraits() {
     }
@@ -179,8 +193,7 @@ public final class AppearanceTraits {
             }
         }
 
-        for (int index = 0; index < RENDERERS.size(); index++) {
-            AppearanceTraitRenderer renderer = RENDERERS.get(index);
+        for (AppearanceTraitRenderer renderer : RENDERERS) {
             String traitId = renderer.traitId();
             if (!activeTraits.contains(traitId)) {
                 continue;
@@ -192,5 +205,9 @@ public final class AppearanceTraits {
             result.add(renderer);
         }
         return result;
+    }
+
+    public static AppearanceTraitRenderer rendererFor(String traitId) {
+        return RENDERER_BY_TRAIT.get(traitId);
     }
 }

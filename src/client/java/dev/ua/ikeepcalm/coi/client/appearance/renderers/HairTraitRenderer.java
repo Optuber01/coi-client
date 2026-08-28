@@ -49,9 +49,12 @@ public final class HairTraitRenderer implements AppearanceTraitRenderer {
     public void submit(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, PlayerModel model) {
         TraitGeometry g = TraitGeometry.INSTANCE;
         int light = state.lightCoords;
+        dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.Settings settings =
+                dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get();
 
         poseStack.pushPose();
         model.head.translateAndRotate(poseStack);
+        poseStack.translate(0.0f, settings.hairYOffsetPixels / 16.0f, 0.0f);
         collector.order(1).submitCustomGeometry(
                 poseStack,
                 RENDER_TYPE,
@@ -62,6 +65,8 @@ public final class HairTraitRenderer implements AppearanceTraitRenderer {
         if (style == Style.LONG) {
             poseStack.pushPose();
             model.body.translateAndRotate(poseStack);
+            poseStack.translate(0.0f, settings.hairYOffsetPixels / 16.0f, 0.0f);
+            poseStack.scale(1.0f, settings.hairLength, 1.0f);
             collector.order(1).submitCustomGeometry(
                     poseStack,
                     RENDER_TYPE,
@@ -92,13 +97,18 @@ public final class HairTraitRenderer implements AppearanceTraitRenderer {
 
     private void drawLongHair(TraitGeometry g, PoseStack.Pose pose,
                               com.mojang.blaze3d.vertex.VertexConsumer consumer, int light) {
-        // Back panel down the torso
-        g.boxPixels(pose, consumer, -3.85f, -0.3f, 2.03f, 3.85f, 11.7f, 2.72f, base, light);
-        // Long side strands
-        g.boxPixels(pose, consumer, -4.18f, 0.35f, 1.55f, -3.42f, 10.4f, 2.55f, base, light);
-        g.boxPixels(pose, consumer, 3.42f, 0.35f, 1.55f, 4.18f, 10.4f, 2.55f, base, light);
+        // Back panel down past the waist onto the upper legs
+        g.boxPixels(pose, consumer, -3.85f, -0.3f, 2.03f, 3.85f, 15.8f, 2.72f, base, light);
+        // Tapered tail below the main panel
+        g.boxPixels(pose, consumer, -2.6f, 15.6f, 2.12f, 2.6f, 18.2f, 2.62f, base, light);
+        // Long side strands falling past the shoulders
+        g.boxPixels(pose, consumer, -4.18f, 0.35f, 1.55f, -3.42f, 13.4f, 2.55f, base, light);
+        g.boxPixels(pose, consumer, 3.42f, 0.35f, 1.55f, 4.18f, 13.4f, 2.55f, base, light);
+        // Front-visible side wisps so length reads from the front too
+        g.boxPixels(pose, consumer, -4.28f, 1.5f, 0.4f, -3.95f, 10.8f, 1.35f, base, light);
+        g.boxPixels(pose, consumer, 3.95f, 1.5f, 0.4f, 4.28f, 10.8f, 1.35f, base, light);
         // Highlight streaks
-        g.boxPixels(pose, consumer, -2.65f, 0.0f, 2.73f, -2.10f, 10.9f, 2.90f, highlight, light);
-        g.boxPixels(pose, consumer, 1.95f, 0.0f, 2.73f, 2.43f, 9.8f, 2.90f, highlight, light);
+        g.boxPixels(pose, consumer, -2.65f, 0.0f, 2.73f, -2.10f, 13.6f, 2.90f, highlight, light);
+        g.boxPixels(pose, consumer, 1.95f, 0.0f, 2.73f, 2.43f, 12.2f, 2.90f, highlight, light);
     }
 }

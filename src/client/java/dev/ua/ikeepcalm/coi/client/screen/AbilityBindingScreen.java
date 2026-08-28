@@ -118,7 +118,7 @@ public class AbilityBindingScreen extends Screen {
         appearanceSettingsButton = Button.builder(Component.translatable("screen.coi.appearance_settings"),
                 button -> {
                     this.onClose();
-                    Minecraft.getInstance().setScreen(new AppearanceSettingsScreen());
+                    Minecraft.getInstance().setScreen(new AppearanceSettingsScreen(null));
                 }).bounds(buttonX + buttonW + 8, buttonY, buttonW, 20).build();
         this.addRenderableWidget(appearanceSettingsButton);
 

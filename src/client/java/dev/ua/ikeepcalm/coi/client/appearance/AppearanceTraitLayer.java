@@ -27,7 +27,7 @@ public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerM
         if (playerUuid == null || state.isInvisible) {
             return;
         }
-        if (!AppearanceConfig.getSettings().enableAppearanceTraits) {
+        if (!AppearanceConfig.shouldRender(playerUuid)) {
             return;
         }
         // Partial forms keep the player's own head and torso, and every trait hangs off one of those,
@@ -46,6 +46,12 @@ public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerM
 
         PlayerModel model = getParentModel();
         for (AppearanceTraitRenderer renderer : renderers) {
+            AppearanceTraits.Family family = AppearanceTraits.familyOf(renderer.traitId());
+            if (family != null
+                    && AppearanceTraits.BODY_ALTERING_FAMILIES.contains(family.id())
+                    && !AppearanceConfig.get().showBodyChanges) {
+                continue;
+            }
             renderer.submit(poseStack, collector, state, model);
         }
     }
