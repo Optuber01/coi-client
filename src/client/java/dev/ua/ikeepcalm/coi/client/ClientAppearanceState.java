@@ -25,6 +25,21 @@ public class ClientAppearanceState {
         traitsByUuid.put(targetUuid, Set.of(traits.split(",")));
     }
 
+    /**
+     * The renderable trait set for a player — server-reported traits unioned with local
+     * debug overrides, so the preview screen's toggles show up instantly. Never null.
+     */
+    public static Set<String> getTraits(String playerUuid) {
+        if (playerUuid == null) return Set.of();
+        Set<String> traits = traitsByUuid.get(playerUuid);
+        Set<String> debugTraits = debugTraitsByUuid.get(playerUuid);
+        if (traits == null) return debugTraits != null ? debugTraits : Set.of();
+        if (debugTraits == null) return traits;
+        Set<String> merged = new HashSet<>(traits);
+        merged.addAll(debugTraits);
+        return Set.copyOf(merged);
+    }
+
     public static boolean hasTrait(String playerUuid, String traitId) {
         if (playerUuid == null) return false;
         Set<String> traits = traitsByUuid.get(playerUuid);

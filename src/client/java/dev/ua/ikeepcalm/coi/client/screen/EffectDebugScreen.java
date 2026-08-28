@@ -1,6 +1,7 @@
 package dev.ua.ikeepcalm.coi.client.screen;
 
 import dev.ua.ikeepcalm.coi.client.ClientBeyonderState;
+import dev.ua.ikeepcalm.coi.client.appearance.UniquenessParticleManager;
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
 import dev.ua.ikeepcalm.coi.client.effects.VisualEffect;
 import dev.ua.ikeepcalm.coi.client.effects.impl.ImpactFrameEffect;
@@ -19,8 +20,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * Developer-only screen for testing visual effects without server commands.
- * Only accessible via the debug keybinding registered in dev environments.
+ * Debug screen for testing visual effects without server commands, reachable via F8 in
+ * any jar (not just dev environments).
  */
 public class EffectDebugScreen extends Screen {
 
@@ -183,6 +184,42 @@ public class EffectDebugScreen extends Screen {
 
         y += 26;
 
+        // Uniqueness particle effects: cycle a debug pathway assignment on the local
+        // player to preview each of the 22 pathway signatures without a server.
+        int uniquenessY = y;
+        java.util.List<String> pathways = UniquenessParticleManager.PATHWAYS;
+        String currentPathway = minecraft.player != null
+                ? UniquenessParticleManager.getDebugPathway(minecraft.player.getUUID().toString())
+                : null;
+        final int[] pathwayIndex = {-1};
+        if (currentPathway != null) {
+            pathwayIndex[0] = pathways.indexOf(currentPathway);
+        }
+
+        String uniquenessLabel = pathwayIndex[0] == -1
+                ? "Uniqueness: None (Click to cycle)"
+                : "Uniqueness: " + pathways.get(pathwayIndex[0]);
+        Button uniquenessCycleBtn = Button.builder(Component.literal(uniquenessLabel), btn -> {
+            if (minecraft.player == null || pathways.isEmpty()) return;
+            String uuid = minecraft.player.getUUID().toString();
+            pathwayIndex[0] = (pathwayIndex[0] + 1) % pathways.size();
+            String selected = pathways.get(pathwayIndex[0]);
+            UniquenessParticleManager.setDebugPathway(uuid, selected);
+            btn.setMessage(Component.literal("Uniqueness: " + selected));
+        }).bounds(panelX, uniquenessY, PANEL_W / 2 - 2, 20).build();
+        addRenderableWidget(uniquenessCycleBtn);
+
+        addRenderableWidget(Button.builder(Component.literal("Clear Uniqueness").withStyle(ChatFormatting.YELLOW), btn -> {
+            if (minecraft.player != null) {
+                UniquenessParticleManager.setDebugPathway(
+                        minecraft.player.getUUID().toString(), null);
+                pathwayIndex[0] = -1;
+                uniquenessCycleBtn.setMessage(Component.literal("Uniqueness: None (Click to cycle)"));
+            }
+        }).bounds(panelX + PANEL_W / 2 + 2, uniquenessY, PANEL_W / 2 - 2, 20).build());
+
+        y += 26;
+
         addRenderableWidget(Button.builder(
                 Component.literal("Appearance Traits — Local Preview").withStyle(ChatFormatting.AQUA),
                 btn -> minecraft.setScreen(new AppearanceDebugScreen(this))
@@ -201,7 +238,7 @@ public class EffectDebugScreen extends Screen {
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         // Semi-transparent panel behind controls (no blur — world is still rendering)
         int panelX = (this.width - PANEL_W) / 2;
-        int panelH = 50 + EffectManager.getRegistry().size() * ROW_H + 34 + 26 + 26 + 26;
+        int panelH = 50 + EffectManager.getRegistry().size() * ROW_H + 34 + 26 + 26 + 26 + 26;
         graphics.fill(panelX - 8, 8, panelX + PANEL_W + 8, 8 + panelH, 0xCC000000);
 
         super.extractRenderState(graphics, mouseX, mouseY, a);

@@ -2,9 +2,7 @@ package dev.ua.ikeepcalm.coi.client.appearance;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ua.ikeepcalm.coi.client.ClientAppearanceState;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.FemaleTraitsRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.HornsTraitRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.MushroomTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.config.AppearanceConfig;
 import dev.ua.ikeepcalm.coi.client.mcf.AvatarRenderStateAccessor;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalCreatureForm;
 import dev.ua.ikeepcalm.coi.client.mcf.PartialForms;
@@ -19,12 +17,6 @@ import java.util.List;
 
 public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
-    private static final List<AppearanceTraitRenderer> TRAIT_RENDERERS = List.of(
-            new FemaleTraitsRenderer(),
-            new HornsTraitRenderer(),
-            new MushroomTraitRenderer()
-    );
-
     public AppearanceTraitLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
         super(renderer);
     }
@@ -35,6 +27,9 @@ public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerM
         if (playerUuid == null || state.isInvisible) {
             return;
         }
+        if (!AppearanceConfig.getSettings().enableAppearanceTraits) {
+            return;
+        }
         // Partial forms keep the player's own head and torso, and every trait hangs off one of those,
         // so a character's horns shouldn't disappear the moment they grow a dragon's lower half.
         // Full forms replace the body outright and have nothing left to attach to.
@@ -43,11 +38,15 @@ public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerM
             return;
         }
 
+        List<AppearanceTraitRenderer> renderers = AppearanceTraits.resolve(
+                ClientAppearanceState.getTraits(playerUuid));
+        if (renderers.isEmpty()) {
+            return;
+        }
+
         PlayerModel model = getParentModel();
-        for (AppearanceTraitRenderer renderer : TRAIT_RENDERERS) {
-            if (ClientAppearanceState.hasTrait(playerUuid, renderer.traitId())) {
-                renderer.submit(poseStack, collector, state, model);
-            }
+        for (AppearanceTraitRenderer renderer : renderers) {
+            renderer.submit(poseStack, collector, state, model);
         }
     }
 }

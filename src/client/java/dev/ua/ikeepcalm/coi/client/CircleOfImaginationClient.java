@@ -1,8 +1,10 @@
 package dev.ua.ikeepcalm.coi.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.ua.ikeepcalm.coi.client.appearance.UniquenessParticleManager;
 import dev.ua.ikeepcalm.coi.client.config.AbilityConfig;
 import dev.ua.ikeepcalm.coi.client.config.AbilityInfo;
+import dev.ua.ikeepcalm.coi.client.config.AppearanceConfig;
 import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
 import dev.ua.ikeepcalm.coi.client.effects.EffectManager;
@@ -29,7 +31,6 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -90,7 +91,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     public static KeyMapping abilityMenu;
     public static KeyMapping abilityWheel;
     public static KeyMapping gestureCast;
-    public static KeyMapping effectDebugMenu; // null when not in dev environment
+    public static KeyMapping effectDebugMenu;
     private static String[] boundAbilities = new String[MAX_ABILITIES];
     private static String[] wheelAbilities = new String[MAX_WHEEL_SIZE];
     private static String[] gestureAbilities = new String[GestureType.values().length];
@@ -329,6 +330,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         HudConfig.load();
+        AppearanceConfig.load();
         ClientStateStore.load();
         boundAbilities = AbilityConfig.loadBindings();
         wheelAbilities = AbilityConfig.loadWheelBindings();
@@ -355,6 +357,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             ClientStateStore.setLastMadness(ClientBeyonderState.getMadness());
             ClientBeyonderState.reset();
             ClientAppearanceState.reset();
+            UniquenessParticleManager.reset();
             EffectManager.stopAll();
             MythicalFormManager.clearAll();
             tourPendingAt = 0;
@@ -503,19 +506,20 @@ public class CircleOfImaginationClient implements ClientModInitializer {
                 category
         ));
 
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            effectDebugMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                    "screen.coi.effect_debug",
-                    InputConstants.Type.KEYSYM,
-                    GLFW.GLFW_KEY_F8,
-                    category
-            ));
-        }
+        // F8 debug menu is available in normal jars too — it gates nothing and lets
+        // players test visual effects and appearance previews without a server.
+        effectDebugMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "screen.coi.effect_debug",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F8,
+                category
+        ));
     }
 
     private void registerTickHandler() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             HallucinationManager.tick(client);
+            UniquenessParticleManager.tick(client);
             DiscordPresenceManager.tick();
 
             if (client.player == null) return;

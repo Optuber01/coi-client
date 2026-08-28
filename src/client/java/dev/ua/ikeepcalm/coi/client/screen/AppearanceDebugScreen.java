@@ -1,6 +1,7 @@
 package dev.ua.ikeepcalm.coi.client.screen;
 
 import dev.ua.ikeepcalm.coi.client.ClientAppearanceState;
+import dev.ua.ikeepcalm.coi.client.appearance.AppearanceTraits;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -12,21 +13,24 @@ import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Local preview for the appearance traits: toggles any of the registered traits on the
+ * local player without a server. Traits are split across pages (the registry holds 38),
+ * cycled with a single page button; the preview entity updates live.
+ */
 public final class AppearanceDebugScreen extends Screen {
 
     private static final int PANEL_W = 560;
     private static final int PANEL_H = 330;
     private static final int BUTTON_W = 140;
     private static final int BUTTON_H = 22;
-
-    private static final List<DebugTrait> TRAITS = List.of(
-            new DebugTrait("female_traits", "Female Traits"),
-            new DebugTrait("horns", "Abyss Horns"),
-            new DebugTrait("mushroom", "Head Mushroom")
-    );
+    private static final int ROWS_PER_PAGE = 5;
+    private static final int COLUMNS = 2;
+    private static final int PER_PAGE = ROWS_PER_PAGE * COLUMNS;
 
     private final Screen parent;
     private final List<TraitButton> traitButtons = new ArrayList<>();
+    private int page;
     private int panelX;
     private int panelY;
 
@@ -45,10 +49,16 @@ public final class AppearanceDebugScreen extends Screen {
         int controlsX = panelX + 246;
         int controlsY = panelY + 54;
 
-        for (int index = 0; index < TRAITS.size(); index++) {
-            DebugTrait trait = TRAITS.get(index);
-            int column = index % 2;
-            int row = index / 2;
+        int pageCount = pageCount();
+        page = Math.floorMod(page, pageCount);
+        int start = page * PER_PAGE;
+        int end = Math.min(start + PER_PAGE, AppearanceTraits.TRAITS.size());
+
+        for (int index = start; index < end; index++) {
+            AppearanceTraits.TraitInfo trait = AppearanceTraits.TRAITS.get(index);
+            int localIndex = index - start;
+            int column = localIndex % COLUMNS;
+            int row = localIndex / COLUMNS;
             int x = controlsX + column * (BUTTON_W + 12);
             int y = controlsY + row * 44;
             boolean enabled = ClientAppearanceState.hasDebugTrait(playerUuid, trait.id());
@@ -63,20 +73,31 @@ public final class AppearanceDebugScreen extends Screen {
             traitButtons.add(new TraitButton(trait, x, y));
         }
 
-        int traitRows = (TRAITS.size() + 1) / 2;
-        int actionY = controlsY + traitRows * 44 + 12;
+        int actionY = controlsY + ROWS_PER_PAGE * 44 + 12;
+        addRenderableWidget(Button.builder(
+                        Component.literal("Page " + (page + 1) + "/" + pageCount + " ▶").withStyle(ChatFormatting.GOLD),
+                        clicked -> {
+                            page = (page + 1) % pageCount();
+                            rebuildWidgets();
+                        }
+                ).bounds(controlsX, actionY, BUTTON_W, BUTTON_H).build());
+
         addRenderableWidget(Button.builder(
                 Component.literal("Clear All Traits").withStyle(ChatFormatting.RED),
                 clicked -> {
                     ClientAppearanceState.clearDebugTraits(localPlayerUuid());
                     rebuildWidgets();
                 }
-        ).bounds(controlsX, actionY, BUTTON_W, BUTTON_H).build());
+        ).bounds(controlsX + BUTTON_W + 12, actionY, BUTTON_W, BUTTON_H).build());
 
         addRenderableWidget(Button.builder(
                 Component.translatable("gui.back"),
                 clicked -> onClose()
-        ).bounds(controlsX + BUTTON_W + 12, actionY, BUTTON_W, BUTTON_H).build());
+        ).bounds(controlsX, actionY + 32, BUTTON_W * 2 + 12, BUTTON_H).build());
+    }
+
+    private static int pageCount() {
+        return (AppearanceTraits.TRAITS.size() + PER_PAGE - 1) / PER_PAGE;
     }
 
     @Override
@@ -119,9 +140,10 @@ public final class AppearanceDebugScreen extends Screen {
         );
 
         for (TraitButton entry : traitButtons) {
+            String family = entry.trait().family() != null ? "  ·" + entry.trait().family().id() : "";
             graphics.text(
                     font,
-                    Component.literal(entry.trait().id()).withStyle(ChatFormatting.DARK_GRAY),
+                    Component.literal(entry.trait().id() + family).withStyle(ChatFormatting.DARK_GRAY),
                     entry.x() + 3,
                     entry.y() + BUTTON_H + 2,
                     0xFF777777
@@ -145,14 +167,11 @@ public final class AppearanceDebugScreen extends Screen {
                 : null;
     }
 
-    private static Component buttonLabel(DebugTrait trait, boolean enabled) {
+    private static Component buttonLabel(AppearanceTraits.TraitInfo trait, boolean enabled) {
         return Component.literal((enabled ? "ON  " : "OFF  ") + trait.displayName())
                 .withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.GRAY);
     }
 
-    private record DebugTrait(String id, String displayName) {
-    }
-
-    private record TraitButton(DebugTrait trait, int x, int y) {
+    private record TraitButton(AppearanceTraits.TraitInfo trait, int x, int y) {
     }
 }
