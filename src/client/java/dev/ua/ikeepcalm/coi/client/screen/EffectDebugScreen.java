@@ -21,7 +21,8 @@ import java.util.function.Supplier;
 
 /**
  * Debug screen for testing visual effects without server commands, reachable via F8 in
- * any jar (not just dev environments).
+ * any jar (not just dev environments). The effect list pages to fit any gui scale, and
+ * a uniqueness cycler previews each pathway's particle signature.
  */
 public class EffectDebugScreen extends Screen {
 
@@ -33,6 +34,12 @@ public class EffectDebugScreen extends Screen {
     private final List<EffectRow> rows = new ArrayList<>();
     private EditBox paramsField;
     private int madnessRowY;
+    private int effectPage;
+    private int effectPageCount = 1;
+    private int pageNavY = -1;
+    private int panelX;
+    private int panelW;
+    private int panelH;
 
     public EffectDebugScreen(Screen parent) {
         super(Component.literal("Visual Effects — Debug"));
@@ -84,21 +91,46 @@ public class EffectDebugScreen extends Screen {
     protected void init() {
         rows.clear();
 
-        int panelX = (this.width - PANEL_W) / 2;
+        panelW = Math.min(PANEL_W, Math.max(304, this.width - 24));
+        panelX = (this.width - panelW) / 2;
         int y = 50;
 
         // Params input shared by all "Test" buttons
         this.paramsField = new EditBox(this.font,
-                panelX, y, PANEL_W - 4, 20, Component.literal("params")
+                panelX, y, panelW - 4, 20, Component.literal("params")
         );
         paramsField.setMaxLength(200);
         paramsField.setHint(Component.literal("params (leave blank for defaults)").withStyle(ChatFormatting.DARK_GRAY));
         addRenderableWidget(paramsField);
         y += 28;
 
-        // One row per registered effect
+        // One row per registered effect, paged so the panel fits any gui scale
         Map<String, Supplier<VisualEffect>> registry = EffectManager.getRegistry();
-        for (Map.Entry<String, Supplier<VisualEffect>> entry : registry.entrySet()) {
+        List<Map.Entry<String, Supplier<VisualEffect>>> effects = new ArrayList<>(registry.entrySet());
+        // Leaves room for page navigation plus madness, form, uniqueness, appearance and done controls.
+        int fixedHeight = 240;
+        int effectsPerPage = Math.max(1, (this.height - fixedHeight) / ROW_H);
+        effectPageCount = Math.max(1, (effects.size() + effectsPerPage - 1) / effectsPerPage);
+        effectPage = Math.clamp(effectPage, 0, effectPageCount - 1);
+        if (effectPageCount > 1) {
+            pageNavY = y;
+            addRenderableWidget(Button.builder(Component.literal("<"), button -> {
+                effectPage = Math.floorMod(effectPage - 1, effectPageCount);
+                rebuildWidgets();
+            }).bounds(panelX, y, 30, 20).build());
+            addRenderableWidget(Button.builder(Component.literal(">"), button -> {
+                effectPage = (effectPage + 1) % effectPageCount;
+                rebuildWidgets();
+            }).bounds(panelX + panelW - 34, y, 30, 20).build());
+            y += 24;
+        } else {
+            pageNavY = -1;
+        }
+
+        int effectStart = effectPage * effectsPerPage;
+        int effectEnd = Math.min(effects.size(), effectStart + effectsPerPage);
+        for (int effectIndex = effectStart; effectIndex < effectEnd; effectIndex++) {
+            Map.Entry<String, Supplier<VisualEffect>> entry = effects.get(effectIndex);
             String id = entry.getKey();
             VisualEffect probe = entry.getValue().get(); // just for metadata
             String defaultParams = probe.getDefaultParams();
@@ -171,7 +203,7 @@ public class EffectDebugScreen extends Screen {
             String selected = forms.get(activeIndex[0]);
             MythicalFormManager.handlePacket(uuid, selected + ":true:start");
             btn.setMessage(Component.literal("Form: " + selected));
-        }).bounds(panelX, formY, PANEL_W / 2 - 2, 20).build();
+        }).bounds(panelX, formY, panelW / 2 - 2, 20).build();
         addRenderableWidget(formCycleBtn);
 
         addRenderableWidget(Button.builder(Component.literal("Clear Form").withStyle(ChatFormatting.YELLOW), btn -> {
@@ -180,14 +212,14 @@ public class EffectDebugScreen extends Screen {
                 activeIndex[0] = -1;
                 formCycleBtn.setMessage(Component.literal("Form: None (Click to cycle)"));
             }
-        }).bounds(panelX + PANEL_W / 2 + 2, formY, PANEL_W / 2 - 2, 20).build());
+        }).bounds(panelX + panelW / 2 + 2, formY, panelW / 2 - 2, 20).build());
 
         y += 26;
 
         // Uniqueness particle effects: cycle a debug pathway assignment on the local
         // player to preview each of the 22 pathway signatures without a server.
         int uniquenessY = y;
-        java.util.List<String> pathways = UniquenessParticleManager.PATHWAYS;
+        List<String> pathways = UniquenessParticleManager.PATHWAYS;
         String currentPathway = minecraft.player != null
                 ? UniquenessParticleManager.getDebugPathway(minecraft.player.getUUID().toString())
                 : null;
@@ -206,7 +238,7 @@ public class EffectDebugScreen extends Screen {
             String selected = pathways.get(pathwayIndex[0]);
             UniquenessParticleManager.setDebugPathway(uuid, selected);
             btn.setMessage(Component.literal("Uniqueness: " + selected));
-        }).bounds(panelX, uniquenessY, PANEL_W / 2 - 2, 20).build();
+        }).bounds(panelX, uniquenessY, panelW / 2 - 2, 20).build();
         addRenderableWidget(uniquenessCycleBtn);
 
         addRenderableWidget(Button.builder(Component.literal("Clear Uniqueness").withStyle(ChatFormatting.YELLOW), btn -> {
@@ -216,30 +248,29 @@ public class EffectDebugScreen extends Screen {
                 pathwayIndex[0] = -1;
                 uniquenessCycleBtn.setMessage(Component.literal("Uniqueness: None (Click to cycle)"));
             }
-        }).bounds(panelX + PANEL_W / 2 + 2, uniquenessY, PANEL_W / 2 - 2, 20).build());
+        }).bounds(panelX + panelW / 2 + 2, uniquenessY, panelW / 2 - 2, 20).build());
 
         y += 26;
 
         addRenderableWidget(Button.builder(
                 Component.literal("Appearance Traits — Local Preview").withStyle(ChatFormatting.AQUA),
                 btn -> minecraft.setScreen(new AppearanceDebugScreen(this))
-        ).bounds(panelX, y, PANEL_W, 20).build());
+        ).bounds(panelX, y, panelW, 20).build());
         y += 26;
 
         // Stop All
         addRenderableWidget(Button.builder(Component.literal("Stop All Effects").withStyle(ChatFormatting.RED),
-                btn -> EffectManager.stopAll()).bounds(panelX, y, PANEL_W / 2 - 2, 20).build());
+                btn -> EffectManager.stopAll()).bounds(panelX, y, panelW / 2 - 2, 20).build());
 
         // Done
-        addRenderableWidget(Button.builder(Component.translatable("gui.done"), btn -> onClose()).bounds(panelX + PANEL_W / 2 + 2, y, PANEL_W / 2 - 2, 20).build());
+        addRenderableWidget(Button.builder(Component.translatable("gui.done"), btn -> onClose()).bounds(panelX + panelW / 2 + 2, y, panelW / 2 - 2, 20).build());
+        panelH = Math.min(this.height - 16, y + 28 - 8);
     }
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         // Semi-transparent panel behind controls (no blur — world is still rendering)
-        int panelX = (this.width - PANEL_W) / 2;
-        int panelH = 50 + EffectManager.getRegistry().size() * ROW_H + 34 + 26 + 26 + 26 + 26;
-        graphics.fill(panelX - 8, 8, panelX + PANEL_W + 8, 8 + panelH, 0xCC000000);
+        graphics.fill(panelX - 8, 8, panelX + panelW + 8, 8 + panelH, 0xCC000000);
 
         super.extractRenderState(graphics, mouseX, mouseY, a);
 
@@ -250,6 +281,11 @@ public class EffectDebugScreen extends Screen {
         // Column header
         graphics.text(font, Component.literal("Params:").withStyle(ChatFormatting.GRAY),
                 panelX, 38, 0xFFFFFFFF);
+
+        if (pageNavY >= 0) {
+            graphics.centeredText(font, Component.literal("Effects " + (effectPage + 1) + "/" + effectPageCount).withStyle(ChatFormatting.GRAY),
+                    this.width / 2, pageNavY + 6, 0xFFAAAAAA);
+        }
 
         // Effect name labels + active indicator
         for (EffectRow row : rows) {
@@ -266,7 +302,15 @@ public class EffectDebugScreen extends Screen {
         String madnessLabel = String.format("Madness %.0f%% · S%d (Min %.0f%%)",
                 m, stage, ClientBeyonderState.getPermanentMadness());
         graphics.text(font, Component.literal(madnessLabel).withStyle(ChatFormatting.LIGHT_PURPLE),
-                panelX + 300, madnessRowY + 6, 0xFFFFFFFF);
+                panelX + Math.min(300, panelW - 136), madnessRowY + 6, 0xFFFFFFFF);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (effectPageCount <= 1 || verticalAmount == 0) return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        effectPage = Math.floorMod(effectPage + (verticalAmount < 0 ? 1 : -1), effectPageCount);
+        rebuildWidgets();
+        return true;
     }
 
     @Override

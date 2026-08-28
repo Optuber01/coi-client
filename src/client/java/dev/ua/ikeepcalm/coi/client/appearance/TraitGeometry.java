@@ -18,6 +18,37 @@ public final class TraitGeometry implements Coi3dPrimitives {
         return new Point(x * PIXEL, y * PIXEL, z * PIXEL);
     }
 
+    /**
+     * Six-face box in part-local pixel space with a single tint — the workhorse for
+     * hair slabs, side locks and fringe segments. Drawn closed so silhouettes read
+     * from every angle.
+     */
+    public void boxPixels(
+            PoseStack.Pose pose,
+            VertexConsumer consumer,
+            float minX, float minY, float minZ,
+            float maxX, float maxY, float maxZ,
+            Tint tint,
+            int light
+    ) {
+        float x0 = minX * PIXEL, y0 = minY * PIXEL, z0 = minZ * PIXEL;
+        float x1 = maxX * PIXEL, y1 = maxY * PIXEL, z1 = maxZ * PIXEL;
+        float r = tint.r(), g = tint.g(), b = tint.b(), a = tint.a();
+
+        quad(pose, consumer, pointPixels(minX, minY, minZ), pointPixels(maxX, minY, minZ),
+                pointPixels(maxX, maxY, minZ), pointPixels(minX, maxY, minZ), tint, light);
+        quad(pose, consumer, pointPixels(minX, minY, maxZ), pointPixels(minX, maxY, maxZ),
+                pointPixels(maxX, maxY, maxZ), pointPixels(maxX, minY, maxZ), tint, light);
+        quad(pose, consumer, pointPixels(minX, maxY, minZ), pointPixels(maxX, maxY, minZ),
+                pointPixels(maxX, maxY, maxZ), pointPixels(minX, maxY, maxZ), tint, light);
+        quad(pose, consumer, pointPixels(minX, minY, minZ), pointPixels(minX, minY, maxZ),
+                pointPixels(maxX, minY, maxZ), pointPixels(maxX, minY, minZ), tint, light);
+        quad(pose, consumer, pointPixels(maxX, minY, minZ), pointPixels(maxX, minY, maxZ),
+                pointPixels(maxX, maxY, maxZ), pointPixels(maxX, maxY, minZ), tint, light);
+        quad(pose, consumer, pointPixels(minX, minY, minZ), pointPixels(minX, maxY, minZ),
+                pointPixels(minX, maxY, maxZ), pointPixels(minX, minY, maxZ), tint, light);
+    }
+
     public void drawTube(
             PoseStack.Pose pose,
             VertexConsumer consumer,

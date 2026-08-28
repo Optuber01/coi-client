@@ -20,6 +20,7 @@ public final class BakedAccessoryModel implements Coi3dPrimitives {
      * Stride per vertex: x, y, z, r, g, b, a, nx, ny, nz. UVs are unused (blank texture).
      */
     private static final int STRIDE = 10;
+    private static final float PIXEL_SCALE = 1.0f / 16.0f;
 
     private final float[] vertices;
 
@@ -49,9 +50,11 @@ public final class BakedAccessoryModel implements Coi3dPrimitives {
                 System.arraycopy(vertices, 0, grown, 0, size);
                 vertices = grown;
             }
-            vertices[size] = x;
-            vertices[size + 1] = y;
-            vertices[size + 2] = z;
+            // Builder input is part-local pixels (matching the vanilla skin grid);
+            // stored in block units so render() can emit values directly.
+            vertices[size] = x * PIXEL_SCALE;
+            vertices[size + 1] = y * PIXEL_SCALE;
+            vertices[size + 2] = z * PIXEL_SCALE;
             vertices[size + 3] = r;
             vertices[size + 4] = g;
             vertices[size + 5] = b;
