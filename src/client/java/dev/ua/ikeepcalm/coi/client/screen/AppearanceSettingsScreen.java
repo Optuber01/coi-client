@@ -3,12 +3,18 @@ package dev.ua.ikeepcalm.coi.client.screen;
 import dev.ua.ikeepcalm.coi.client.config.AppearanceConfig;
 import dev.ua.ikeepcalm.coi.util.CoiStyle;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
 import org.jspecify.annotations.NonNull;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +23,8 @@ import java.util.function.Supplier;
 /**
  * Appearance customization: visibility switches plus per-element fit knobs (chest
  * shape, hair length/offset, eye fit, wing scale) so traits can be tuned to the
- * player's own skin. Live preview rotates by moving the mouse over it; scroll to zoom.
+ * player's own skin. The preview is fully drag-rotatable (front to back), with
+ * snap buttons and scroll zoom.
  */
 public final class AppearanceSettingsScreen extends Screen {
 
@@ -43,7 +50,9 @@ public final class AppearanceSettingsScreen extends Screen {
     private int contentX;
     private int contentW;
     private float previewZoom = 1.0f;
-    private String status;
+    private float previewYaw;
+    private float previewPitch;
+    private boolean draggingPreview;
 
     public AppearanceSettingsScreen(Screen parent) {
         super(Component.literal("Appearance Settings"));
@@ -60,7 +69,7 @@ public final class AppearanceSettingsScreen extends Screen {
 
         previewLeft = panelX + 12;
         int previewWidth = Math.clamp(Math.round(panelW * 0.38f), 100, 214);
-        previewRight = previewLeft + previewWidth;
+        int previewRight = previewLeft + previewWidth;
         contentX = previewRight + 12;
         contentW = panelX + panelW - 12 - contentX;
 
@@ -75,7 +84,6 @@ public final class AppearanceSettingsScreen extends Screen {
                 entry.action.run();
                 AppearanceConfig.save();
                 clicked.setMessage(Component.literal(entry.label.get()));
-                status = null;
             }).bounds(contentX, top + index * rowStep, contentW, buttonHeight).build();
             addRenderableWidget(button);
         }
@@ -91,12 +99,34 @@ public final class AppearanceSettingsScreen extends Screen {
             AppearanceConfig.reset();
             rebuildWidgets();
         }).bounds(contentX + navW + gap, navY, navW, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("± Zoom"), clicked -> {
-            previewZoom += 0.2f;
-            if (previewZoom > 1.6f) previewZoom = 0.6f;
-        }).bounds(contentX + (navW + gap) * 2, navY, navW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Front"), clicked -> resetPreview())
+                .bounds(contentX + (navW + gap) * 2, navY, navW, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), clicked -> onClose())
                 .bounds(contentX + (navW + gap) * 3, navY, navW, 20).build());
+
+        addPreviewControls(previewRight);
+    }
+
+    private void addPreviewControls(int previewRight) {
+        int gap = 3;
+        int available = previewRight - previewLeft - 8;
+        int buttonW = (available - gap * 4) / 5;
+        int x = previewLeft + 4;
+        int y = panelY + panelH - 42;
+        addRenderableWidget(Button.builder(Component.literal("<"), clicked -> previewYaw -= 45.0f)
+                .bounds(x, y, buttonW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal(">"), clicked -> previewYaw += 45.0f)
+                .bounds(x + buttonW + gap, y, buttonW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("^"), clicked ->
+                        previewPitch = Math.clamp(previewPitch - 10.0f, -60.0f, 60.0f))
+                .bounds(x + (buttonW + gap) * 2, y, buttonW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("v"), clicked ->
+                        previewPitch = Math.clamp(previewPitch + 10.0f, -60.0f, 60.0f))
+                .bounds(x + (buttonW + gap) * 3, y, buttonW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("±"), clicked -> {
+            previewZoom += 0.2f;
+            if (previewZoom > 1.6f) previewZoom = 0.6f;
+        }).bounds(x + (buttonW + gap) * 4, y, buttonW, 20).build());
     }
 
     private List<SettingEntry> entriesForPage() {
@@ -154,24 +184,23 @@ public final class AppearanceSettingsScreen extends Screen {
                                    int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, width, height, 0x90000000);
         CoiStyle.drawCard(graphics, panelX, panelY, panelW, panelH);
+        int previewWidth = Math.clamp(Math.round(panelW * 0.38f), 100, 214);
+        int previewRight = previewLeft + previewWidth;
         graphics.fill(previewLeft, panelY + 42, previewRight, panelY + panelH - 18, 0xAA050507);
 
         if (minecraft.player != null) {
             int previewScale = Math.round(Math.min(
                     Math.min(72, Math.max(42, (panelH - 86) / 3)),
                     Math.max(30, (previewRight - previewLeft) / 3)) * previewZoom);
-            InventoryScreen.extractEntityInInventoryFollowsMouse(
-                    graphics,
+            extractPreviewEntity(graphics,
                     previewLeft + 4,
                     panelY + 48,
                     previewRight - 4,
                     panelY + panelH - 48,
                     previewScale,
-                    0.0625f,
-                    mouseX,
-                    mouseY,
-                    minecraft.player
-            );
+                    previewYaw,
+                    previewPitch,
+                    minecraft.player);
         }
 
         graphics.centeredText(font, title.copy().withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
@@ -182,16 +211,40 @@ public final class AppearanceSettingsScreen extends Screen {
             default -> "Eyes, wings and uniqueness";
         };
         graphics.centeredText(font,
-                Component.literal(subtitle + " — move your mouse over the preview to rotate")
+                Component.literal(subtitle + " — drag the preview to rotate, scroll to zoom")
                         .withStyle(ChatFormatting.GRAY),
                 contentX + contentW / 2, panelY + 36, 0xFFAAAAAA);
 
-        if (status != null) {
-            graphics.centeredText(font, Component.literal(status).withStyle(ChatFormatting.GREEN),
-                    contentX + contentW / 2, panelY + panelH - 42, 0xFFFFFFFF);
-        }
-
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (super.mouseClicked(event, doubleClick)) return true;
+        if (event.button() == 0 && insidePreview(event.x(), event.y())) {
+            draggingPreview = true;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (draggingPreview && event.button() == 0) {
+            previewYaw += (float) dragX * 1.5f;
+            previewPitch = Math.clamp(previewPitch + (float) dragY, -60.0f, 60.0f);
+            return true;
+        }
+        return super.mouseDragged(event, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (draggingPreview && event.button() == 0) {
+            draggingPreview = false;
+            return true;
+        }
+        return super.mouseReleased(event);
     }
 
     @Override
@@ -205,8 +258,42 @@ public final class AppearanceSettingsScreen extends Screen {
     }
 
     private boolean insidePreview(double x, double y) {
-        return x >= previewLeft && x <= previewRight
+        int previewWidth = Math.clamp(Math.round(panelW * 0.38f), 100, 214);
+        return x >= previewLeft && x <= previewLeft + previewWidth
                 && y >= panelY + 42 && y <= panelY + panelH - 18;
+    }
+
+    private void resetPreview() {
+        previewYaw = 0.0f;
+        previewPitch = 0.0f;
+        previewZoom = 1.0f;
+    }
+
+    /**
+     * Fixed-angle variant of the inventory player preview: unlike the mouse-following
+     * helper (which caps yaw at ~±31°), this draws the entity at an explicit yaw/pitch
+     * so the preview can spin the full 360°. Mirrors the vanilla extraction math —
+     * the model is flipped on Z and the living render state's rotations are set directly.
+     */
+    private static void extractPreviewEntity(GuiGraphicsExtractor graphics,
+                                             int x1, int y1, int x2, int y2, int scale,
+                                             float yawDegrees, float pitchDegrees,
+                                             LivingEntity entity) {
+        Minecraft minecraft = Minecraft.getInstance();
+        EntityRenderState state = minecraft.getEntityRenderDispatcher().extractEntity(entity, 1.0f);
+        if (state instanceof LivingEntityRenderState living) {
+            living.bodyRot = 180.0f + yawDegrees;
+            living.yRot = yawDegrees;
+            living.xRot = pitchDegrees;
+            living.boundingBoxWidth /= living.scale;
+            living.boundingBoxHeight /= living.scale;
+            living.scale = 1.0f;
+        }
+        Quaternionf flip = new Quaternionf().rotateZ((float) Math.PI);
+        Quaternionf pitch = new Quaternionf().rotateX(pitchDegrees * ((float) Math.PI / 180.0f));
+        flip.mul(pitch);
+        Vector3f translation = new Vector3f(0.0f, state.boundingBoxHeight / 2.0f + 0.0625f, 0.0f);
+        graphics.entity(state, scale, translation, flip, pitch, x1, y1, x2, y2);
     }
 
     @Override

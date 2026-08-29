@@ -117,10 +117,15 @@ public class FemaleTraitsRenderer implements AppearanceTraitRenderer, Coi3dPrimi
     private SkinVertex chestVertex(int xIndex, int yIndex, float front, float vOffset) {
         AppearanceConfig.Settings settings = AppearanceConfig.get();
         float scale = pathwayScale * settings.chestScale;
+        // Vertical growth is heavily damped (and never reaches past mid-torso): larger
+        // pathway profiles must project outward and widen, not drag the bust down to
+        // the stomach. The lift profile itself stays anchored at the upper chest.
+        float yScale = 1.0f + (scale - 1.0f) * 0.35f;
         float sourceX = CHEST_X[xIndex];
         float sourceY = CHEST_Y[yIndex];
         float x = sourceX * scale;
-        float y = CHEST_TOP + (sourceY - CHEST_TOP) * scale + settings.chestYOffsetPixels;
+        float y = Math.min(CHEST_TOP + (sourceY - CHEST_TOP) * yScale + settings.chestYOffsetPixels,
+                CHEST_TOP + (CHEST_Y[CHEST_Y.length - 1] - CHEST_TOP) + settings.chestYOffsetPixels + 0.6f);
 
         float xLift = CHEST_X_LIFT[xIndex];
         if (xIndex == 3) {
