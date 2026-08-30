@@ -54,7 +54,6 @@ public final class UniquenessParticleManager {
             Map.entry("silver_hair", "fortune"),
             Map.entry("long_brown_hair", "mother"),
             Map.entry("long_black_hair", "darkness"),
-            Map.entry("glowing_eyes", "visionary"),
             Map.entry("darkness_wings", "darkness"),
             Map.entry("horns", "abyss"),
             Map.entry("mushroom", "mother"));

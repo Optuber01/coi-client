@@ -3,6 +3,7 @@ package dev.ua.ikeepcalm.coi.client.appearance.renderers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ua.ikeepcalm.coi.client.appearance.AppearanceTraitRenderer;
 import dev.ua.ikeepcalm.coi.client.appearance.TraitGeometry;
+import dev.ua.ikeepcalm.coi.client.config.AppearanceConfig;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -10,13 +11,14 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.entity.player.PlayerModelType;
 
 /**
- * Whole-body hide overlays: pale, devil armor, wood, stone, chitin, zombie, wraith and
- * regrowth vines. Body-hugging with per-style inflation so stacked categories never
- * z-fight, detail patches for material texture, and slim-model aware arms.
+ * Whole-body hide overlays: devil armor, wood, stone, chitin, zombie and wraith.
+ * Body-hugging with per-style inflation so stacked categories never z-fight, detail
+ * patches for material texture, slim-model aware arms, and a user opacity knob so the
+ * hide can be blended with the player's own skin.
  */
 public final class SkinTraitRenderer implements AppearanceTraitRenderer {
 
-    public enum Style {PALE, DEVIL_ARMOR, WOOD, STONE, CHITIN, ZOMBIE, WRAITH, REGROWTH}
+    public enum Style {DEVIL_ARMOR, WOOD, STONE, CHITIN, ZOMBIE, WRAITH}
 
     private final String traitId;
     private final Style style;
@@ -27,24 +29,20 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
         this.traitId = traitId;
         this.style = style;
         this.primary = switch (style) {
-            case PALE -> new TraitGeometry.Tint(0.82f, 0.86f, 0.90f, 0.28f);
             case DEVIL_ARMOR -> new TraitGeometry.Tint(0.025f, 0.018f, 0.028f, 0.94f);
             case WOOD -> new TraitGeometry.Tint(0.29f, 0.15f, 0.055f, 0.86f);
             case STONE -> new TraitGeometry.Tint(0.38f, 0.40f, 0.43f, 0.88f);
             case CHITIN -> new TraitGeometry.Tint(0.10f, 0.055f, 0.13f, 0.92f);
             case ZOMBIE -> new TraitGeometry.Tint(0.24f, 0.40f, 0.25f, 0.58f);
             case WRAITH -> new TraitGeometry.Tint(0.35f, 0.70f, 0.82f, 0.24f);
-            case REGROWTH -> new TraitGeometry.Tint(0.08f, 0.36f, 0.12f, 0.92f);
         };
         this.detail = switch (style) {
-            case PALE -> new TraitGeometry.Tint(0.70f, 0.75f, 0.82f, 0.18f);
             case DEVIL_ARMOR -> new TraitGeometry.Tint(0.30f, 0.025f, 0.035f, 0.96f);
             case WOOD -> new TraitGeometry.Tint(0.48f, 0.28f, 0.075f, 0.92f);
             case STONE -> new TraitGeometry.Tint(0.59f, 0.61f, 0.64f, 0.90f);
             case CHITIN -> new TraitGeometry.Tint(0.34f, 0.08f, 0.39f, 0.96f);
             case ZOMBIE -> new TraitGeometry.Tint(0.11f, 0.21f, 0.12f, 0.72f);
             case WRAITH -> new TraitGeometry.Tint(0.72f, 0.92f, 1.0f, 0.32f);
-            case REGROWTH -> new TraitGeometry.Tint(0.24f, 0.66f, 0.18f, 0.94f);
         };
     }
 
@@ -60,10 +58,8 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
         submitPart(stack, collector, state, model.body, Part.BODY, slim);
         submitPart(stack, collector, state, model.leftArm, Part.ARM, slim);
         submitPart(stack, collector, state, model.rightArm, Part.ARM, slim);
-        if (style != Style.PALE && style != Style.REGROWTH) {
-            submitPart(stack, collector, state, model.leftLeg, Part.LEG, slim);
-            submitPart(stack, collector, state, model.rightLeg, Part.LEG, slim);
-        }
+        submitPart(stack, collector, state, model.leftLeg, Part.LEG, slim);
+        submitPart(stack, collector, state, model.rightLeg, Part.LEG, slim);
     }
 
     private void submitPart(PoseStack stack, SubmitNodeCollector collector, AvatarRenderState state, ModelPart part,
@@ -80,10 +76,9 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
 
     private void drawPart(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light, Part part, boolean slim) {
         TraitGeometry g = TraitGeometry.INSTANCE;
-        if (style == Style.REGROWTH) {
-            drawVines(g, pose, consumer, light, part, slim);
-            return;
-        }
+        float opacity = AppearanceConfig.get().overlayOpacity;
+        TraitGeometry.Tint primary = withOpacity(this.primary, opacity);
+        TraitGeometry.Tint detail = withOpacity(this.detail, opacity);
 
         float inflate = style == Style.DEVIL_ARMOR || style == Style.CHITIN ? 0.35f : 0.14f;
         switch (part) {
@@ -100,7 +95,7 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
                     2 + inflate, 12 + inflate, 2 + inflate, primary, light);
         }
 
-        if (style == Style.PALE || style == Style.WRAITH) return;
+        if (style == Style.WRAITH) return;
         switch (part) {
             case HEAD -> {
                 g.boxPixels(pose, consumer, -3.35f, -7.95f, -4.48f, -1.95f, -6.7f, -4.16f, detail, light);
@@ -119,18 +114,9 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
         }
     }
 
-    private void drawVines(TraitGeometry g, PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light, Part part, boolean slim) {
-        if (part == Part.HEAD) {
-            g.boxPixels(pose, consumer, -4.35f, -7.6f, 3.9f, -3.85f, -0.6f, 4.35f, primary, light);
-            g.boxPixels(pose, consumer, 3.72f, -5.8f, 3.9f, 4.3f, -1.2f, 4.35f, detail, light);
-        } else if (part == Part.BODY) {
-            g.boxPixels(pose, consumer, -3.7f, 0.2f, -2.32f, -3.1f, 11.8f, -2.05f, primary, light);
-            g.boxPixels(pose, consumer, -3.15f, 4.5f, -2.34f, 2.6f, 5.15f, -2.05f, detail, light);
-            g.boxPixels(pose, consumer, 2.15f, 4.7f, -2.34f, 2.75f, 10.9f, -2.05f, primary, light);
-        } else if (part == Part.ARM) {
-            float edge = slim ? -1.75f : -2.25f;
-            g.boxPixels(pose, consumer, edge, -1.6f, -2.28f, edge + 0.55f, 11.7f, -2.02f, primary, light);
-        }
+    private static TraitGeometry.Tint withOpacity(TraitGeometry.Tint tint, float opacity) {
+        if (opacity >= 0.999f) return tint;
+        return new TraitGeometry.Tint(tint.r(), tint.g(), tint.b(), tint.a() * opacity);
     }
 
     private enum Part {HEAD, BODY, ARM, LEG}

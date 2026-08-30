@@ -11,8 +11,8 @@ import java.nio.file.Path;
 
 /**
  * Local controls for the appearance system, persisted to {@code config/coi_appearance.json}:
- * visibility switches, and per-element fit knobs (chest shape, hair length/offset, eye
- * size/spacing/height, wing scale) so cosmetics can be tuned to the player's own skin.
+ * visibility switches, and per-element fit knobs (chest shape, hair length/offset, wing
+ * scale/flap, skin overlay opacity) so cosmetics can be tuned to the player's own skin.
  */
 public final class AppearanceConfig {
 
@@ -84,10 +84,9 @@ public final class AppearanceConfig {
         settings.chestFullness = Math.clamp(settings.chestFullness, 0.75f, 1.35f);
         settings.hairLength = Math.clamp(settings.hairLength, 0.50f, 1.60f);
         settings.hairYOffsetPixels = Math.clamp(settings.hairYOffsetPixels, -1.5f, 1.5f);
-        settings.eyeScale = Math.clamp(settings.eyeScale, 0.60f, 1.60f);
-        settings.eyeSpacing = Math.clamp(settings.eyeSpacing, 0.70f, 1.40f);
-        settings.eyeYOffsetPixels = Math.clamp(settings.eyeYOffsetPixels, -1.5f, 1.5f);
         settings.wingScale = Math.clamp(settings.wingScale, 0.60f, 1.50f);
+        settings.wingFlapSpeed = Math.clamp(settings.wingFlapSpeed, 0.20f, 3.0f);
+        settings.overlayOpacity = Math.clamp(settings.overlayOpacity, 0.20f, 1.0f);
     }
 
     public static final class Settings {
@@ -106,12 +105,11 @@ public final class AppearanceConfig {
         // Hair fit
         public float hairLength = 1.0f;
         public float hairYOffsetPixels = 0.0f;
-        // Eye fit
-        public float eyeScale = 1.0f;
-        public float eyeSpacing = 1.0f;
-        public float eyeYOffsetPixels = 0.0f;
         // Wings
+        public float wingFlapSpeed = 1.0f;
         public float wingScale = 1.0f;
+        // Skin overlay blending
+        public float overlayOpacity = 1.0f;
         // Uniqueness particles
         public boolean enableUniquenessEffects = true;
         public boolean uniquenessShowSelf = true;

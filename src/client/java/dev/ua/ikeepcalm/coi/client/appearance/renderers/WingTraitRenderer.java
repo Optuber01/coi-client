@@ -61,7 +61,7 @@ public final class WingTraitRenderer implements AppearanceTraitRenderer {
     }
 
     private void drawWings(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light) {
-        float flap = (float) Math.sin(System.currentTimeMillis() * 0.0045) * (style == Style.ILLUSORY ? 0.9f : 0.55f);
+        float flap = (float) Math.sin(System.currentTimeMillis() * 0.0045 * dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().wingFlapSpeed) * (style == Style.ILLUSORY ? 0.9f : 0.55f);
         drawWing(pose, consumer, light, -1.0f, flap);
         drawWing(pose, consumer, light, 1.0f, flap);
     }
