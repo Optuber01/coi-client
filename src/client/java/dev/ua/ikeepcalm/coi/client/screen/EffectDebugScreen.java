@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * Debug screen for testing visual effects without server commands, reachable via F8 in
- * any jar (not just dev environments). The effect list pages to fit any gui scale, and
- * a uniqueness cycler previews each pathway's particle signature.
+ * Development-only screen for testing visual effects without server commands. The effect
+ * list pages to fit any GUI scale, and a uniqueness cycler previews each pathway's particle
+ * signature.
  */
 public class EffectDebugScreen extends Screen {
 

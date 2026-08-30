@@ -19,7 +19,9 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -51,13 +53,13 @@ public final class AppearanceSettingsScreen extends Screen {
     private double scrollOffset;
 
     /** One row of the settings column: a section header or a single control. */
-    private record Element(int height, Supplier<String> label, Runnable action) {
+    private record Element(int height, Supplier<Component> label, Runnable action) {
 
-        static Element header(String text) {
-            return new Element(HEADER_H, () -> text, null);
+        static Element header(String translationKey) {
+            return new Element(HEADER_H, () -> Component.translatable(translationKey), null);
         }
 
-        static Element control(Supplier<String> label, Runnable action) {
+        static Element control(Supplier<Component> label, Runnable action) {
             return new Element(BUTTON_H + BUTTON_GAP, label, action);
         }
 
@@ -67,7 +69,7 @@ public final class AppearanceSettingsScreen extends Screen {
     }
 
     public AppearanceSettingsScreen(Screen parent) {
-        super(Component.literal("Appearance Settings"));
+        super(Component.translatable("screen.coi.appearance_settings"));
         this.parent = parent;
     }
 
@@ -104,7 +106,7 @@ public final class AppearanceSettingsScreen extends Screen {
             if (rowBottom < listTop || rowTop > listBottom || element.isHeader()) {
                 continue;
             }
-            Button button = Button.builder(Component.literal(element.label().get()), clicked -> {
+            Button button = Button.builder(element.label().get(), clicked -> {
                 element.action().run();
                 AppearanceConfig.save();
                 rebuildWidgets();
@@ -115,11 +117,12 @@ public final class AppearanceSettingsScreen extends Screen {
         int navY = panelY + panelH - 28;
         int gap = 6;
         int navW = (contentW - gap * 2) / 3;
-        addRenderableWidget(Button.builder(Component.literal("Reset").withStyle(ChatFormatting.RED), clicked -> {
+        addRenderableWidget(Button.builder(
+                Component.translatable("screen.coi.appearance.reset").withStyle(ChatFormatting.RED), clicked -> {
             AppearanceConfig.reset();
             rebuildWidgets();
         }).bounds(contentX, navY, navW, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Front"), clicked -> resetPreview())
+        addRenderableWidget(Button.builder(Component.translatable("screen.coi.appearance.front"), clicked -> resetPreview())
                 .bounds(contentX + navW + gap, navY, navW, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), clicked -> onClose())
                 .bounds(contentX + (navW + gap) * 2, navY, navW, 20).build());
@@ -140,50 +143,94 @@ public final class AppearanceSettingsScreen extends Screen {
         Set<String> families = activeFamilies(active);
 
         List<Element> elements = new ArrayList<>();
-        elements.add(Element.header("General"));
-        elements.add(toggleControl("All appearance rendering", () -> settings.enabled, value -> settings.enabled = value));
-        elements.add(toggleControl("Show on yourself", () -> settings.showSelf, value -> settings.showSelf = value));
-        elements.add(toggleControl("Show on other players", () -> settings.showOthers, value -> settings.showOthers = value));
-
-        if (families.contains("body")) {
-            elements.add(Element.header("Chest fit"));
-            elements.add(cycleControl("Size", () -> settings.chestScale, value -> settings.chestScale = value, CHEST_SIZE));
-            elements.add(pixelControl("Separation", () -> settings.chestSeparationPixels, value -> settings.chestSeparationPixels = value, SEPARATION));
-            elements.add(pixelControl("Vertical position", () -> settings.chestYOffsetPixels, value -> settings.chestYOffsetPixels = value, VERTICAL));
-            elements.add(cycleControl("Roundness", () -> settings.chestFullness, value -> settings.chestFullness = value, FULLNESS));
-            elements.add(toggleControl("Project jacket pixels", () -> settings.projectJacket, value -> settings.projectJacket = value));
+        addGeneralElements(elements, settings);
+        addBodyElements(elements, settings, families);
+        addHairElements(elements, settings, families);
+        addWingElements(elements, settings, families);
+        addSkinElements(elements, settings, families);
+        if (active.isEmpty()) {
+            elements.add(Element.header("screen.coi.appearance.no_traits"));
         }
-
-        if (families.contains("hair")) {
-            elements.add(Element.header("Hair fit"));
-            elements.add(cycleControl("Length", () -> settings.hairLength, value -> settings.hairLength = value, HAIR_LENGTH));
-            elements.add(pixelControl("Vertical position", () -> settings.hairYOffsetPixels, value -> settings.hairYOffsetPixels = value, HALF_PX));
-        }
-
-        if (families.contains("wings")) {
-            elements.add(Element.header("Wings"));
-            elements.add(cycleControl("Scale", () -> settings.wingScale, value -> settings.wingScale = value, SCALE));
-            elements.add(cycleControl("Flap speed", () -> settings.wingFlapSpeed, value -> settings.wingFlapSpeed = value, FLAP_SPEED));
-        }
-
-        if (families.contains("skin") || families.contains("chained")) {
-            elements.add(Element.header("Skin overlay"));
-            elements.add(cycleControl("Opacity", () -> settings.overlayOpacity, value -> settings.overlayOpacity = value, OPACITY));
-        }
-
-        if (families.isEmpty()) {
-            elements.add(Element.header("No traits enabled — use F8 → Appearance Traits"));
-        }
-
-        elements.add(Element.header("Uniqueness particles"));
-        elements.add(toggleControl("Effects enabled", () -> settings.enableUniquenessEffects, value -> settings.enableUniquenessEffects = value));
-        elements.add(toggleControl("Show on yourself", () -> settings.uniquenessShowSelf, value -> settings.uniquenessShowSelf = value));
-        elements.add(toggleControl("Show on other players", () -> settings.uniquenessShowOthers, value -> settings.uniquenessShowOthers = value));
+        addUniquenessElements(elements, settings);
         return elements;
     }
 
+    private static void addGeneralElements(List<Element> elements, AppearanceConfig.Settings settings) {
+        elements.add(Element.header("screen.coi.appearance.section.general"));
+        elements.add(toggleControl("screen.coi.appearance.traits_enabled",
+                () -> settings.enabled, value -> settings.enabled = value));
+        elements.add(toggleControl("screen.coi.appearance.show_self",
+                () -> settings.showSelf, value -> settings.showSelf = value));
+        elements.add(toggleControl("screen.coi.appearance.show_others",
+                () -> settings.showOthers, value -> settings.showOthers = value));
+        elements.add(toggleControl("screen.coi.appearance.show_body_changes",
+                () -> settings.showBodyChanges, value -> settings.showBodyChanges = value));
+    }
+
+    private static void addBodyElements(List<Element> elements, AppearanceConfig.Settings settings,
+                                        Set<String> families) {
+        if (!families.contains("body")) {
+            return;
+        }
+        elements.add(Element.header("screen.coi.appearance.section.chest"));
+        elements.add(cycleControl("screen.coi.appearance.size",
+                () -> settings.chestScale, value -> settings.chestScale = value, CHEST_SIZE));
+        elements.add(pixelControl("screen.coi.appearance.separation",
+                () -> settings.chestSeparationPixels, value -> settings.chestSeparationPixels = value, SEPARATION));
+        elements.add(pixelControl("screen.coi.appearance.vertical_position",
+                () -> settings.chestYOffsetPixels, value -> settings.chestYOffsetPixels = value, VERTICAL));
+        elements.add(cycleControl("screen.coi.appearance.roundness",
+                () -> settings.chestFullness, value -> settings.chestFullness = value, FULLNESS));
+        elements.add(toggleControl("screen.coi.appearance.project_jacket",
+                () -> settings.projectJacket, value -> settings.projectJacket = value));
+    }
+
+    private static void addHairElements(List<Element> elements, AppearanceConfig.Settings settings,
+                                        Set<String> families) {
+        if (!families.contains("hair")) {
+            return;
+        }
+        elements.add(Element.header("screen.coi.appearance.section.hair"));
+        elements.add(cycleControl("screen.coi.appearance.length",
+                () -> settings.hairLength, value -> settings.hairLength = value, HAIR_LENGTH));
+        elements.add(pixelControl("screen.coi.appearance.vertical_position",
+                () -> settings.hairYOffsetPixels, value -> settings.hairYOffsetPixels = value, HALF_PX));
+    }
+
+    private static void addWingElements(List<Element> elements, AppearanceConfig.Settings settings,
+                                        Set<String> families) {
+        if (!families.contains("wings")) {
+            return;
+        }
+        elements.add(Element.header("screen.coi.appearance.section.wings"));
+        elements.add(cycleControl("screen.coi.appearance.scale",
+                () -> settings.wingScale, value -> settings.wingScale = value, SCALE));
+        elements.add(cycleControl("screen.coi.appearance.flap_speed",
+                () -> settings.wingFlapSpeed, value -> settings.wingFlapSpeed = value, FLAP_SPEED));
+    }
+
+    private static void addSkinElements(List<Element> elements, AppearanceConfig.Settings settings,
+                                        Set<String> families) {
+        if (!families.contains("skin") && !families.contains("chained")) {
+            return;
+        }
+        elements.add(Element.header("screen.coi.appearance.section.skin"));
+        elements.add(cycleControl("screen.coi.appearance.opacity",
+                () -> settings.overlayOpacity, value -> settings.overlayOpacity = value, OPACITY));
+    }
+
+    private static void addUniquenessElements(List<Element> elements, AppearanceConfig.Settings settings) {
+        elements.add(Element.header("screen.coi.appearance.section.uniqueness"));
+        elements.add(toggleControl("screen.coi.appearance.uniqueness_enabled",
+                () -> settings.enableUniquenessEffects, value -> settings.enableUniquenessEffects = value));
+        elements.add(toggleControl("screen.coi.appearance.uniqueness_self",
+                () -> settings.uniquenessShowSelf, value -> settings.uniquenessShowSelf = value));
+        elements.add(toggleControl("screen.coi.appearance.uniqueness_others",
+                () -> settings.uniquenessShowOthers, value -> settings.uniquenessShowOthers = value));
+    }
+
     private static Set<String> activeFamilies(Set<String> activeTraits) {
-        Set<String> families = new java.util.HashSet<>();
+        Set<String> families = new HashSet<>();
         for (String traitId : activeTraits) {
             AppearanceTraits.Family family = AppearanceTraits.familyOf(traitId);
             if (family != null) {
@@ -250,7 +297,7 @@ public final class AppearanceSettingsScreen extends Screen {
         graphics.centeredText(font, title.copy().withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                 width / 2, panelY + 12, 0xFFFFFFFF);
         graphics.centeredText(font,
-                Component.literal("drag the preview to rotate — scroll the controls to scroll")
+                Component.translatable("screen.coi.appearance_settings.hint")
                         .withStyle(ChatFormatting.GRAY),
                 contentX + contentW / 2, panelY + 28, 0xFFAAAAAA);
 
@@ -262,7 +309,7 @@ public final class AppearanceSettingsScreen extends Screen {
             int rowTop = y;
             y += element.height();
             if (element.isHeader() && rowTop >= listTop - HEADER_H && rowTop <= panelY + panelH - 34) {
-                graphics.text(font, Component.literal(element.label().get()).withStyle(ChatFormatting.GOLD),
+                graphics.text(font, element.label().get().copy().withStyle(ChatFormatting.GOLD),
                         contentX + 2, rowTop + 3, 0xFFFFFFFF);
             }
         }
@@ -306,7 +353,9 @@ public final class AppearanceSettingsScreen extends Screen {
             previewZoom = Math.clamp(previewZoom + (verticalAmount > 0 ? 0.1f : -0.1f), 0.6f, 1.6f);
             return true;
         }
-        if (mouseX >= contentX && verticalAmount != 0.0) {
+        if (mouseX >= contentX && mouseX <= contentX + contentW
+                && mouseY >= panelY + 44 && mouseY <= panelY + panelH - 34
+                && verticalAmount != 0.0) {
             scrollOffset -= verticalAmount * 24.0;
             rebuildWidgets();
             return true;
@@ -337,10 +386,12 @@ public final class AppearanceSettingsScreen extends Screen {
                                              LivingEntity entity) {
         Minecraft minecraft = Minecraft.getInstance();
         EntityRenderState state = minecraft.getEntityRenderDispatcher().extractEntity(entity, 1.0f);
+        state.shadowPieces.clear();
+        state.outlineColor = 0;
         if (state instanceof LivingEntityRenderState living) {
             living.bodyRot = 180.0f + yawDegrees;
             living.yRot = yawDegrees;
-            living.xRot = pitchDegrees;
+            living.xRot = -pitchDegrees;
             living.boundingBoxWidth /= living.scale;
             living.boundingBoxHeight /= living.scale;
             living.scale = 1.0f;
@@ -362,21 +413,25 @@ public final class AppearanceSettingsScreen extends Screen {
         return false;
     }
 
-    private static Element toggleControl(String name, BoolGetter getter, BoolSetter setter) {
+    private static Element toggleControl(String nameKey, BoolGetter getter, BoolSetter setter) {
         return Element.control(
-                () -> (getter.get() ? "ON  " : "OFF  ") + name,
+                () -> Component.translatable(
+                        getter.get() ? "screen.coi.appearance.toggle_on" : "screen.coi.appearance.toggle_off",
+                        Component.translatable(nameKey)),
                 () -> setter.set(!getter.get()));
     }
 
-    private static Element cycleControl(String name, FloatGetter getter, FloatSetter setter, float[] values) {
+    private static Element cycleControl(String nameKey, FloatGetter getter, FloatSetter setter, float[] values) {
         return Element.control(
-                () -> String.format("%s: %.0f%%", name, getter.get() * 100.0f),
+                () -> Component.translatable("screen.coi.appearance.percent_value",
+                        Component.translatable(nameKey), Math.round(getter.get() * 100.0f)),
                 () -> setter.set(nextValue(getter.get(), values)));
     }
 
-    private static Element pixelControl(String name, FloatGetter getter, FloatSetter setter, float[] values) {
+    private static Element pixelControl(String nameKey, FloatGetter getter, FloatSetter setter, float[] values) {
         return Element.control(
-                () -> String.format("%s: %+.2f px", name, getter.get()),
+                () -> Component.translatable("screen.coi.appearance.pixel_value",
+                        Component.translatable(nameKey), String.format(Locale.ROOT, "%+.2f", getter.get())),
                 () -> setter.set(nextValue(getter.get(), values)));
     }
 

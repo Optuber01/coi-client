@@ -2,8 +2,11 @@ package dev.ua.ikeepcalm.coi.client.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,6 +20,7 @@ import java.nio.file.Path;
 public final class AppearanceConfig {
 
     private static final int CONFIG_VERSION = 4;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppearanceConfig.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir()
             .resolve("coi_appearance.json");
@@ -34,9 +38,8 @@ public final class AppearanceConfig {
             Settings loaded = GSON.fromJson(Files.readString(CONFIG_PATH), Settings.class);
             settings = loaded == null ? new Settings() : loaded;
             sanitize();
-        } catch (Exception exception) {
-            System.err.println("COI Client: Failed to read appearance settings; using defaults");
-            exception.printStackTrace();
+        } catch (IOException | JsonParseException exception) {
+            LOGGER.warn("Failed to read appearance settings; using defaults", exception);
             settings = new Settings();
         }
     }
@@ -44,10 +47,10 @@ public final class AppearanceConfig {
     public static void save() {
         sanitize();
         try {
+            Files.createDirectories(CONFIG_PATH.getParent());
             Files.writeString(CONFIG_PATH, GSON.toJson(settings));
         } catch (IOException exception) {
-            System.err.println("COI Client: Failed to save appearance settings");
-            exception.printStackTrace();
+            LOGGER.warn("Failed to save appearance settings", exception);
         }
     }
 

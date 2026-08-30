@@ -31,6 +31,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -91,7 +92,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     public static KeyMapping abilityMenu;
     public static KeyMapping abilityWheel;
     public static KeyMapping gestureCast;
-    public static KeyMapping effectDebugMenu;
+    public static KeyMapping effectDebugMenu; // null outside development environments
     private static String[] boundAbilities = new String[MAX_ABILITIES];
     private static String[] wheelAbilities = new String[MAX_WHEEL_SIZE];
     private static String[] gestureAbilities = new String[GestureType.values().length];
@@ -506,14 +507,14 @@ public class CircleOfImaginationClient implements ClientModInitializer {
                 category
         ));
 
-        // F8 debug menu is available in normal jars too — it gates nothing and lets
-        // players test visual effects and appearance previews without a server.
-        effectDebugMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "screen.coi.effect_debug",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F8,
-                category
-        ));
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            effectDebugMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                    "screen.coi.effect_debug",
+                    InputConstants.Type.KEYSYM,
+                    GLFW.GLFW_KEY_F8,
+                    category
+            ));
+        }
     }
 
     private void registerTickHandler() {

@@ -15,9 +15,9 @@ import net.minecraft.resources.Identifier;
  * Feminine chest profile on the player's own skin — the original main-branch torso
  * mesh, scaled per pathway (mother fullest) and adjustable via the appearance settings
  * (size, separation, vertical position, roundness). Ears stay on female_traits only;
- {@code demoness_ears} is the standalone variant.
+ * {@code demoness_ears} is the standalone variant.
  */
-public class FemaleTraitsRenderer implements AppearanceTraitRenderer, Coi3dPrimitives {
+public final class FemaleTraitsRenderer implements AppearanceTraitRenderer, Coi3dPrimitives {
 
     private static final float PIXEL = 1.0f / 16.0f;
     private static final float TEXTURE_SIZE = 64.0f;

@@ -1,11 +1,20 @@
 package dev.ua.ikeepcalm.coi.client.appearance;
 
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.*;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.BeastTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.ClawTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.DemonessEarsRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.FemaleTraitsRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.HairTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.HornsTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.MushroomTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.SkinTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.WingTraitRenderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -30,7 +39,11 @@ public final class AppearanceTraits {
     public record Family(String id, List<String> priorityOrder) {
     }
 
-    public record TraitInfo(String id, String displayName, Family family) {
+    public record TraitInfo(String displayName, Family family, AppearanceTraitRenderer renderer) {
+
+        public String id() {
+            return renderer.traitId();
+        }
     }
 
     public static final Family BODY = new Family("body",
@@ -63,68 +76,59 @@ public final class AppearanceTraits {
         }
     }
 
-    /** Debug UI listing — display names are not localized, matching the other debug screens. */
+    /** Authoritative trait registry. Display names are debug-only and intentionally not localized. */
     public static final List<TraitInfo> TRAITS = List.of(
-            new TraitInfo("female_traits", "Demoness Figure", BODY),
-            new TraitInfo("mother_traits", "Mother Figure", BODY),
-            new TraitInfo("moon_traits", "Moon Figure", BODY),
-            new TraitInfo("chaos_traits", "Chaos Figure", BODY),
-            new TraitInfo("demoness_ears", "Cat Ears", null),
-            new TraitInfo("long_brown_hair", "Long Brown Hair", HAIR),
-            new TraitInfo("long_black_hair", "Long Black Hair", HAIR),
-            new TraitInfo("silver_hair", "Silver Hair", HAIR),
-            new TraitInfo("red_hair", "Red Hair", HAIR),
-            new TraitInfo("blue_hair", "Blue Hair", HAIR),
-            new TraitInfo("black_hair", "Black Hair", HAIR),
-            new TraitInfo("werewolf_traits", "Werewolf Traits", CHAINED),
-            new TraitInfo("wraith_traits", "Wraith Traits", CHAINED),
-            new TraitInfo("zombie_traits", "Zombie Traits", CHAINED),
-            new TraitInfo("devil_wings", "Devil Wings", WINGS),
-            new TraitInfo("darkness_wings", "Darkness Wings", WINGS),
-            new TraitInfo("bat_mutation", "Bat Wings", WINGS),
-            new TraitInfo("devil_skin", "Devil Armor Skin", SKIN),
-            new TraitInfo("wood_skin", "Wood Skin", SKIN),
-            new TraitInfo("stone_skin", "Stone Skin", SKIN),
-            new TraitInfo("chitin_mutation", "Chitin Mutation", SKIN),
-            new TraitInfo("corrosive_claws", "Corrosive Claws", CLAWS),
-            new TraitInfo("predator_mutation", "Predator Claws", CLAWS),
-            new TraitInfo("horns", "Abyss Horns", null),
-            new TraitInfo("mushroom", "Head Mushroom", null)
-    );
-
-    private static final List<AppearanceTraitRenderer> RENDERERS = List.of(
-            new FemaleTraitsRenderer("mother_traits", 1.38f),
-            new FemaleTraitsRenderer("moon_traits", 1.28f),
-            new FemaleTraitsRenderer("chaos_traits", 1.18f),
-            new FemaleTraitsRenderer("female_traits", 1.08f),
-            new DemonessEarsRenderer(),
-            new HairTraitRenderer("long_brown_hair", HairTraitRenderer.Style.LONG, 0.25f, 0.11f, 0.045f),
-            new HairTraitRenderer("long_black_hair", HairTraitRenderer.Style.LONG, 0.025f, 0.018f, 0.03f),
-            new HairTraitRenderer("silver_hair", HairTraitRenderer.Style.SHORT, 0.72f, 0.76f, 0.82f),
-            new HairTraitRenderer("red_hair", HairTraitRenderer.Style.SHORT, 0.58f, 0.025f, 0.025f),
-            new HairTraitRenderer("blue_hair", HairTraitRenderer.Style.SHORT, 0.035f, 0.23f, 0.62f),
-            new HairTraitRenderer("black_hair", HairTraitRenderer.Style.SHORT, 0.018f, 0.014f, 0.025f),
-            new BeastTraitRenderer("werewolf_traits"),
-            new SkinTraitRenderer("wraith_traits", SkinTraitRenderer.Style.WRAITH),
-            new SkinTraitRenderer("zombie_traits", SkinTraitRenderer.Style.ZOMBIE),
-            new WingTraitRenderer("devil_wings", WingTraitRenderer.Style.DEVIL),
-            new WingTraitRenderer("darkness_wings", WingTraitRenderer.Style.ILLUSORY),
-            new WingTraitRenderer("bat_mutation", WingTraitRenderer.Style.NATURAL),
-            new SkinTraitRenderer("devil_skin", SkinTraitRenderer.Style.DEVIL_ARMOR),
-            new SkinTraitRenderer("wood_skin", SkinTraitRenderer.Style.WOOD),
-            new SkinTraitRenderer("stone_skin", SkinTraitRenderer.Style.STONE),
-            new SkinTraitRenderer("chitin_mutation", SkinTraitRenderer.Style.CHITIN),
-            new ClawTraitRenderer("corrosive_claws", ClawTraitRenderer.Style.CORROSIVE),
-            new ClawTraitRenderer("predator_mutation", ClawTraitRenderer.Style.PREDATOR),
-            new HornsTraitRenderer(),
-            new MushroomTraitRenderer()
+            new TraitInfo("Demoness Figure", BODY, new FemaleTraitsRenderer("female_traits", 1.08f)),
+            new TraitInfo("Mother Figure", BODY, new FemaleTraitsRenderer("mother_traits", 1.38f)),
+            new TraitInfo("Moon Figure", BODY, new FemaleTraitsRenderer("moon_traits", 1.28f)),
+            new TraitInfo("Chaos Figure", BODY, new FemaleTraitsRenderer("chaos_traits", 1.18f)),
+            new TraitInfo("Cat Ears", null, new DemonessEarsRenderer()),
+            new TraitInfo("Long Brown Hair", HAIR,
+                    new HairTraitRenderer("long_brown_hair", HairTraitRenderer.Style.LONG, 0.25f, 0.11f, 0.045f)),
+            new TraitInfo("Long Black Hair", HAIR,
+                    new HairTraitRenderer("long_black_hair", HairTraitRenderer.Style.LONG, 0.025f, 0.018f, 0.03f)),
+            new TraitInfo("Silver Hair", HAIR,
+                    new HairTraitRenderer("silver_hair", HairTraitRenderer.Style.SHORT, 0.72f, 0.76f, 0.82f)),
+            new TraitInfo("Red Hair", HAIR,
+                    new HairTraitRenderer("red_hair", HairTraitRenderer.Style.SHORT, 0.58f, 0.025f, 0.025f)),
+            new TraitInfo("Blue Hair", HAIR,
+                    new HairTraitRenderer("blue_hair", HairTraitRenderer.Style.SHORT, 0.035f, 0.23f, 0.62f)),
+            new TraitInfo("Black Hair", HAIR,
+                    new HairTraitRenderer("black_hair", HairTraitRenderer.Style.SHORT, 0.018f, 0.014f, 0.025f)),
+            new TraitInfo("Werewolf Traits", CHAINED, new BeastTraitRenderer("werewolf_traits")),
+            new TraitInfo("Wraith Traits", CHAINED,
+                    new SkinTraitRenderer("wraith_traits", SkinTraitRenderer.Style.WRAITH)),
+            new TraitInfo("Zombie Traits", CHAINED,
+                    new SkinTraitRenderer("zombie_traits", SkinTraitRenderer.Style.ZOMBIE)),
+            new TraitInfo("Devil Wings", WINGS, new WingTraitRenderer("devil_wings", WingTraitRenderer.Style.DEVIL)),
+            new TraitInfo("Darkness Wings", WINGS,
+                    new WingTraitRenderer("darkness_wings", WingTraitRenderer.Style.ILLUSORY)),
+            new TraitInfo("Bat Wings", WINGS, new WingTraitRenderer("bat_mutation", WingTraitRenderer.Style.NATURAL)),
+            new TraitInfo("Devil Armor Skin", SKIN,
+                    new SkinTraitRenderer("devil_skin", SkinTraitRenderer.Style.DEVIL_ARMOR)),
+            new TraitInfo("Wood Skin", SKIN, new SkinTraitRenderer("wood_skin", SkinTraitRenderer.Style.WOOD)),
+            new TraitInfo("Stone Skin", SKIN, new SkinTraitRenderer("stone_skin", SkinTraitRenderer.Style.STONE)),
+            new TraitInfo("Chitin Mutation", SKIN,
+                    new SkinTraitRenderer("chitin_mutation", SkinTraitRenderer.Style.CHITIN)),
+            new TraitInfo("Corrosive Claws", CLAWS,
+                    new ClawTraitRenderer("corrosive_claws", ClawTraitRenderer.Style.CORROSIVE)),
+            new TraitInfo("Predator Claws", CLAWS,
+                    new ClawTraitRenderer("predator_mutation", ClawTraitRenderer.Style.PREDATOR)),
+            new TraitInfo("Abyss Horns", null, new HornsTraitRenderer()),
+            new TraitInfo("Head Mushroom", null, new MushroomTraitRenderer())
     );
 
     private static final Map<String, AppearanceTraitRenderer> RENDERER_BY_TRAIT = new HashMap<>();
 
     static {
-        for (AppearanceTraitRenderer renderer : RENDERERS) {
-            RENDERER_BY_TRAIT.put(renderer.traitId(), renderer);
+        for (TraitInfo trait : TRAITS) {
+            if (!Objects.equals(FAMILY_BY_TRAIT.get(trait.id()), trait.family())) {
+                throw new IllegalStateException("Appearance trait family mismatch: " + trait.id());
+            }
+            AppearanceTraitRenderer previous = RENDERER_BY_TRAIT.put(trait.id(), trait.renderer());
+            if (previous != null) {
+                throw new IllegalStateException("Duplicate appearance trait id: " + trait.id());
+            }
         }
     }
 
@@ -145,10 +149,11 @@ public final class AppearanceTraits {
      * active trait is kept. Order follows {@link #TRAITS} for stable debug layout.
      */
     public static List<AppearanceTraitRenderer> resolve(Set<String> activeTraits) {
-        List<AppearanceTraitRenderer> result = new ArrayList<>();
         if (activeTraits.isEmpty()) {
-            return result;
+            return List.of();
         }
+
+        List<AppearanceTraitRenderer> result = new ArrayList<>();
 
         Map<String, String> winnerByFamily = new HashMap<>();
         for (Family family : FAMILIES) {
@@ -160,7 +165,8 @@ public final class AppearanceTraits {
             }
         }
 
-        for (AppearanceTraitRenderer renderer : RENDERERS) {
+        for (TraitInfo trait : TRAITS) {
+            AppearanceTraitRenderer renderer = trait.renderer();
             String traitId = renderer.traitId();
             if (!activeTraits.contains(traitId)) {
                 continue;

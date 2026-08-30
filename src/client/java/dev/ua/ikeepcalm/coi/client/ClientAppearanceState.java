@@ -12,17 +12,35 @@ import java.util.concurrent.ConcurrentHashMap;
  * kept until an explicit clear (empty payload) or a fresh non-empty update arrives, so a
  * missed periodic resync from the server doesn't flicker the trait off.
  */
-public class ClientAppearanceState {
+public final class ClientAppearanceState {
 
     private static final Map<String, Set<String>> traitsByUuid = new ConcurrentHashMap<>();
     private static final Map<String, Set<String>> debugTraitsByUuid = new ConcurrentHashMap<>();
 
+    private ClientAppearanceState() {
+    }
+
     public static void handlePacket(String targetUuid, String traits) {
+        if (targetUuid == null || targetUuid.isBlank()) {
+            return;
+        }
         if (traits == null || traits.isBlank()) {
             traitsByUuid.remove(targetUuid);
             return;
         }
-        traitsByUuid.put(targetUuid, Set.of(traits.split(",")));
+
+        Set<String> parsed = new HashSet<>();
+        for (String trait : traits.split(",")) {
+            String normalized = trait.trim();
+            if (!normalized.isEmpty()) {
+                parsed.add(normalized);
+            }
+        }
+        if (parsed.isEmpty()) {
+            traitsByUuid.remove(targetUuid);
+        } else {
+            traitsByUuid.put(targetUuid, Set.copyOf(parsed));
+        }
     }
 
     /**
