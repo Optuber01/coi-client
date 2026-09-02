@@ -185,7 +185,7 @@ public class EffectDebugScreen extends Screen {
 
         addRenderableWidget(Button.builder(
                 Component.literal("Appearance Traits — Local Preview").withStyle(ChatFormatting.AQUA),
-                btn -> minecraft.setScreen(new AppearanceDebugScreen(this))
+                btn -> minecraft.gui.setScreen(new AppearanceDebugScreen(this))
         ).bounds(panelX, y, PANEL_W, 20).build());
         y += 26;
 
@@ -234,7 +234,7 @@ public class EffectDebugScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 
     @Override

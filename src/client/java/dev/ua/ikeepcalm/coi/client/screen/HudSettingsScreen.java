@@ -266,7 +266,7 @@ public class HudSettingsScreen extends Screen {
                 _ -> {
                     ClientStateStore.setTourCompleted(false);
                     if (this.minecraft.player != null) {
-                        this.minecraft.setScreen(new TourScreen());
+                        this.minecraft.gui.setScreen(new TourScreen());
                     }
                 }).bounds(contentX + 10, 0, contentW - 20, 20).build());
     }
@@ -492,6 +492,6 @@ public class HudSettingsScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 }

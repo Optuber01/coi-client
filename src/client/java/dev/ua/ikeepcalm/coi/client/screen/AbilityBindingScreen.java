@@ -110,7 +110,7 @@ public class AbilityBindingScreen extends Screen {
         hudSettingsButton = Button.builder(Component.translatable("screen.coi.hud_settings"),
                 button -> {
                     this.onClose();
-                    Minecraft.getInstance().setScreen(new HudSettingsScreen(null));
+                    Minecraft.getInstance().gui.setScreen(new HudSettingsScreen(null));
                 }).bounds(buttonX, buttonY, buttonW, 20).build();
         this.addRenderableWidget(hudSettingsButton);
 
@@ -419,6 +419,6 @@ public class AbilityBindingScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 }

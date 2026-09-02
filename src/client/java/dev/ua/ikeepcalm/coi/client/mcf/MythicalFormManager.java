@@ -8,7 +8,6 @@ import dev.ua.ikeepcalm.coi.client.mcf.forms.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.phys.Vec3;
 
@@ -178,9 +177,6 @@ public class MythicalFormManager {
 
     public static void clearAll() {
         uuidForms.clear();
-    }
-
-    public static void renderForm(String pathway, AbstractClientPlayer player, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
     }
 
     public static void renderFormSubmit(String pathway, AvatarRenderState state, PoseStack.Pose pose, VertexConsumer consumer) {
