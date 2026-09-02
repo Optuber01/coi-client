@@ -10,16 +10,14 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 
 /**
  * Werewolf traits — dark fur hide over head and body, a protruding muzzle with black
- * nose, triangular ears, a light chest patch and bone claws on both hands. Slim-model
- * aware arm hide.
+ * nose, triangular ears and a light chest patch. Claws are rendered separately so the
+ * Werewolf Claws ability has its own progression and visual treatment.
  */
 public final class BeastTraitRenderer implements AppearanceTraitRenderer {
 
     private static final TraitGeometry.Tint FUR = new TraitGeometry.Tint(0.17f, 0.16f, 0.18f, 0.92f);
     private static final TraitGeometry.Tint FUR_LIGHT = new TraitGeometry.Tint(0.34f, 0.32f, 0.31f, 0.92f);
     private static final TraitGeometry.Tint NOSE = new TraitGeometry.Tint(0.025f, 0.018f, 0.02f, 1.0f);
-    private static final TraitGeometry.Tint CLAW = new TraitGeometry.Tint(0.72f, 0.68f, 0.58f, 1.0f);
-
     private final String traitId;
 
     public BeastTraitRenderer(String traitId) {
@@ -85,11 +83,5 @@ public final class BeastTraitRenderer implements AppearanceTraitRenderer {
         TraitGeometry g = TraitGeometry.INSTANCE;
         float half = slim ? 1.68f : 2.18f;
         g.boxPixels(pose, consumer, -half, -2.15f, -2.18f, half, 12.18f, 2.18f, FUR, light);
-        for (int index = 0; index < 3; index++) {
-            float x = -1.25f + index * 1.25f;
-            g.drawTube(pose, consumer,
-                    new TraitGeometry.Point[]{g.pointPixels(x, 10.7f, -1.8f), g.pointPixels(x, 13.8f, -2.8f)},
-                    new float[]{0.24f, 0.035f}, 5, new TraitGeometry.Tint[]{CLAW}, light);
-        }
     }
 }

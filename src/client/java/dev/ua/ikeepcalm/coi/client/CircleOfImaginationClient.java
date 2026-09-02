@@ -317,17 +317,6 @@ public class CircleOfImaginationClient implements ClientModInitializer {
         }
     }
 
-    public static void addTestAbilities() {
-        if (availableAbilities.isEmpty()) {
-            System.out.println("COI Client: Adding test abilities for debugging...");
-            availableAbilities.add("fireball - Fireball");
-            availableAbilities.add("heal - Healing Light");
-            availableAbilities.add("teleport - Teleportation");
-            availableAbilities.add("shield - Magic Shield");
-            System.out.println("COI Client: Added " + availableAbilities.size() + " test abilities");
-        }
-    }
-
     @Override
     public void onInitializeClient() {
         HudConfig.load();
@@ -527,10 +516,10 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
             // First-join tour: opens once the delay has passed and no other
             // screen is in the way (stays pending until the way is clear)
-            if (tourPendingAt > 0 && System.currentTimeMillis() >= tourPendingAt && client.screen == null) {
+            if (tourPendingAt > 0 && System.currentTimeMillis() >= tourPendingAt && client.gui.screen() == null) {
                 tourPendingAt = 0;
                 if (!ClientStateStore.isTourCompleted()) {
-                    client.setScreen(new TourScreen());
+                    client.gui.setScreen(new TourScreen());
                 }
             }
 
@@ -545,14 +534,14 @@ public class CircleOfImaginationClient implements ClientModInitializer {
 
             // Enhanced Ability Wheel trigger logic
             if (abilityWheel.isDown()) {
-                if (client.screen == null) {
-                    client.setScreen(new AbilityWheelScreen());
+                if (client.gui.screen() == null) {
+                    client.gui.setScreen(new AbilityWheelScreen());
                 }
             }
 
             // Gesture casting: inert until at least one gesture has an ability bound
-            if (gestureCast.isDown() && client.screen == null && hasAnyGestureBound()) {
-                client.setScreen(new GestureScreen());
+            if (gestureCast.isDown() && client.gui.screen() == null && hasAnyGestureBound()) {
+                client.gui.setScreen(new GestureScreen());
             }
         });
     }
@@ -562,11 +551,11 @@ public class CircleOfImaginationClient implements ClientModInitializer {
             keyPressed[index] = true;
 
             if (index == MAX_ABILITIES) {
-                Minecraft.getInstance().setScreen(new AbilityBindingScreen(null));
+                Minecraft.getInstance().gui.setScreen(new AbilityBindingScreen(null));
                 return;
             }
             if (index == MAX_ABILITIES + 1) {
-                Minecraft.getInstance().setScreen(new EffectDebugScreen(null));
+                Minecraft.getInstance().gui.setScreen(new EffectDebugScreen(null));
                 return;
             }
 

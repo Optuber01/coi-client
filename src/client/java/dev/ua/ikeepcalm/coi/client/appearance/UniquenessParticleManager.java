@@ -316,11 +316,15 @@ public final class UniquenessParticleManager {
     }
 
     private static void emitChained(Emission e) {
-        var random = e.player().getRandom();
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.0f),
-                e.x() + (random.nextDouble() - 0.5) * 0.9, e.y() + 0.5 + random.nextDouble() * 1.2,
-                e.z() + (random.nextDouble() - 0.5) * 0.9, 0.0, -0.005, 0.0);
-        if (random.nextFloat() < 0.15f) {
+        double angle = e.tick() * 0.32 + e.phase() * Math.PI * 2;
+        for (int side = 0; side < 2; side++) {
+            double linkAngle = angle + side * Math.PI;
+            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.35f),
+                    e.x() + Math.cos(linkAngle) * 0.78,
+                    e.y() + 1.15 + Math.sin(angle * 0.7 + side * Math.PI) * 0.45,
+                    e.z() + Math.sin(linkAngle) * 0.78, 0.0, -0.008, 0.0);
+        }
+        if (e.player().getRandom().nextFloat() < 0.3f) {
             e.level().addParticle(ParticleTypes.SCULK_SOUL, e.x(), e.y() + 1.4, e.z(), 0.0, 0.01, 0.0);
         }
     }
@@ -338,10 +342,16 @@ public final class UniquenessParticleManager {
 
     private static void emitMoon(Emission e) {
         double angle = e.tick() * 0.16 + e.phase() * Math.PI * 2;
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.0f),
-                e.x() + Math.cos(angle) * 0.85, e.y() + 1.2 + Math.sin(angle) * 0.5,
-                e.z() + Math.sin(angle) * 0.85, 0.0, 0.005, 0.0);
-        if (e.player().getRandom().nextFloat() < 0.1f) {
+        for (int side = 0; side < 2; side++) {
+            double orbit = angle + side * Math.PI;
+            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.35f),
+                    e.x() + Math.cos(orbit) * 1.0, e.y() + 1.3 + Math.sin(orbit) * 0.62,
+                    e.z() + Math.sin(orbit) * 1.0, 0.0, 0.008, 0.0);
+        }
+        e.level().addParticle(new DustParticleOptions(0xE8F2FF, 1.1f),
+                e.x() + Math.cos(angle * 0.5) * 0.32, e.y() + 2.45,
+                e.z() + Math.sin(angle * 0.5) * 0.32, 0.0, -0.004, 0.0);
+        if (e.player().getRandom().nextFloat() < 0.25f) {
             e.level().addParticle(ParticleTypes.SNOWFLAKE, e.x(), e.y() + 2.4, e.z(), 0.0, -0.01, 0.0);
         }
     }
@@ -359,10 +369,14 @@ public final class UniquenessParticleManager {
 
     private static void emitJusticiar(Emission e) {
         double angle = e.tick() * 0.15 + e.phase() * Math.PI * 2;
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.0f),
-                e.x() + Math.cos(angle) * 0.8, e.y() + 1.0, e.z() + Math.sin(angle) * 0.8,
-                0.0, 0.012, 0.0);
-        if (e.player().getRandom().nextFloat() < 0.15f) {
+        for (int side = -1; side <= 1; side += 2) {
+            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.35f),
+                    e.x() + Math.cos(angle) * side * 0.95, e.y() + 1.35,
+                    e.z() + Math.sin(angle) * side * 0.95, 0.0, 0.012, 0.0);
+        }
+        e.level().addParticle(new DustParticleOptions(0xFFF2A8, 1.15f),
+                e.x(), e.y() + 2.15, e.z(), 0.0, 0.008, 0.0);
+        if (e.player().getRandom().nextFloat() < 0.3f) {
             e.level().addParticle(ParticleTypes.ENCHANT, e.x(), e.y() + 2.0, e.z(), 0.0, 0.01, 0.0);
         }
     }
@@ -418,23 +432,30 @@ public final class UniquenessParticleManager {
 
     private static void emitParagon(Emission e) {
         var random = e.player().getRandom();
-        e.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
-                e.x() + (random.nextDouble() - 0.5) * 0.7, e.y() + 0.8 + random.nextDouble() * 1.2,
-                e.z() + (random.nextDouble() - 0.5) * 0.7, 0.0, 0.02, 0.0);
-        if (random.nextFloat() < 0.3f) {
-            e.level().addParticle(new DustParticleOptions(e.rgb(), 0.85f),
-                    e.x(), e.y() + 1.3, e.z(), 0.0, 0.015, 0.0);
+        double angle = e.tick() * 0.38 + e.phase() * Math.PI * 2;
+        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.4f),
+                e.x() + Math.cos(angle) * 0.85, e.y() + 1.35,
+                e.z() + Math.sin(angle) * 0.85, 0.0, 0.018, 0.0);
+        for (int spark = 0; spark < 2; spark++) {
+            e.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
+                    e.x() + (random.nextDouble() - 0.5) * 1.15, e.y() + 0.55 + random.nextDouble() * 1.75,
+                    e.z() + (random.nextDouble() - 0.5) * 1.15, 0.0, 0.025, 0.0);
+        }
+        if (e.tick() % 3 == 0) {
+            e.level().addParticle(ParticleTypes.END_ROD, e.x(), e.y() + 2.25, e.z(), 0.0, 0.015, 0.0);
         }
     }
 
     private static void emitTower(Emission e) {
         var random = e.player().getRandom();
-        if (e.tick() % 2 == 0) {
-            e.level().addParticle(new DustParticleOptions(e.rgb(), 0.95f),
-                    e.x() + (random.nextDouble() - 0.5) * 0.5, e.y() + 0.2 + (e.tick() % 30) * 0.06,
-                    e.z() + (random.nextDouble() - 0.5) * 0.5, 0.0, 0.03, 0.0);
+        double rise = (e.tick() % 24) / 24.0;
+        for (int column = 0; column < 3; column++) {
+            double angle = column * Math.PI * 2 / 3 + e.tick() * 0.08;
+            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.25f),
+                    e.x() + Math.cos(angle) * 0.42, e.y() + 0.2 + ((rise + column / 3.0) % 1.0) * 2.5,
+                    e.z() + Math.sin(angle) * 0.42, 0.0, 0.035, 0.0);
         }
-        if (random.nextFloat() < 0.08f) {
+        if (random.nextFloat() < 0.2f) {
             e.level().addParticle(ParticleTypes.CLOUD, e.x(), e.y() + 2.6, e.z(), 0.0, 0.01, 0.0);
         }
     }

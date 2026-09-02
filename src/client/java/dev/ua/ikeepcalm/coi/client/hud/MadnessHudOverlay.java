@@ -32,7 +32,7 @@ public class MadnessHudOverlay {
         Minecraft client = Minecraft.getInstance();
         HudConfig.HudSettings settings = HudConfig.getSettings();
 
-        if (client.player == null || client.options.hideGui || !settings.enabled || !settings.showMadnessBar) {
+        if (client.player == null || client.gui.hud.isHidden() || !settings.enabled || !settings.showMadnessBar) {
             return;
         }
 

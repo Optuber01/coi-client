@@ -32,7 +32,7 @@ public class AbilityHudOverlay {
         Minecraft client = Minecraft.getInstance();
         HudConfig.HudSettings settings = HudConfig.getSettings();
 
-        if (client.player == null || client.options.hideGui || !settings.enabled) {
+        if (client.player == null || client.gui.hud.isHidden() || !settings.enabled) {
             return;
         }
 

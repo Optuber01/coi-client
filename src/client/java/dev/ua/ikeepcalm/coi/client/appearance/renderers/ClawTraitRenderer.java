@@ -10,12 +10,12 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 
 /**
  * Curved talons growing from each hand: three tapered tubes that arc forward past the
- * fingertips. Corrosive claws glow with luminous magenta symbols near the base; the
- * predator variant is dark keratin.
+ * fingertips. Corrosive claws glow with luminous magenta symbols near the base; werewolf
+ * claws are venom-dark with a blood-red accent.
  */
 public final class ClawTraitRenderer implements AppearanceTraitRenderer {
 
-    public enum Style {CORROSIVE, PREDATOR}
+    public enum Style {CORROSIVE, WEREWOLF}
 
     private final String traitId;
     private final Style style;
@@ -25,12 +25,14 @@ public final class ClawTraitRenderer implements AppearanceTraitRenderer {
     public ClawTraitRenderer(String traitId, Style style) {
         this.traitId = traitId;
         this.style = style;
-        this.claw = style == Style.CORROSIVE
-                ? new TraitGeometry.Tint(0.19f, 0.015f, 0.23f, 0.98f)
-                : new TraitGeometry.Tint(0.16f, 0.11f, 0.07f, 0.98f);
-        this.symbol = style == Style.CORROSIVE
-                ? new TraitGeometry.Tint(0.75f, 0.08f, 0.88f, 0.95f)
-                : new TraitGeometry.Tint(0.72f, 0.48f, 0.20f, 0.88f);
+        this.claw = switch (style) {
+            case CORROSIVE -> new TraitGeometry.Tint(0.19f, 0.015f, 0.23f, 0.98f);
+            case WEREWOLF -> new TraitGeometry.Tint(0.08f, 0.07f, 0.065f, 0.99f);
+        };
+        this.symbol = switch (style) {
+            case CORROSIVE -> new TraitGeometry.Tint(0.75f, 0.08f, 0.88f, 0.95f);
+            case WEREWOLF -> new TraitGeometry.Tint(0.55f, 0.09f, 0.08f, 0.9f);
+        };
     }
 
     @Override

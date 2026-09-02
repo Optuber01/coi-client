@@ -7,7 +7,7 @@ Guidance for Claude Code when working in this repository.
 COI Client is a client-only Minecraft Fabric mod implementing a customizable ability system with HUD overlay. Players bind up to **10 abilities** to keybindings (slots 1–6 default Z/X/C/V/B/N, slots 7–10 default unbound), use them in-game, and can customize the HUD visually. The player-facing slot count is the `activeAbilitySlots` HUD setting (1–10, default 6); `MAX_ABILITIES = 10` is a hard ceiling because keymappings can only be registered once at init. Lowering the count hides bindings without deleting them. The mod communicates with a server-side Paper plugin via **Fabric custom payloads** (plugin messaging).
 
 **Environment:** Client-only
-**Java:** 21 | **MC:** 1.21.11 | **Fabric Loader:** 0.18.4 | **Fabric API:** 0.141.3+1.21.11
+**Java:** 25 | **MC:** 26.2 | **Fabric Loader:** 0.19.5 | **Fabric API:** 0.159.0+26.2
 
 ## Build Commands
 

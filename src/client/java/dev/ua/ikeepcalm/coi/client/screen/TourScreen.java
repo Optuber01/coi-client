@@ -238,7 +238,7 @@ public class TourScreen extends Screen {
         // Dismissing the tour by any means (Finish, Skip, Esc) counts as done
         ClientStateStore.setTourCompleted(true);
         if (this.minecraft != null) {
-            this.minecraft.setScreen(null);
+            this.minecraft.gui.setScreen(null);
         }
     }
 }

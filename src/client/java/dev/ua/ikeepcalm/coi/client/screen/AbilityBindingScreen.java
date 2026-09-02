@@ -74,11 +74,6 @@ public class AbilityBindingScreen extends Screen {
         // Request abilities from server when screen opens
         CircleOfImaginationClient.requestAbilitiesFromServer();
 
-        // For testing purposes, add sample abilities if none are available
-        if (CircleOfImaginationClient.getAvailableAbilities().isEmpty()) {
-            CircleOfImaginationClient.addTestAbilities();
-        }
-
         contentW = Math.clamp(this.width - 80, 300, 440);
         contentX = (this.width - contentW) / 2;
 
@@ -111,14 +106,14 @@ public class AbilityBindingScreen extends Screen {
         hudSettingsButton = Button.builder(Component.translatable("screen.coi.hud_settings"),
                 button -> {
                     this.onClose();
-                    Minecraft.getInstance().setScreen(new HudSettingsScreen(null));
+                    Minecraft.getInstance().gui.setScreen(new HudSettingsScreen(null));
                 }).bounds(buttonX, buttonY, buttonW, 20).build();
         this.addRenderableWidget(hudSettingsButton);
 
         appearanceSettingsButton = Button.builder(Component.translatable("screen.coi.appearance_settings"),
                 button -> {
                     this.onClose();
-                    Minecraft.getInstance().setScreen(new AppearanceSettingsScreen(null));
+                    Minecraft.getInstance().gui.setScreen(new AppearanceSettingsScreen(null));
                 }).bounds(buttonX + buttonW + 8, buttonY, buttonW, 20).build();
         this.addRenderableWidget(appearanceSettingsButton);
 
@@ -427,6 +422,6 @@ public class AbilityBindingScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.minecraft.gui.setScreen(this.parent);
     }
 }

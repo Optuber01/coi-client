@@ -8,7 +8,6 @@ import dev.ua.ikeepcalm.coi.client.appearance.renderers.HairTraitRenderer;
 import dev.ua.ikeepcalm.coi.client.appearance.renderers.HornsTraitRenderer;
 import dev.ua.ikeepcalm.coi.client.appearance.renderers.MushroomTraitRenderer;
 import dev.ua.ikeepcalm.coi.client.appearance.renderers.SkinTraitRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.WingTraitRenderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,9 +25,8 @@ import java.util.Set;
  * <ul>
  *     <li>Body: mother → moon → chaos primogenitor → demoness</li>
  *     <li>Hair: long brown → long black → silver → red → blue → black</li>
- *     <li>Wings: devil → darkness → natural bat</li>
- *     <li>Chained: werewolf → wraith → zombie; Claws: corrosive → predator</li>
- *     <li>Skin: devil → chitin → stone → wood</li>
+ *     <li>Chained: wraith → zombie → werewolf; Claws: corrosive → werewolf</li>
+ *     <li>Skin: devil → stone → wood</li>
  * </ul>
  *
  * <p>Trait ids are the opaque strings the COI server sends via {@code coi-client:appearance};
@@ -50,21 +48,19 @@ public final class AppearanceTraits {
             List.of("mother_traits", "moon_traits", "chaos_traits", "female_traits"));
     public static final Family HAIR = new Family("hair",
             List.of("long_brown_hair", "long_black_hair", "silver_hair", "red_hair", "blue_hair", "black_hair"));
-    public static final Family WINGS = new Family("wings",
-            List.of("devil_wings", "darkness_wings", "bat_mutation"));
     public static final Family CHAINED = new Family("chained",
-            List.of("werewolf_traits", "wraith_traits", "zombie_traits"));
+            List.of("wraith_traits", "zombie_traits", "werewolf_traits"));
     public static final Family CLAWS = new Family("claws",
-            List.of("corrosive_claws", "predator_mutation"));
+            List.of("corrosive_claws", "werewolf_claws"));
     public static final Family SKIN = new Family("skin",
-            List.of("devil_skin", "chitin_mutation", "stone_skin", "wood_skin"));
+            List.of("devil_skin", "stone_skin", "wood_skin"));
 
     /** Families gated by the "Body enhancements" visibility switch. */
     public static final Set<String> BODY_ALTERING_FAMILIES = Set.of(
             BODY.id(), SKIN.id(), CHAINED.id());
 
     public static final List<Family> FAMILIES = List.of(
-            BODY, HAIR, WINGS, CHAINED, CLAWS, SKIN);
+            BODY, HAIR, CHAINED, CLAWS, SKIN);
 
     private static final Map<String, Family> FAMILY_BY_TRAIT = new HashMap<>();
 
@@ -96,24 +92,18 @@ public final class AppearanceTraits {
             new TraitInfo("Black Hair", HAIR,
                     new HairTraitRenderer("black_hair", HairTraitRenderer.Style.SHORT, 0.018f, 0.014f, 0.025f)),
             new TraitInfo("Werewolf Traits", CHAINED, new BeastTraitRenderer("werewolf_traits")),
+            new TraitInfo("Werewolf Claws", CLAWS,
+                    new ClawTraitRenderer("werewolf_claws", ClawTraitRenderer.Style.WEREWOLF)),
             new TraitInfo("Wraith Traits", CHAINED,
                     new SkinTraitRenderer("wraith_traits", SkinTraitRenderer.Style.WRAITH)),
             new TraitInfo("Zombie Traits", CHAINED,
                     new SkinTraitRenderer("zombie_traits", SkinTraitRenderer.Style.ZOMBIE)),
-            new TraitInfo("Devil Wings", WINGS, new WingTraitRenderer("devil_wings", WingTraitRenderer.Style.DEVIL)),
-            new TraitInfo("Darkness Wings", WINGS,
-                    new WingTraitRenderer("darkness_wings", WingTraitRenderer.Style.ILLUSORY)),
-            new TraitInfo("Bat Wings", WINGS, new WingTraitRenderer("bat_mutation", WingTraitRenderer.Style.NATURAL)),
             new TraitInfo("Devil Armor Skin", SKIN,
                     new SkinTraitRenderer("devil_skin", SkinTraitRenderer.Style.DEVIL_ARMOR)),
             new TraitInfo("Wood Skin", SKIN, new SkinTraitRenderer("wood_skin", SkinTraitRenderer.Style.WOOD)),
             new TraitInfo("Stone Skin", SKIN, new SkinTraitRenderer("stone_skin", SkinTraitRenderer.Style.STONE)),
-            new TraitInfo("Chitin Mutation", SKIN,
-                    new SkinTraitRenderer("chitin_mutation", SkinTraitRenderer.Style.CHITIN)),
             new TraitInfo("Corrosive Claws", CLAWS,
                     new ClawTraitRenderer("corrosive_claws", ClawTraitRenderer.Style.CORROSIVE)),
-            new TraitInfo("Predator Claws", CLAWS,
-                    new ClawTraitRenderer("predator_mutation", ClawTraitRenderer.Style.PREDATOR)),
             new TraitInfo("Abyss Horns", null, new HornsTraitRenderer()),
             new TraitInfo("Head Mushroom", null, new MushroomTraitRenderer())
     );
