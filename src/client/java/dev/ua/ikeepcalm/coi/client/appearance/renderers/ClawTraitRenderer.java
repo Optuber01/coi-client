@@ -9,9 +9,8 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 
 /**
- * Curved talons growing from each hand: three tapered tubes that arc forward past the
- * fingertips. Corrosive claws glow with luminous magenta symbols near the base; werewolf
- * claws are venom-dark with a blood-red accent.
+ * Short, separate fingertip talons. The old tubes started inside the wrist and were too thin
+ * to read reliably; these start at the hand edge, widen at the knuckle, and taper forward.
  */
 public final class ClawTraitRenderer implements AppearanceTraitRenderer {
 
@@ -58,13 +57,13 @@ public final class ClawTraitRenderer implements AppearanceTraitRenderer {
     private void drawClaws(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light) {
         TraitGeometry g = TraitGeometry.INSTANCE;
         for (int index = 0; index < 3; index++) {
-            float x = -1.3f + index * 1.3f;
+            float x = -1.25f + index * 1.25f;
             TraitGeometry.Point[] path = {
-                    g.pointPixels(x, 10.5f, -1.65f),
-                    g.pointPixels(x, 12.1f, -2.05f),
-                    g.pointPixels(x, 14.2f, -2.85f)
+                    g.pointPixels(x, 10.9f, -2.15f),
+                    g.pointPixels(x, 12.0f, -2.65f),
+                    g.pointPixels(x, 13.8f, -4.15f)
             };
-            g.drawTube(pose, consumer, path, new float[]{0.28f, 0.22f, 0.04f}, 5,
+            g.drawTube(pose, consumer, path, new float[]{0.44f, 0.30f, 0.08f}, 6,
                     new TraitGeometry.Tint[]{symbol, claw}, light);
         }
     }

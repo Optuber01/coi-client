@@ -11,10 +11,8 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.entity.player.PlayerModelType;
 
 /**
- * Whole-body hide overlays: devil armor, wood, stone, chitin, zombie and wraith.
- * Body-hugging with per-style inflation so stacked categories never z-fight, detail
- * patches for material texture, slim-model aware arms, and a user opacity knob so the
- * hide can be blended with the player's own skin.
+ * Subtle material overlays for devil armor, wood, stone, zombie and wraith. These leave
+ * the base player skin readable instead of drawing an opaque second mannequin over it.
  */
 public final class SkinTraitRenderer implements AppearanceTraitRenderer {
 
@@ -29,20 +27,20 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
         this.traitId = traitId;
         this.style = style;
         this.primary = switch (style) {
-            case DEVIL_ARMOR -> new TraitGeometry.Tint(0.025f, 0.018f, 0.028f, 0.94f);
-            case WOOD -> new TraitGeometry.Tint(0.29f, 0.15f, 0.055f, 0.86f);
-            case STONE -> new TraitGeometry.Tint(0.38f, 0.40f, 0.43f, 0.88f);
-            case CHITIN -> new TraitGeometry.Tint(0.10f, 0.055f, 0.13f, 0.92f);
-            case ZOMBIE -> new TraitGeometry.Tint(0.24f, 0.40f, 0.25f, 0.58f);
-            case WRAITH -> new TraitGeometry.Tint(0.35f, 0.70f, 0.82f, 0.24f);
+            case DEVIL_ARMOR -> new TraitGeometry.Tint(0.08f, 0.025f, 0.09f, 0.38f);
+            case WOOD -> new TraitGeometry.Tint(0.38f, 0.20f, 0.07f, 0.34f);
+            case STONE -> new TraitGeometry.Tint(0.48f, 0.50f, 0.54f, 0.32f);
+            case CHITIN -> new TraitGeometry.Tint(0.16f, 0.08f, 0.18f, 0.36f);
+            case ZOMBIE -> new TraitGeometry.Tint(0.24f, 0.40f, 0.25f, 0.28f);
+            case WRAITH -> new TraitGeometry.Tint(0.35f, 0.70f, 0.82f, 0.18f);
         };
         this.detail = switch (style) {
-            case DEVIL_ARMOR -> new TraitGeometry.Tint(0.30f, 0.025f, 0.035f, 0.96f);
-            case WOOD -> new TraitGeometry.Tint(0.48f, 0.28f, 0.075f, 0.92f);
-            case STONE -> new TraitGeometry.Tint(0.59f, 0.61f, 0.64f, 0.90f);
-            case CHITIN -> new TraitGeometry.Tint(0.34f, 0.08f, 0.39f, 0.96f);
-            case ZOMBIE -> new TraitGeometry.Tint(0.11f, 0.21f, 0.12f, 0.72f);
-            case WRAITH -> new TraitGeometry.Tint(0.72f, 0.92f, 1.0f, 0.32f);
+            case DEVIL_ARMOR -> new TraitGeometry.Tint(0.70f, 0.06f, 0.10f, 0.58f);
+            case WOOD -> new TraitGeometry.Tint(0.62f, 0.34f, 0.10f, 0.48f);
+            case STONE -> new TraitGeometry.Tint(0.72f, 0.75f, 0.80f, 0.46f);
+            case CHITIN -> new TraitGeometry.Tint(0.55f, 0.12f, 0.62f, 0.52f);
+            case ZOMBIE -> new TraitGeometry.Tint(0.18f, 0.32f, 0.18f, 0.42f);
+            case WRAITH -> new TraitGeometry.Tint(0.72f, 0.92f, 1.0f, 0.25f);
         };
     }
 
@@ -80,7 +78,9 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
         TraitGeometry.Tint primary = withOpacity(this.primary, opacity);
         TraitGeometry.Tint detail = withOpacity(this.detail, opacity);
 
-        float inflate = style == Style.DEVIL_ARMOR || style == Style.CHITIN ? 0.35f : 0.14f;
+        // Keep the overlay just outside the vanilla cuboid. Larger inflation detached
+        // shoulders/hips and made the devil skin read as a black silhouette.
+        float inflate = 0.055f;
         switch (part) {
             case HEAD -> g.boxPixels(pose, consumer, -4 - inflate, -8 - inflate, -4 - inflate,
                     4 + inflate, inflate, 4 + inflate, primary, light);

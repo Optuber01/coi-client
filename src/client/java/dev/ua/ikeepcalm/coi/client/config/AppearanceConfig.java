@@ -112,7 +112,8 @@ public final class AppearanceConfig {
         public float wingFlapSpeed = 1.0f;
         public float wingScale = 1.0f;
         // Skin overlay blending
-        public float overlayOpacity = 1.0f;
+        /** Restrained default so material traits accent the base skin instead of obscuring it. */
+        public float overlayOpacity = 0.55f;
         // Uniqueness particles
         public boolean enableUniquenessEffects = true;
         public boolean uniquenessShowSelf = true;
