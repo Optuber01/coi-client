@@ -3,6 +3,7 @@ package dev.ua.ikeepcalm.coi.client.appearance;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ua.ikeepcalm.coi.client.ClientAppearanceState;
 import dev.ua.ikeepcalm.coi.client.config.AppearanceConfig;
+import dev.ua.ikeepcalm.coi.client.appearance.renderers.UniquenessAdornmentRenderer;
 import dev.ua.ikeepcalm.coi.client.mcf.AvatarRenderStateAccessor;
 import dev.ua.ikeepcalm.coi.client.mcf.MythicalCreatureForm;
 import dev.ua.ikeepcalm.coi.client.mcf.PartialForms;
@@ -38,11 +39,8 @@ public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerM
             return;
         }
 
-        List<AppearanceTraitRenderer> renderers = AppearanceTraits.resolve(
-                ClientAppearanceState.getTraits(playerUuid));
-        if (renderers.isEmpty()) {
-            return;
-        }
+        var activeTraits = ClientAppearanceState.getTraits(playerUuid);
+        List<AppearanceTraitRenderer> renderers = AppearanceTraits.resolve(activeTraits);
 
         PlayerModel model = getParentModel();
         for (AppearanceTraitRenderer renderer : renderers) {
@@ -53,6 +51,12 @@ public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerM
                 continue;
             }
             renderer.submit(poseStack, collector, state, model);
+        }
+        if (AppearanceConfig.get().enableUniquenessEffects) {
+            String pathway = UniquenessParticleManager.resolvePathway(playerUuid, activeTraits);
+            if (pathway != null) {
+                UniquenessAdornmentRenderer.submit(pathway, poseStack, collector, state, model);
+            }
         }
     }
 }

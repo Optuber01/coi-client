@@ -7,6 +7,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ShriekParticleOption;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,11 +79,15 @@ public final class UniquenessParticleManager {
 
     public static String resolvePathway(AbstractClientPlayer player) {
         String uuid = player.getUUID().toString();
+        return resolvePathway(uuid, ClientAppearanceState.getTraits(uuid));
+    }
+
+    public static String resolvePathway(String uuid, Iterable<String> traits) {
         String debug = debugPathwayByUuid.get(uuid);
         if (debug != null) {
             return debug;
         }
-        for (String traitId : ClientAppearanceState.getTraits(uuid)) {
+        for (String traitId : traits) {
             if (!traitId.startsWith(UNIQUENESS_MARKER_PREFIX)) {
                 continue;
             }
@@ -187,8 +192,64 @@ public final class UniquenessParticleManager {
         if (shouldEmit(uuid, emissionTick, intensity)) {
             level.addParticle(new DustParticleOptions(rgb, 0.7f),
                     backX, y + 0.12, backZ, -dx * 0.4, 0.015, -dz * 0.4);
+            emitPathwayTrail(level, player, pathway, backX, backZ, dx, dz);
         }
         return true;
+    }
+
+    /** Community-inspired movement signatures: footsteps and wakes, not generic body orbits. */
+    private static void emitPathwayTrail(ClientLevel level, AbstractClientPlayer player, String pathway,
+                                         double backX, double backZ, double dx, double dz) {
+        double y = player.getY();
+        var random = player.getRandom();
+        switch (pathway) {
+            case "mother" -> {
+                level.addParticle(ParticleTypes.CHERRY_LEAVES, backX, y + 0.08, backZ, 0.0, 0.025, 0.0);
+                level.addParticle(ParticleTypes.HAPPY_VILLAGER, backX, y + 0.04, backZ, 0.0, 0.012, 0.0);
+            }
+            case "priest" -> {
+                level.addParticle(ParticleTypes.LAVA, backX, y + 0.12, backZ, 0.0, 0.015, 0.0);
+                level.addParticle(ParticleTypes.SMALL_FLAME, backX, y + 0.18, backZ, -dx * 0.2, 0.015, -dz * 0.2);
+            }
+            case "tyrant" -> level.addParticle(ParticleTypes.RAIN,
+                    player.getX() + (random.nextDouble() - 0.5) * 0.8, y + 2.65,
+                    player.getZ() + (random.nextDouble() - 0.5) * 0.8, 0.0, -0.10, 0.0);
+            case "door" -> level.addParticle(ParticleTypes.GLOW_SQUID_INK, backX, y + 1.15, backZ,
+                    -dx * 0.3, 0.012, -dz * 0.3);
+            case "visionary" -> {
+                level.addParticle(ParticleTypes.END_ROD, backX, y + 2.15, backZ, -dx * 0.45, 0.0, -dz * 0.45);
+                level.addParticle(ParticleTypes.FIREWORK, player.getX(), y + 1.25, player.getZ(), 0.0, 0.015, 0.0);
+            }
+            case "death" -> {
+                level.addParticle(ParticleTypes.SOUL, backX, y + 0.25, backZ, -dx * 0.2, 0.02, -dz * 0.2);
+                level.addParticle(ParticleTypes.SCULK_SOUL, backX, y + 0.55, backZ, 0.0, 0.015, 0.0);
+            }
+            case "darkness" -> level.addParticle(ParticleTypes.SMOKE, backX, y + 1.4, backZ,
+                    -dx * 0.18, 0.025, -dz * 0.18);
+            case "emperor" -> {
+                level.addParticle(ParticleTypes.MYCELIUM, backX, y + 0.06, backZ, 0.0, 0.01, 0.0);
+                level.addParticle(new DustParticleOptions(0x18051F, 1.1f), backX, y + 0.15, backZ, 0.0, 0.0, 0.0);
+            }
+            case "demoness" -> level.addParticle(ParticleTypes.ITEM_SNOWBALL, backX, y + 0.12, backZ,
+                    -dx * 0.15, 0.01, -dz * 0.15);
+            case "fool" -> {
+                level.addParticle(new DustParticleOptions(0x9B6CFF, 0.9f), backX, y + 0.5, backZ, 0.0, 0.01, 0.0);
+                level.addParticle(ParticleTypes.END_ROD, backX, y + 1.5, backZ, -dx * 0.25, 0.0, -dz * 0.25);
+            }
+            case "error" -> level.addParticle(ParticleTypes.DUST_PLUME, backX, y + 0.18, backZ,
+                    -dx * 0.25, 0.02, -dz * 0.25);
+            case "tower" -> level.addParticle(ParticleTypes.ENCHANT, backX, y + 1.0, backZ,
+                    -dx * 0.5, 0.01, -dz * 0.5);
+            case "chained" -> {
+                level.addParticle(ParticleTypes.ENCHANT, backX, y + 0.7, backZ, 0.0, 0.01, 0.0);
+                level.addParticle(ParticleTypes.POOF, backX, y + 0.12, backZ, -dx * 0.15, 0.0, -dz * 0.15);
+            }
+            case "moon" -> level.addParticle(new DustParticleOptions(0xC41432, 1.0f), backX, y + 0.16, backZ,
+                    -dx * 0.2, 0.01, -dz * 0.2);
+            case "justiciar" -> level.addParticle(ParticleTypes.DRIPPING_HONEY, backX, y + 1.3, backZ,
+                    0.0, -0.02, 0.0);
+            default -> { }
+        }
     }
 
     /** Deterministic sampling makes the intensity control reduce particle count without flicker bursts. */
@@ -315,6 +376,7 @@ public final class UniquenessParticleManager {
                 e.z() + Math.sin(angle) * 0.8, 0.0, 0.0, 0.0);
         if (e.tick() % 3 == 0) {
             e.level().addParticle(ParticleTypes.CLOUD, e.x(), e.y() + 2.2, e.z(), 0.0, 0.005, 0.0);
+            e.level().addParticle(ParticleTypes.RAIN, e.x(), e.y() + 2.6, e.z(), 0.0, -0.08, 0.0);
         }
     }
 
@@ -332,8 +394,8 @@ public final class UniquenessParticleManager {
         var random = e.player().getRandom();
         if (e.tick() % 2 == 0) {
             e.level().addParticle(ParticleTypes.SOUL_FIRE_FLAME,
-                    e.x() + (random.nextDouble() - 0.5) * 0.9, e.y() + 0.2 + random.nextDouble() * 1.6,
-                    e.z() + (random.nextDouble() - 0.5) * 0.9, 0.0, 0.015, 0.0);
+                    e.x() + (random.nextDouble() - 0.5) * 0.38, e.y() + 2.18 + random.nextDouble() * 0.42,
+                    e.z() + (random.nextDouble() - 0.5) * 0.38, 0.0, 0.025, 0.0);
         }
         e.level().addParticle(ParticleTypes.ASH, e.x(), e.y() + 1.8, e.z(), 0.0, -0.01, 0.0);
     }
@@ -361,6 +423,9 @@ public final class UniquenessParticleManager {
         }
         e.level().addParticle(new DustParticleOptions(e.rgb(), 0.8f),
                 e.x(), e.y() + 1.1, e.z(), 0.0, 0.008, 0.0);
+        if (e.tick() % 3 == 0) {
+            e.level().addParticle(ParticleTypes.CHERRY_LEAVES, e.x(), e.y() + 1.85, e.z(), 0.0, -0.01, 0.0);
+        }
     }
 
     private static void emitMoon(Emission e) {
@@ -412,6 +477,9 @@ public final class UniquenessParticleManager {
         if (random.nextFloat() < 0.3f) {
             e.level().addParticle(ParticleTypes.ASH, e.x(), e.y() + 2.5, e.z(), 0.0, -0.02, 0.0);
         }
+        if (e.tick() % 6 == 0) {
+            e.level().addParticle(new ShriekParticleOption(0), e.x(), e.y() + 2.25, e.z(), 0.0, 0.04, 0.0);
+        }
     }
 
     private static void emitDeath(Emission e) {
@@ -422,13 +490,20 @@ public final class UniquenessParticleManager {
         e.level().addParticle(ParticleTypes.SOUL,
                 e.x() + (random.nextDouble() - 0.5) * 0.8, e.y() + 0.6 + random.nextDouble() * 1.4,
                 e.z() + (random.nextDouble() - 0.5) * 0.8, 0.0, 0.02, 0.0);
+        e.level().addParticle(ParticleTypes.SCULK_SOUL,
+                e.x() + (random.nextDouble() - 0.5) * 0.65, e.y() + 0.35,
+                e.z() + (random.nextDouble() - 0.5) * 0.65, 0.0, 0.012, 0.0);
     }
 
     private static void emitHermit(Emission e) {
         double angle = e.tick() * 0.11 + e.phase() * Math.PI * 2;
         e.level().addParticle(new DustParticleOptions(e.rgb(), 0.95f),
-                e.x() + Math.cos(angle) * 1.1, e.y() + 0.5 + (e.tick() % 20) * 0.09,
+                e.x() + Math.cos(angle) * 0.72, e.y() + 2.05 + Math.sin(angle * 2.0) * 0.34,
                 e.z() + Math.sin(angle) * 1.1, 0.0, 0.004, 0.0);
+        if (e.tick() % 3 == 0) {
+            e.level().addParticle(ParticleTypes.END_ROD, e.x() - Math.cos(angle) * 0.55,
+                    e.y() + 2.15, e.z() - Math.sin(angle) * 0.55, 0.0, 0.006, 0.0);
+        }
     }
 
     private static void emitFortune(Emission e) {
@@ -465,7 +540,12 @@ public final class UniquenessParticleManager {
                     e.z() + (random.nextDouble() - 0.5) * 1.15, 0.0, 0.025, 0.0);
         }
         if (e.tick() % 3 == 0) {
-            e.level().addParticle(ParticleTypes.END_ROD, e.x(), e.y() + 2.25, e.z(), 0.0, 0.015, 0.0);
+            float yaw = e.player().getYRot() * ((float) Math.PI / 180.0f);
+            double handX = Math.cos(yaw) * 0.48;
+            double handZ = Math.sin(yaw) * 0.48;
+            e.level().addParticle(ParticleTypes.WAX_ON, e.x() + handX, e.y() + 1.15, e.z() + handZ, 0.0, 0.01, 0.0);
+            e.level().addParticle(ParticleTypes.WAX_ON, e.x() - handX, e.y() + 1.15, e.z() - handZ, 0.0, 0.01, 0.0);
+            e.level().addParticle(ParticleTypes.NOTE, e.x(), e.y() + 2.35, e.z(), 0.0, 0.02, 0.0);
         }
     }
 
