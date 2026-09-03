@@ -96,6 +96,7 @@
   "screen.coi.appearance.uniqueness_enabled": "Ефекти унікальності",
   "screen.coi.appearance.uniqueness_self": "Показувати власну унікальність",
   "screen.coi.appearance.uniqueness_others": "Показувати унікальність інших гравців",
+  "screen.coi.appearance.uniqueness_intensity": "Інтенсивність частинок",
   "screen.coi.effect_debug": "Візуальні ефекти (налагодження)",
   "key.coi.effect_debug": "Відкрити меню налагодження ефектів",
   "screen.coi.gesture.circle": "Коло",

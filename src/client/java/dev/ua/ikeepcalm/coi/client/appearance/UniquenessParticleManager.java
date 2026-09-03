@@ -39,10 +39,12 @@ public final class UniquenessParticleManager {
 
     private static final double MAX_DISTANCE_SQ = 48.0 * 48.0;
     private static final int GLYPH_PERIOD_TICKS = 90;
+    private static final int STATIONARY_SIGIL_TICKS = 30; // 30 half-rate updates = three seconds
     private static final String UNIQUENESS_MARKER_PREFIX = "uniqueness:";
 
     private static final Map<String, String> debugPathwayByUuid = new ConcurrentHashMap<>();
     private static final Map<String, double[]> lastPositions = new HashMap<>();
+    private static final Map<String, Integer> stationaryTicks = new HashMap<>();
     private static int tickCounter = 0;
 
     private UniquenessParticleManager() {
@@ -70,6 +72,7 @@ public final class UniquenessParticleManager {
     public static void reset() {
         debugPathwayByUuid.clear();
         lastPositions.clear();
+        stationaryTicks.clear();
         tickCounter = 0;
     }
 
@@ -103,6 +106,7 @@ public final class UniquenessParticleManager {
         AppearanceConfig.Settings settings = AppearanceConfig.get();
         if (!settings.enableUniquenessEffects) {
             lastPositions.clear();
+            stationaryTicks.clear();
             return;
         }
         ClientLevel level = client.level;
@@ -138,25 +142,34 @@ public final class UniquenessParticleManager {
             }
 
             tracked.add(uuid);
-            emitTrail(level, player, uuid, pathway);
-            emit(level, player, pathway, tickCounter / 2);
+            long emissionTick = tickCounter / 2;
+            boolean moving = emitTrail(level, player, uuid, pathway, settings.uniquenessParticleIntensity, emissionTick);
+            int stillFor = moving ? 0 : stationaryTicks.merge(uuid, 1, Integer::sum);
+            if (stillFor >= STATIONARY_SIGIL_TICKS && stillFor % 2 == 0) {
+                emitStationarySigil(level, player, pathway, stillFor - STATIONARY_SIGIL_TICKS);
+            }
+            if (shouldEmit(uuid, emissionTick, settings.uniquenessParticleIntensity)) {
+                emit(level, player, pathway, emissionTick);
+            }
         }
 
         lastPositions.keySet().retainAll(tracked);
+        stationaryTicks.keySet().retainAll(tracked);
     }
 
     // ------------------------------------------------------------------
     // Emission
     // ------------------------------------------------------------------
 
-    private static void emitTrail(ClientLevel level, AbstractClientPlayer player, String uuid, String pathway) {
+    private static boolean emitTrail(ClientLevel level, AbstractClientPlayer player, String uuid, String pathway,
+                                     float intensity, long emissionTick) {
         double[] last = lastPositions.get(uuid);
         double x = player.getX();
         double y = player.getY();
         double z = player.getZ();
         if (last == null) {
             lastPositions.put(uuid, new double[]{x, y, z});
-            return;
+            return false;
         }
         double dx = x - last[0];
         double dz = z - last[2];
@@ -164,15 +177,25 @@ public final class UniquenessParticleManager {
         last[1] = y;
         last[2] = z;
         if (dx * dx + dz * dz < 0.0004) {
-            return; // trails require movement
+            return false; // trails require movement
         }
 
         int rgb = accent(pathway);
         float yawRad = player.getYRot() * ((float) Math.PI / 180.0f);
         double backX = x - Math.sin(yawRad) * 0.35;
         double backZ = z + Math.cos(yawRad) * 0.35;
-        level.addParticle(new DustParticleOptions(rgb, 0.7f),
-                backX, y + 0.12, backZ, -dx * 0.4, 0.015, -dz * 0.4);
+        if (shouldEmit(uuid, emissionTick, intensity)) {
+            level.addParticle(new DustParticleOptions(rgb, 0.7f),
+                    backX, y + 0.12, backZ, -dx * 0.4, 0.015, -dz * 0.4);
+        }
+        return true;
+    }
+
+    /** Deterministic sampling makes the intensity control reduce particle count without flicker bursts. */
+    private static boolean shouldEmit(String uuid, long emissionTick, float intensity) {
+        if (intensity >= 0.999f) return true;
+        long sample = emissionTick * 31L + uuid.hashCode() * 17L;
+        return Math.floorMod(sample, 100L) < Math.round(intensity * 100.0f);
     }
 
     private static void emit(ClientLevel level, AbstractClientPlayer player, String pathway, long emissionTick) {
@@ -529,6 +552,43 @@ public final class UniquenessParticleManager {
                         baseZ + rightZ * offsetX,
                         0.0, 0.012, 0.0);
             }
+        }
+    }
+
+    /**
+     * A held uniqueness settles into its pathway sigil after three seconds without walking.
+     * Dust particles naturally fade; when movement resumes this method stops feeding them, so
+     * the symbol dissolves instead of popping off. The masks are original low-resolution
+     * interpretations of the official pathway-symbol vocabulary, not copied wiki artwork.
+     */
+    private static void emitStationarySigil(ClientLevel level, AbstractClientPlayer player, String pathway,
+                                            int settledTicks) {
+        long mask = GLYPH_MASKS.getOrDefault(pathway, 0L);
+        int rgb = accent(pathway);
+        float yawRad = player.getYRot() * ((float) Math.PI / 180.0f);
+        double rightX = Math.cos(yawRad);
+        double rightZ = Math.sin(yawRad);
+        // Behind the shoulders, so the sigil reads as a quiet aura rather than a face overlay.
+        double baseX = player.getX() + Math.sin(yawRad) * 0.92;
+        double baseZ = player.getZ() - Math.cos(yawRad) * 0.92;
+        double baseY = player.getY() + 1.7;
+        float size = Math.min(0.58f, 0.22f + settledTicks * 0.018f);
+        double cell = 0.19;
+
+        for (int row = 0; row < 5; row++) {
+            for (int col = 0; col < 5; col++) {
+                int bit = row * 5 + col;
+                if (((mask >> bit) & 1L) == 0L) continue;
+                double horizontal = (col - 2) * cell;
+                double vertical = (2 - row) * cell;
+                level.addParticle(new DustParticleOptions(rgb, size),
+                        baseX + rightX * horizontal, baseY + vertical,
+                        baseZ + rightZ * horizontal, 0.0, 0.0, 0.0);
+            }
+        }
+        // A restrained centre light makes the symbol legible in darkness without becoming a beacon.
+        if (settledTicks % 6 == 0) {
+            level.addParticle(ParticleTypes.END_ROD, baseX, baseY, baseZ, 0.0, 0.002, 0.0);
         }
     }
 

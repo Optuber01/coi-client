@@ -96,6 +96,7 @@
   "screen.coi.appearance.uniqueness_enabled": "Uniqueness Effects",
   "screen.coi.appearance.uniqueness_self": "Show Your Uniqueness",
   "screen.coi.appearance.uniqueness_others": "Show Other Players' Uniqueness",
+  "screen.coi.appearance.uniqueness_intensity": "Particle Intensity",
   "screen.coi.effect_debug": "Visual Effects (Debug)",
   "key.coi.effect_debug": "Open Effects Debug Menu",
   "screen.coi.gesture.circle": "Circle",

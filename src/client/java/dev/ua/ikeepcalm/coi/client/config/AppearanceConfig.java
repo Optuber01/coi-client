@@ -19,7 +19,7 @@ import java.nio.file.Path;
  */
 public final class AppearanceConfig {
 
-    private static final int CONFIG_VERSION = 4;
+    private static final int CONFIG_VERSION = 5;
     private static final Logger LOGGER = LoggerFactory.getLogger(AppearanceConfig.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir()
@@ -90,6 +90,7 @@ public final class AppearanceConfig {
         settings.wingScale = Math.clamp(settings.wingScale, 0.60f, 1.50f);
         settings.wingFlapSpeed = Math.clamp(settings.wingFlapSpeed, 0.20f, 3.0f);
         settings.overlayOpacity = Math.clamp(settings.overlayOpacity, 0.20f, 1.0f);
+        settings.uniquenessParticleIntensity = Math.clamp(settings.uniquenessParticleIntensity, 0.15f, 1.0f);
     }
 
     public static final class Settings {
@@ -118,5 +119,7 @@ public final class AppearanceConfig {
         public boolean enableUniquenessEffects = true;
         public boolean uniquenessShowSelf = true;
         public boolean uniquenessShowOthers = true;
+        /** Sampling rate for pathway particles; stationary sigils remain readable at every value. */
+        public float uniquenessParticleIntensity = 1.0f;
     }
 }

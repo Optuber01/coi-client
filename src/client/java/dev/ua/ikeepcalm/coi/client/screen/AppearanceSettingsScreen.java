@@ -227,6 +227,9 @@ public final class AppearanceSettingsScreen extends Screen {
                 () -> settings.uniquenessShowSelf, value -> settings.uniquenessShowSelf = value));
         elements.add(toggleControl("screen.coi.appearance.uniqueness_others",
                 () -> settings.uniquenessShowOthers, value -> settings.uniquenessShowOthers = value));
+        elements.add(cycleControl("screen.coi.appearance.uniqueness_intensity",
+                () -> settings.uniquenessParticleIntensity, value -> settings.uniquenessParticleIntensity = value,
+                UNIQUENESS_INTENSITY));
     }
 
     private static Set<String> activeFamilies(Set<String> activeTraits) {
@@ -271,6 +274,7 @@ public final class AppearanceSettingsScreen extends Screen {
     private static final float[] SCALE = {0.6f, 0.8f, 1.0f, 1.2f, 1.4f};
     private static final float[] FLAP_SPEED = {0.2f, 0.5f, 1.0f, 1.5f, 2.0f, 3.0f};
     private static final float[] OPACITY = {0.2f, 0.35f, 0.5f, 0.65f, 0.8f, 1.0f};
+    private static final float[] UNIQUENESS_INTENSITY = {0.15f, 0.30f, 0.50f, 0.70f, 1.0f};
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics,
