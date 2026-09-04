@@ -666,10 +666,9 @@ public final class UniquenessParticleManager {
                         baseZ + rightZ * horizontal, 0.0, 0.0, 0.0);
             }
         }
-        // A restrained centre light makes the symbol legible in darkness without becoming a beacon.
-        if (settledTicks % 6 == 0) {
-            level.addParticle(ParticleTypes.END_ROD, baseX, baseY, baseZ, 0.0, 0.002, 0.0);
-        }
+        // Keep the centre empty. Billboard particles such as END_ROD become an opaque white
+        // sprite from the front camera and can cover the holder's face even when placed behind
+        // the model; the dust matrix remains readable in darkness without that hotspot.
     }
 
     // 5x5 bit patterns (bit = row*5+col, row 0 = top) — rough procedural sigils per pathway
