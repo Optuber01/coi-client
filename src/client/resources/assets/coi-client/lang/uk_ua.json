@@ -168,5 +168,5 @@
   "screen.coi.appearance.reset_defaults": "Типові значення",
   "screen.coi.appearance.reset_hint": "Відновити всі типові налаштування. Скасувати відкидає скидання.",
   "screen.coi.appearance.rotate_short_hint": "Поворот мишею",
-  "screen.coi.appearance.particles_hint": "Змінює частинки у світі. Огляд показує модельовані риси."
+  "screen.coi.appearance.particles_hint": "Змінює сяйво частинок і сліди у світі. Попередній перегляд показує форму шляху."
 }

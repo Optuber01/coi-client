@@ -7,7 +7,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ShriekParticleOption;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,19 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Emits each pathway's uniqueness signature around players: a colored aura (orbiting
- * dust, halos, rising motes), a procedural dot-matrix glyph of the pathway's symbol
- * rising every few seconds, and a movement trail. The Twilight Giant instead gets a
- * full-bright setting-sun backdrop hanging behind the shoulders.
- *
- * <p>Runs on the client tick but emits at half tick rate. Players farther than 48 blocks
- * are ignored, the local player is suppressed while the camera is first-person, and the
- * whole system respects the self/other toggles in {@link AppearanceConfig}.</p>
- *
- * <p>Production pathway state comes from an authoritative {@code uniqueness:<pathway>}
- * marker in the appearance payload. Development builds may override it from the F8 screen.</p>
- */
+/** Bounded world-space accents and the preserved Death/Door particle compositions. */
 public final class UniquenessParticleManager {
 
     /** The 22 pathways with a uniqueness signature, matching the COI server roster. */
@@ -47,6 +34,8 @@ public final class UniquenessParticleManager {
     private static final Map<String, double[]> lastPositions = new HashMap<>();
     private static final Map<String, Integer> stationaryTicks = new HashMap<>();
     private static int tickCounter = 0;
+    private static ClientLevel lastLevel;
+    private static long lastGameTick = Long.MIN_VALUE;
 
     private UniquenessParticleManager() {
     }
@@ -75,6 +64,8 @@ public final class UniquenessParticleManager {
         lastPositions.clear();
         stationaryTicks.clear();
         tickCounter = 0;
+        lastLevel = null;
+        lastGameTick = Long.MIN_VALUE;
     }
 
     public static String resolvePathway(AbstractClientPlayer player) {
@@ -104,6 +95,18 @@ public final class UniquenessParticleManager {
     // ------------------------------------------------------------------
 
     public static void tick(Minecraft client) {
+        ClientLevel current = client.level;
+        if (current == null) return;
+        long gameTick = current.getGameTime();
+        // GUI pauses and replay render samples must not emit particles without advancing the world.
+        if (current == lastLevel && gameTick == lastGameTick) return;
+        if (current != lastLevel || gameTick < lastGameTick) {
+            lastPositions.clear();
+            stationaryTicks.clear();
+            tickCounter = 0;
+        }
+        lastLevel = current;
+        lastGameTick = gameTick;
         tickCounter++;
         if ((tickCounter & 1) == 1) {
             return; // half tick rate
@@ -132,7 +135,7 @@ public final class UniquenessParticleManager {
                 continue;
             }
             boolean self = player == client.player;
-            if (self && firstPerson) {
+            if (self && firstPerson && camera == player) {
                 continue; // suppress for the local first-person camera
             }
             if (!AppearanceConfig.shouldRenderUniqueness(uuid)) {
@@ -150,12 +153,10 @@ public final class UniquenessParticleManager {
             long emissionTick = tickCounter / 2;
             boolean moving = emitTrail(level, player, uuid, pathway, settings.uniquenessParticleIntensity, emissionTick);
             int stillFor = moving ? 0 : stationaryTicks.merge(uuid, 1, Integer::sum);
-            if (stillFor >= STATIONARY_SIGIL_TICKS && stillFor % 2 == 0) {
+            if (legacyParticles(pathway) && stillFor >= STATIONARY_SIGIL_TICKS && stillFor % 2 == 0) {
                 emitStationarySigil(level, player, pathway, stillFor - STATIONARY_SIGIL_TICKS);
             }
-            if (shouldEmit(uuid, emissionTick, settings.uniquenessParticleIntensity)) {
-                emit(level, player, pathway, emissionTick);
-            }
+            emit(level, player, pathway, emissionTick);
         }
 
         lastPositions.keySet().retainAll(tracked);
@@ -187,8 +188,8 @@ public final class UniquenessParticleManager {
 
         int rgb = accent(pathway);
         float yawRad = player.getYRot() * ((float) Math.PI / 180.0f);
-        double backX = x - Math.sin(yawRad) * 0.35;
-        double backZ = z + Math.cos(yawRad) * 0.35;
+        double backX = x + Math.sin(yawRad) * 0.35;
+        double backZ = z - Math.cos(yawRad) * 0.35;
         if (shouldEmit(uuid, emissionTick, intensity)) {
             level.addParticle(new DustParticleOptions(rgb, 0.7f),
                     backX, y + 0.12, backZ, -dx * 0.4, 0.015, -dz * 0.4);
@@ -201,53 +202,13 @@ public final class UniquenessParticleManager {
     private static void emitPathwayTrail(ClientLevel level, AbstractClientPlayer player, String pathway,
                                          double backX, double backZ, double dx, double dz) {
         double y = player.getY();
-        var random = player.getRandom();
         switch (pathway) {
-            case "mother" -> {
-                level.addParticle(ParticleTypes.CHERRY_LEAVES, backX, y + 0.08, backZ, 0.0, 0.025, 0.0);
-                level.addParticle(ParticleTypes.HAPPY_VILLAGER, backX, y + 0.04, backZ, 0.0, 0.012, 0.0);
-            }
-            case "priest" -> {
-                level.addParticle(ParticleTypes.LAVA, backX, y + 0.12, backZ, 0.0, 0.015, 0.0);
-                level.addParticle(ParticleTypes.SMALL_FLAME, backX, y + 0.18, backZ, -dx * 0.2, 0.015, -dz * 0.2);
-            }
-            case "tyrant" -> level.addParticle(ParticleTypes.RAIN,
-                    player.getX() + (random.nextDouble() - 0.5) * 0.8, y + 2.65,
-                    player.getZ() + (random.nextDouble() - 0.5) * 0.8, 0.0, -0.10, 0.0);
             case "door" -> level.addParticle(ParticleTypes.GLOW_SQUID_INK, backX, y + 1.15, backZ,
                     -dx * 0.3, 0.012, -dz * 0.3);
-            case "visionary" -> {
-                level.addParticle(ParticleTypes.END_ROD, backX, y + 2.15, backZ, -dx * 0.45, 0.0, -dz * 0.45);
-                level.addParticle(ParticleTypes.FIREWORK, player.getX(), y + 1.25, player.getZ(), 0.0, 0.015, 0.0);
-            }
             case "death" -> {
                 level.addParticle(ParticleTypes.SOUL, backX, y + 0.25, backZ, -dx * 0.2, 0.02, -dz * 0.2);
                 level.addParticle(ParticleTypes.SCULK_SOUL, backX, y + 0.55, backZ, 0.0, 0.015, 0.0);
             }
-            case "darkness" -> level.addParticle(ParticleTypes.SMOKE, backX, y + 1.4, backZ,
-                    -dx * 0.18, 0.025, -dz * 0.18);
-            case "emperor" -> {
-                level.addParticle(ParticleTypes.MYCELIUM, backX, y + 0.06, backZ, 0.0, 0.01, 0.0);
-                level.addParticle(new DustParticleOptions(0x18051F, 1.1f), backX, y + 0.15, backZ, 0.0, 0.0, 0.0);
-            }
-            case "demoness" -> level.addParticle(ParticleTypes.ITEM_SNOWBALL, backX, y + 0.12, backZ,
-                    -dx * 0.15, 0.01, -dz * 0.15);
-            case "fool" -> {
-                level.addParticle(new DustParticleOptions(0x9B6CFF, 0.9f), backX, y + 0.5, backZ, 0.0, 0.01, 0.0);
-                level.addParticle(ParticleTypes.END_ROD, backX, y + 1.5, backZ, -dx * 0.25, 0.0, -dz * 0.25);
-            }
-            case "error" -> level.addParticle(ParticleTypes.DUST_PLUME, backX, y + 0.18, backZ,
-                    -dx * 0.25, 0.02, -dz * 0.25);
-            case "tower" -> level.addParticle(ParticleTypes.ENCHANT, backX, y + 1.0, backZ,
-                    -dx * 0.5, 0.01, -dz * 0.5);
-            case "chained" -> {
-                level.addParticle(ParticleTypes.ENCHANT, backX, y + 0.7, backZ, 0.0, 0.01, 0.0);
-                level.addParticle(ParticleTypes.POOF, backX, y + 0.12, backZ, -dx * 0.15, 0.0, -dz * 0.15);
-            }
-            case "moon" -> level.addParticle(new DustParticleOptions(0xC41432, 1.0f), backX, y + 0.16, backZ,
-                    -dx * 0.2, 0.01, -dz * 0.2);
-            case "justiciar" -> level.addParticle(ParticleTypes.DRIPPING_HONEY, backX, y + 1.3, backZ,
-                    0.0, -0.02, 0.0);
             default -> { }
         }
     }
@@ -265,7 +226,7 @@ public final class UniquenessParticleManager {
         double phase = (seed.getLeastSignificantBits() & 0xFFFF) / (double) 0xFFFF;
 
         long glyphTick = emissionTick + (long) (phase * GLYPH_PERIOD_TICKS);
-        if (glyphTick % GLYPH_PERIOD_TICKS == 0 && !"giant".equals(pathway)) {
+        if (legacyParticles(pathway) && glyphTick % GLYPH_PERIOD_TICKS == 0) {
             emitGlyph(level, player, pathway, rgb);
         }
 
@@ -273,43 +234,11 @@ public final class UniquenessParticleManager {
                 level, player, emissionTick, rgb, phase,
                 player.getX(), player.getY(), player.getZ());
 
+        if (!shouldEmit(player.getUUID().toString(), emissionTick, AppearanceConfig.get().uniquenessParticleIntensity)) return;
         switch (pathway) {
-            case "fool" -> emitFool(emission);
             case "door" -> emitDoor(emission);
-            case "error" -> emitError(emission);
-            case "visionary" -> emitVisionary(emission);
-            case "sun" -> emitSun(emission);
-            case "hanged" -> emitHanged(emission);
-            case "tyrant" -> emitTyrant(emission);
-            case "demoness" -> emitDemoness(emission);
-            case "abyss" -> emitAbyss(emission);
-            case "chained" -> emitChained(emission);
-            case "mother" -> emitMother(emission);
-            case "moon" -> emitMoon(emission);
-            case "priest" -> emitPriest(emission);
-            case "justiciar" -> emitJusticiar(emission);
-            case "giant" -> emitSettingSun(level, player, rgb, emissionTick);
-            case "darkness" -> emitDarkness(emission);
             case "death" -> emitDeath(emission);
-            case "hermit" -> emitHermit(emission);
-            case "fortune" -> emitFortune(emission);
-            case "emperor" -> emitEmperor(emission);
-            case "paragon" -> emitParagon(emission);
-            case "tower" -> emitTower(emission);
-            default -> throw new IllegalArgumentException("Unknown uniqueness pathway: " + pathway);
-        }
-    }
-
-    private static void emitFool(Emission e) {
-        double angle = e.tick() * 0.14 + e.phase() * Math.PI * 2;
-        for (int index = 0; index < 2; index++) {
-            double a = angle + index * Math.PI;
-            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.7f),
-                    e.x() + Math.cos(a) * 0.55, e.y() + 2.55 + Math.sin(e.tick() * 0.31 + index) * 0.08,
-                    e.z() + Math.sin(a) * 0.55, 0.0, 0.004, 0.0);
-        }
-        if (e.player().getRandom().nextFloat() < 0.25f) {
-            e.level().addParticle(ParticleTypes.WHITE_ASH, e.x(), e.y() + 2.3, e.z(), 0.0, 0.01, 0.0);
+            default -> emitAccent(emission);
         }
     }
 
@@ -321,164 +250,6 @@ public final class UniquenessParticleManager {
             e.level().addParticle(ParticleTypes.END_ROD,
                     e.x() + Math.cos(a) * radius, e.y() + 2.45 + Math.sin(a * 2.0) * 0.18,
                     e.z() + Math.sin(a) * radius, 0.0, 0.0, 0.0);
-        }
-    }
-
-    private static void emitError(Emission e) {
-        var random = e.player().getRandom();
-        double jitterX = (random.nextDouble() - 0.5) * 1.3;
-        double jitterZ = (random.nextDouble() - 0.5) * 1.3;
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.0f),
-                e.x() + jitterX, e.y() + 1.0 + random.nextDouble() * 1.3, e.z() + jitterZ, 0.0, 0.0, 0.0);
-        if (random.nextFloat() < 0.3f) {
-            e.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
-                    e.x() + jitterX, e.y() + 1.6, e.z() + jitterZ, 0.0, 0.0, 0.0);
-        }
-    }
-
-    private static void emitVisionary(Emission e) {
-        double angle = e.tick() * 0.26 + e.phase() * Math.PI * 2;
-        e.level().addParticle(ParticleTypes.ENCHANT,
-                e.x() + Math.cos(angle) * 0.5, e.y() + 2.1 + Math.sin(angle * 1.5) * 0.22,
-                e.z() + Math.sin(angle) * 0.5, 0.0, 0.012, 0.0);
-        if (e.player().getRandom().nextFloat() < 0.12f) {
-            e.level().addParticle(ParticleTypes.WITCH, e.x(), e.y() + 2.3, e.z(), 0.0, 0.01, 0.0);
-        }
-    }
-
-    private static void emitSun(Emission e) {
-        double angle = e.tick() * 0.18 + e.phase() * Math.PI * 2;
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.25f),
-                e.x() + Math.cos(angle) * 0.9, e.y() + 1.35, e.z() + Math.sin(angle) * 0.9,
-                0.0, 0.01, 0.0);
-        if (e.tick() % 2 == 0) {
-            e.level().addParticle(ParticleTypes.GLOW, e.x(),
-                    e.y() + 0.6 + e.player().getRandom().nextDouble() * 1.4, e.z(), 0.0, 0.02, 0.0);
-        }
-    }
-
-    private static void emitHanged(Emission e) {
-        var random = e.player().getRandom();
-        if (e.tick() % 2 == 0) {
-            e.level().addParticle(ParticleTypes.SOUL,
-                    e.x() + (random.nextDouble() - 0.5) * 1.1, e.y() + 2.4,
-                    e.z() + (random.nextDouble() - 0.5) * 1.1, 0.0, -0.03, 0.0);
-        }
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 0.9f),
-                e.x(), e.y() + 1.6, e.z(), 0.0, -0.01, 0.0);
-    }
-
-    private static void emitTyrant(Emission e) {
-        double angle = e.tick() * 0.34 + e.phase() * Math.PI * 2;
-        var random = e.player().getRandom();
-        e.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
-                e.x() + Math.cos(angle) * 0.8, e.y() + 0.9 + random.nextDouble() * 1.4,
-                e.z() + Math.sin(angle) * 0.8, 0.0, 0.0, 0.0);
-        if (e.tick() % 3 == 0) {
-            e.level().addParticle(ParticleTypes.CLOUD, e.x(), e.y() + 2.2, e.z(), 0.0, 0.005, 0.0);
-            e.level().addParticle(ParticleTypes.RAIN, e.x(), e.y() + 2.6, e.z(), 0.0, -0.08, 0.0);
-        }
-    }
-
-    private static void emitDemoness(Emission e) {
-        double angle = -e.tick() * 0.22 + e.phase() * Math.PI * 2;
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.05f),
-                e.x() + Math.cos(angle) * 0.7, e.y() + 1.5 + Math.sin(angle * 2.0) * 0.3,
-                e.z() + Math.sin(angle) * 0.7, 0.0, 0.0, 0.0);
-        if (e.player().getRandom().nextFloat() < 0.05f) {
-            e.level().addParticle(ParticleTypes.HEART, e.x(), e.y() + 2.2, e.z(), 0.0, 0.0, 0.0);
-        }
-    }
-
-    private static void emitAbyss(Emission e) {
-        var random = e.player().getRandom();
-        if (e.tick() % 2 == 0) {
-            e.level().addParticle(ParticleTypes.SOUL_FIRE_FLAME,
-                    e.x() + (random.nextDouble() - 0.5) * 0.38, e.y() + 2.18 + random.nextDouble() * 0.42,
-                    e.z() + (random.nextDouble() - 0.5) * 0.38, 0.0, 0.025, 0.0);
-        }
-        e.level().addParticle(ParticleTypes.ASH, e.x(), e.y() + 1.8, e.z(), 0.0, -0.01, 0.0);
-    }
-
-    private static void emitChained(Emission e) {
-        double angle = e.tick() * 0.32 + e.phase() * Math.PI * 2;
-        for (int side = 0; side < 2; side++) {
-            double linkAngle = angle + side * Math.PI;
-            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.35f),
-                    e.x() + Math.cos(linkAngle) * 0.78,
-                    e.y() + 1.15 + Math.sin(angle * 0.7 + side * Math.PI) * 0.45,
-                    e.z() + Math.sin(linkAngle) * 0.78, 0.0, -0.008, 0.0);
-        }
-        if (e.player().getRandom().nextFloat() < 0.3f) {
-            e.level().addParticle(ParticleTypes.SCULK_SOUL, e.x(), e.y() + 1.4, e.z(), 0.0, 0.01, 0.0);
-        }
-    }
-
-    private static void emitMother(Emission e) {
-        var random = e.player().getRandom();
-        if (e.tick() % 2 == 0) {
-            e.level().addParticle(ParticleTypes.SPORE_BLOSSOM_AIR,
-                    e.x() + (random.nextDouble() - 0.5) * 1.2, e.y() + 0.4 + random.nextDouble() * 1.8,
-                    e.z() + (random.nextDouble() - 0.5) * 1.2, 0.0, 0.005, 0.0);
-        }
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 0.8f),
-                e.x(), e.y() + 1.1, e.z(), 0.0, 0.008, 0.0);
-        if (e.tick() % 3 == 0) {
-            e.level().addParticle(ParticleTypes.CHERRY_LEAVES, e.x(), e.y() + 1.85, e.z(), 0.0, -0.01, 0.0);
-        }
-    }
-
-    private static void emitMoon(Emission e) {
-        double angle = e.tick() * 0.16 + e.phase() * Math.PI * 2;
-        for (int side = 0; side < 2; side++) {
-            double orbit = angle + side * Math.PI;
-            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.35f),
-                    e.x() + Math.cos(orbit) * 1.0, e.y() + 1.3 + Math.sin(orbit) * 0.62,
-                    e.z() + Math.sin(orbit) * 1.0, 0.0, 0.008, 0.0);
-        }
-        e.level().addParticle(new DustParticleOptions(0xE8F2FF, 1.1f),
-                e.x() + Math.cos(angle * 0.5) * 0.32, e.y() + 2.45,
-                e.z() + Math.sin(angle * 0.5) * 0.32, 0.0, -0.004, 0.0);
-        if (e.player().getRandom().nextFloat() < 0.25f) {
-            e.level().addParticle(ParticleTypes.SNOWFLAKE, e.x(), e.y() + 2.4, e.z(), 0.0, -0.01, 0.0);
-        }
-    }
-
-    private static void emitPriest(Emission e) {
-        var random = e.player().getRandom();
-        if (e.tick() % 2 == 0) {
-            e.level().addParticle(ParticleTypes.SMALL_FLAME,
-                    e.x() + (random.nextDouble() - 0.5) * 0.8, e.y() + 0.3 + random.nextDouble() * 1.5,
-                    e.z() + (random.nextDouble() - 0.5) * 0.8, 0.0, 0.012, 0.0);
-        }
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 0.85f),
-                e.x(), e.y() + 1.7, e.z(), 0.0, 0.006, 0.0);
-    }
-
-    private static void emitJusticiar(Emission e) {
-        double angle = e.tick() * 0.15 + e.phase() * Math.PI * 2;
-        for (int side = -1; side <= 1; side += 2) {
-            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.35f),
-                    e.x() + Math.cos(angle) * side * 0.95, e.y() + 1.35,
-                    e.z() + Math.sin(angle) * side * 0.95, 0.0, 0.012, 0.0);
-        }
-        e.level().addParticle(new DustParticleOptions(0xFFF2A8, 1.15f),
-                e.x(), e.y() + 2.15, e.z(), 0.0, 0.008, 0.0);
-        if (e.player().getRandom().nextFloat() < 0.3f) {
-            e.level().addParticle(ParticleTypes.ENCHANT, e.x(), e.y() + 2.0, e.z(), 0.0, 0.01, 0.0);
-        }
-    }
-
-    private static void emitDarkness(Emission e) {
-        var random = e.player().getRandom();
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.3f),
-                e.x() + (random.nextDouble() - 0.5) * 1.1, e.y() + 1.9,
-                e.z() + (random.nextDouble() - 0.5) * 1.1, 0.0, -0.004, 0.0);
-        if (random.nextFloat() < 0.3f) {
-            e.level().addParticle(ParticleTypes.ASH, e.x(), e.y() + 2.5, e.z(), 0.0, -0.02, 0.0);
-        }
-        if (e.tick() % 6 == 0) {
-            e.level().addParticle(new ShriekParticleOption(0), e.x(), e.y() + 2.25, e.z(), 0.0, 0.04, 0.0);
         }
     }
 
@@ -495,111 +266,26 @@ public final class UniquenessParticleManager {
                 e.z() + (random.nextDouble() - 0.5) * 0.65, 0.0, 0.012, 0.0);
     }
 
-    private static void emitHermit(Emission e) {
-        double angle = e.tick() * 0.11 + e.phase() * Math.PI * 2;
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 0.95f),
-                e.x() + Math.cos(angle) * 0.72, e.y() + 2.05 + Math.sin(angle * 2.0) * 0.34,
-                e.z() + Math.sin(angle) * 1.1, 0.0, 0.004, 0.0);
-        if (e.tick() % 3 == 0) {
-            e.level().addParticle(ParticleTypes.END_ROD, e.x() - Math.cos(angle) * 0.55,
-                    e.y() + 2.15, e.z() - Math.sin(angle) * 0.55, 0.0, 0.006, 0.0);
-        }
+    private static boolean legacyParticles(String pathway) {
+        return "death".equals(pathway) || "door".equals(pathway);
     }
 
-    private static void emitFortune(Emission e) {
-        double angle = -e.tick() * 0.28 + e.phase() * Math.PI * 2;
-        e.level().addParticle(ParticleTypes.GLOW,
-                e.x() + Math.cos(angle) * 0.7, e.y() + 0.8 + (e.tick() % 24) * 0.07,
-                e.z() + Math.sin(angle) * 0.7, 0.0, 0.0, 0.0);
-        if (e.player().getRandom().nextFloat() < 0.2f) {
-            e.level().addParticle(new DustParticleOptions(e.rgb(), 0.8f),
-                    e.x(), e.y() + 1.6, e.z(), 0.0, 0.01, 0.0);
-        }
-    }
-
-    private static void emitEmperor(Emission e) {
-        double angle = e.tick() * 0.2 + e.phase() * Math.PI * 2;
-        double snappedAngle = Math.round(angle / (Math.PI / 2)) * (Math.PI / 2);
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.0f),
-                e.x() + Math.cos(snappedAngle) * 0.7, e.y() + 0.3 + (e.tick() % 26) * 0.075,
-                e.z() + Math.sin(snappedAngle) * 0.7, 0.0, 0.01, 0.0);
-        if (e.player().getRandom().nextFloat() < 0.12f) {
-            e.level().addParticle(ParticleTypes.ENCHANT, e.x(), e.y() + 2.1, e.z(), 0.0, 0.0, 0.0);
-        }
-    }
-
-    private static void emitParagon(Emission e) {
-        var random = e.player().getRandom();
-        double angle = e.tick() * 0.38 + e.phase() * Math.PI * 2;
-        e.level().addParticle(new DustParticleOptions(e.rgb(), 1.4f),
-                e.x() + Math.cos(angle) * 0.85, e.y() + 1.35,
-                e.z() + Math.sin(angle) * 0.85, 0.0, 0.018, 0.0);
-        for (int spark = 0; spark < 2; spark++) {
-            e.level().addParticle(ParticleTypes.ELECTRIC_SPARK,
-                    e.x() + (random.nextDouble() - 0.5) * 1.15, e.y() + 0.55 + random.nextDouble() * 1.75,
-                    e.z() + (random.nextDouble() - 0.5) * 1.15, 0.0, 0.025, 0.0);
-        }
-        if (e.tick() % 3 == 0) {
-            float yaw = e.player().getYRot() * ((float) Math.PI / 180.0f);
-            double handX = Math.cos(yaw) * 0.48;
-            double handZ = Math.sin(yaw) * 0.48;
-            e.level().addParticle(ParticleTypes.WAX_ON, e.x() + handX, e.y() + 1.15, e.z() + handZ, 0.0, 0.01, 0.0);
-            e.level().addParticle(ParticleTypes.WAX_ON, e.x() - handX, e.y() + 1.15, e.z() - handZ, 0.0, 0.01, 0.0);
-            e.level().addParticle(ParticleTypes.NOTE, e.x(), e.y() + 2.35, e.z(), 0.0, 0.02, 0.0);
-        }
-    }
-
-    private static void emitTower(Emission e) {
-        var random = e.player().getRandom();
-        double rise = (e.tick() % 24) / 24.0;
-        for (int column = 0; column < 3; column++) {
-            double angle = column * Math.PI * 2 / 3 + e.tick() * 0.08;
-            e.level().addParticle(new DustParticleOptions(e.rgb(), 1.25f),
-                    e.x() + Math.cos(angle) * 0.42, e.y() + 0.2 + ((rise + column / 3.0) % 1.0) * 2.5,
-                    e.z() + Math.sin(angle) * 0.42, 0.0, 0.035, 0.0);
-        }
-        if (random.nextFloat() < 0.2f) {
-            e.level().addParticle(ParticleTypes.CLOUD, e.x(), e.y() + 2.6, e.z(), 0.0, 0.01, 0.0);
+    private static void emitAccent(Emission e) {
+        if (e.tick() % 3 != 0) return;
+        double angle = e.tick() * .08 + e.phase() * Math.PI * 2;
+        double yaw = Math.toRadians(e.player().getYRot());
+        double horizontal = Math.cos(angle) * .65;
+        double x = e.x() + Math.sin(yaw) * .5 + Math.cos(yaw) * horizontal;
+        double z = e.z() - Math.cos(yaw) * .5 + Math.sin(yaw) * horizontal;
+        e.level().addParticle(new DustParticleOptions(e.rgb(), .35f), x,
+                e.y() + 1.25 + Math.sin(angle) * .6, z, 0, .008, 0);
+        if ("priest".equals(resolvePathway(e.player()))) {
+            e.level().addParticle(ParticleTypes.SMALL_FLAME, x, e.y() + .6, z, 0, .035, 0);
         }
     }
 
     private record Emission(ClientLevel level, AbstractClientPlayer player, long tick, int rgb,
                             double phase, double x, double y, double z) {
-    }
-
-    /**
-     * Twilight Giant's uniqueness: a full-bright setting-sun backdrop hanging behind the
-     * shoulders — a dense ember disc with end-rod rim light, plus an amber ground ring.
-     * Composed from the brightest vanilla particles (end rods render near-emissive), so
-     * the disc reads as glowing even without a custom particle type.
-     */
-    private static void emitSettingSun(ClientLevel level, AbstractClientPlayer player,
-                                       int rgb, long emissionTick) {
-        double x = player.getX();
-        double y = player.getY();
-        double z = player.getZ();
-        float yawRad = player.getYRot() * ((float) Math.PI / 180.0f);
-        double backX = x + Math.sin(yawRad) * 1.5; // behind the player
-        double backZ = z - Math.cos(yawRad) * 1.5;
-        double sunY = y + 1.35;
-
-        var random = player.getRandom();
-        double angle = emissionTick * 0.5 + random.nextDouble() * Math.PI * 2;
-        double radius = 0.55 + random.nextDouble() * 0.5;
-        // Ember disc body
-        level.addParticle(new DustParticleOptions(0xFF9E2E, 2.6f),
-                backX + Math.cos(angle) * radius, sunY + Math.sin(angle) * radius * 0.85,
-                backZ + Math.sin(angle) * radius * 0.35, 0.0, 0.0, 0.0);
-        // Rim light
-        if (emissionTick % 2 == 0) {
-            level.addParticle(ParticleTypes.END_ROD,
-                    backX + Math.cos(angle * 1.7) * 0.95, sunY + Math.sin(angle * 1.7) * 0.8,
-                    backZ + Math.sin(angle * 1.7) * 0.5, 0.0, 0.0, 0.0);
-        }
-        // Amber ground ring in front of the feet
-        double ringAngle = emissionTick * 0.22;
-        level.addParticle(new DustParticleOptions(rgb, 0.9f),
-                x + Math.cos(ringAngle) * 1.0, y + 0.1, z + Math.sin(ringAngle) * 1.0, 0.0, 0.005, 0.0);
     }
 
     /**
@@ -624,6 +310,7 @@ public final class UniquenessParticleManager {
                 if (((mask >> bit) & 1L) == 0L) {
                     continue;
                 }
+                if (!shouldEmit(player.getUUID().toString(), bit, AppearanceConfig.get().uniquenessParticleIntensity)) continue;
                 double offsetX = (col - 2) * cell;
                 double offsetY = (2 - row) * cell;
                 level.addParticle(new DustParticleOptions(rgb, 0.85f),
@@ -659,6 +346,7 @@ public final class UniquenessParticleManager {
             for (int col = 0; col < 5; col++) {
                 int bit = row * 5 + col;
                 if (((mask >> bit) & 1L) == 0L) continue;
+                if (!shouldEmit(player.getUUID().toString(), bit, AppearanceConfig.get().uniquenessParticleIntensity)) continue;
                 double horizontal = (col - 2) * cell;
                 double vertical = (2 - row) * cell;
                 level.addParticle(new DustParticleOptions(rgb, size),
@@ -672,29 +360,9 @@ public final class UniquenessParticleManager {
     }
 
     // 5x5 bit patterns (bit = row*5+col, row 0 = top) — rough procedural sigils per pathway
-    private static final Map<String, Long> GLYPH_MASKS = Map.ofEntries(
-            Map.entry("fool", glyph(".....", ".###.", "#.##.", "#.#.#", ".###.")),      // wheel of fate
-            Map.entry("door", glyph(".###.", "#...#", "#..##", "#.##.", "#...#")),      // archway
-            Map.entry("error", glyph("#.#.#", ".#.#.", "#.##.", ".#.#.", "#.#.#")),     // shattered grid
-            Map.entry("visionary", glyph(".....", ".###.", "#.#.#", "#...#", ".###.")), // open eye
-            Map.entry("sun", glyph(".###.", "##.##", "#.#.#", "##.##", ".###.")),       // radiant disc
-            Map.entry("tyrant", glyph("..#..", ".#.#.", "##.##", ".#.#.", "#####")),    // trident
-            Map.entry("demoness", glyph("#...#", "#.#.#", ".###.", ".#.#.", "#...#")),  // allure cross
-            Map.entry("abyss", glyph(".###.", "#...#", "#.##.", "#.##.", "#####")),     // devouring maw
-            Map.entry("chained", glyph("#####", "..#..", "#####", "..#..", "#####")),   // chain links
-            Map.entry("mother", glyph("..#..", ".#.#.", ".#.#.", ".#.#.", "#####")),    // sprout
-            Map.entry("moon", glyph(".###.", "#..#.", "#.#..", "#.#..", "#..#.")),      // crescent
-            Map.entry("priest", glyph("...#.", "..##.", ".###.", "#####", "..#..")),    // flame sigil
-            Map.entry("darkness", glyph("#...#", ".#.#.", "..#..", ".#.#.", "#...#")),  // closing shadow
-            Map.entry("death", glyph("#...#", ".#.#.", "..#..", ".#.#.", "#...#")),     // bone cross
-            Map.entry("hermit", glyph("#####", "..#..", ".###.", "..#..", "#####")),    // lantern
-            Map.entry("fortune", glyph("#...#", ".###.", "..#..", ".###.", "..#..")),   // dice pips
-            Map.entry("emperor", glyph("#...#", "#####", ".###.", ".###.", "#####")),   // crown
-            Map.entry("paragon", glyph("##.##", ".###.", "..#..", "..#..", "..#..")),   // hammer
-            Map.entry("giant", glyph("##.##", "##.##", "#####", ".###.", "..#..")),     // mountain sun
-            Map.entry("hanged", glyph("#####", "..#..", ".###.", "..#..", ".#.#.")),    // inverted figure
-            Map.entry("justiciar", glyph("#...#", ".#.#.", ".###.", ".#.#.", "#...#")), // scales
-            Map.entry("tower", glyph("#####", "..#..", "..#..", "..#..", "..#..")));    // spire
+    private static final Map<String, Long> GLYPH_MASKS = Map.of(
+            "door", glyph(".###.", "#...#", "#..##", "#.##.", "#...#"),
+            "death", glyph("#...#", ".#.#.", "..#..", ".#.#.", "#...#"));
 
     private static long glyph(String... rows) {
         long mask = 0;
@@ -713,16 +381,16 @@ public final class UniquenessParticleManager {
     }
 
     private static final Map<String, Integer> ACCENTS = Map.ofEntries(
-            Map.entry("fool", 0xB347CC),
+            Map.entry("fool", 0xD6D8CC),
             Map.entry("door", 0x5B7FE6),
             Map.entry("sun", 0xFFE55C),
             Map.entry("tyrant", 0x4AA3FF),
             Map.entry("demoness", 0xB22222),
             Map.entry("priest", 0xFF6B35),
-            Map.entry("error", 0xE04848),
+            Map.entry("error", 0xDBC385),
             Map.entry("tower", 0x99AABB),
-            Map.entry("visionary", 0x44CCBB),
-            Map.entry("hanged", 0x3A6E4F),
+            Map.entry("visionary", 0xD2D4CE),
+            Map.entry("hanged", 0xA34448),
             Map.entry("darkness", 0x4A1A6E),
             Map.entry("death", 0xC8D0E8),
             Map.entry("giant", 0xE88B2A),

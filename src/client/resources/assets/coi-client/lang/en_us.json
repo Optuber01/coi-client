@@ -168,5 +168,5 @@
   "screen.coi.appearance.reset_defaults": "Reset Defaults",
   "screen.coi.appearance.reset_hint": "Restore all appearance settings. Cancel undoes this reset.",
   "screen.coi.appearance.rotate_short_hint": "Drag to rotate",
-  "screen.coi.appearance.particles_hint": "Changes particles in the world. The preview shows modeled features."
+  "screen.coi.appearance.particles_hint": "Adjusts particle glow and world trails. The preview shows the pathway shape."
 }

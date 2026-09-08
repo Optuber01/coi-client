@@ -58,6 +58,7 @@ public final class AppearanceSettingsScreen extends Screen {
 
     @Override
     protected void init() {
+        draggingPreview = draggingScroll = false;
         numbers.forEach(NumberSlider::revertInvalid);
         clearWidgets(); rows.clear(); headings.clear(); numbers.clear(); rowY = 0; done = null;
         panelW = Math.min(600, width - 16);
@@ -335,7 +336,11 @@ public final class AppearanceSettingsScreen extends Screen {
     }
     @Override public boolean mouseDragged(MouseButtonEvent e, double dx, double dy) {
         if (draggingScroll) { scrollTo(e.y()); return true; }
-        if (draggingPreview && e.button() == 0) { previewYaw += (float) dx * 1.5f; previewPitch = Math.clamp(previewPitch + (float) dy, -60, 60); return true; }
+        if (draggingPreview && e.button() == 0) {
+            previewYaw = net.minecraft.util.Mth.wrapDegrees(previewYaw + (float) dx * .65f);
+            previewPitch = Math.clamp(previewPitch + (float) dy * .65f, -45, 45);
+            return true;
+        }
         return super.mouseDragged(e, dx, dy);
     }
     @Override public boolean mouseReleased(MouseButtonEvent e) {
@@ -361,8 +366,9 @@ public final class AppearanceSettingsScreen extends Screen {
         state.outlineColor = 0;
         if (state instanceof LivingEntityRenderState living) {
             living.bodyRot = 180.0f + yawDegrees;
-            living.yRot = yawDegrees;
-            living.xRot = -pitchDegrees;
+            // These are head-relative angles. Orbit the whole model without twisting its neck.
+            living.yRot = 0;
+            living.xRot = 0;
             living.boundingBoxWidth /= living.scale;
             living.boundingBoxHeight /= living.scale;
             living.scale = 1.0f;

@@ -18,6 +18,10 @@ public final class ClawTraitRenderer implements AppearanceTraitRenderer {
 
     public enum Style {CORROSIVE, WEREWOLF}
 
+    private static final net.minecraft.client.renderer.rendertype.RenderType MATERIAL =
+            net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("coi-client", "textures/entity/claw_grain.png"));
+
     private final String traitId;
     private final Style style;
     private final TraitGeometry.Tint claw;
@@ -27,12 +31,12 @@ public final class ClawTraitRenderer implements AppearanceTraitRenderer {
         this.traitId = traitId;
         this.style = style;
         this.claw = switch (style) {
-            case CORROSIVE -> new TraitGeometry.Tint(0.14f, 0.18f, 0.16f, 0.98f);
-            case WEREWOLF -> new TraitGeometry.Tint(0.08f, 0.07f, 0.065f, 0.99f);
+            case CORROSIVE -> new TraitGeometry.Tint(0.18f, 0.20f, 0.21f, 1);
+            case WEREWOLF -> new TraitGeometry.Tint(0.19f, 0.16f, 0.12f, 1);
         };
         this.symbol = switch (style) {
-            case CORROSIVE -> new TraitGeometry.Tint(0.36f, 0.58f, 0.29f, 0.95f);
-            case WEREWOLF -> new TraitGeometry.Tint(0.55f, 0.09f, 0.08f, 0.9f);
+            case CORROSIVE -> new TraitGeometry.Tint(0.34f, 0.40f, 0.35f, 1);
+            case WEREWOLF -> new TraitGeometry.Tint(0.38f, 0.32f, 0.23f, 1);
         };
     }
 
@@ -54,25 +58,34 @@ public final class ClawTraitRenderer implements AppearanceTraitRenderer {
         float center = (left ? 1.0f : -1.0f) * (slim ? 0.5f : 1.0f);
         var settings = AppearanceConfig.get();
         stack.translate(center / 16.0f, settings.clawYOffsetPixels / 16.0f, settings.clawZOffsetPixels / 16.0f);
-        int light = style == Style.CORROSIVE ? TraitRenderSupport.FULL_BRIGHT : state.lightCoords;
-        collector.order(3).submitCustomGeometry(stack, TraitRenderSupport.TRANSLUCENT,
-                (pose, consumer) -> drawClaws(pose, consumer, light, slim));
+        int light = state.lightCoords;
+        collector.order(3).submitCustomGeometry(stack, MATERIAL,
+                (pose, consumer) -> drawClaws(pose, consumer, light, slim, left));
         stack.popPose();
     }
 
-    private void drawClaws(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light, boolean slim) {
+    private void drawClaws(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light, boolean slim, boolean left) {
         TraitGeometry g = TraitGeometry.INSTANCE;
         var settings = AppearanceConfig.get();
         float length = settings.clawLength;
         for (int index = 0; index < 3; index++) {
             float x = (index - 1) * (slim ? 0.8f : 1.1f) * settings.clawSpread;
-            TraitGeometry.Point[] path = {
-                    g.pointPixels(x, 9.6f, -2.05f),
-                    g.pointPixels(x, 9.6f + 1.1f * length, -2.05f - 0.5f * length),
-                    g.pointPixels(x, 9.6f + 2.8f * length, -2.05f - 1.55f * length)
-            };
-            g.drawTube(pose, consumer, path, new float[]{0.35f, 0.25f, 0.06f}, 6,
-                    new TraitGeometry.Tint[]{symbol, claw}, light);
+            TraitGeometry.Point[] path = new TraitGeometry.Point[8];
+            float[] radii = new float[8];
+            TraitGeometry.Tint[] bands = new TraitGeometry.Tint[7];
+            for (int n = 0; n < path.length; n++) {
+                float t = n / 7.0f;
+                path[n] = g.pointPixels(x, 9.6f + 2.8f * t * length, -2.05f - (t * .8f + t * t * .75f) * length);
+                radii[n] = .35f * (1 - t) + .035f;
+                if (n < bands.length) bands[n] = n % 3 == 0 ? symbol : claw;
+            }
+            g.drawTube(pose, consumer, path, radii, 6, bands, light);
+            // A narrow polished ridge catches light; the darker bands read as worn keratin/metal.
+            var edge = style == Style.CORROSIVE ? new TraitGeometry.Tint(.63f, .67f, .68f, 1)
+                    : new TraitGeometry.Tint(.65f, .57f, .42f, 1);
+            for (int n = 0; n < path.length; n++) path[n] = path[n].add(new TraitGeometry.Vec((left ? 1 : -1) * radii[n] / 16, 0, 0));
+            g.drawTube(pose, consumer, path, new float[]{.055f,.055f,.05f,.05f,.045f,.04f,.03f,.01f}, 3,
+                    new TraitGeometry.Tint[]{edge,edge,edge,edge,edge,edge,edge}, light);
         }
     }
 }
