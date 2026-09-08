@@ -109,7 +109,7 @@ public final class UniquenessParticleManager {
             return; // half tick rate
         }
         AppearanceConfig.Settings settings = AppearanceConfig.get();
-        if (!settings.enableUniquenessEffects) {
+        if (!settings.enabled || !settings.enableUniquenessEffects) {
             lastPositions.clear();
             stationaryTicks.clear();
             return;
@@ -132,10 +132,10 @@ public final class UniquenessParticleManager {
                 continue;
             }
             boolean self = player == client.player;
-            if (self && (firstPerson || !settings.uniquenessShowSelf)) {
+            if (self && firstPerson) {
                 continue; // suppress for the local first-person camera
             }
-            if (!self && !settings.uniquenessShowOthers) {
+            if (!AppearanceConfig.shouldRenderUniqueness(uuid)) {
                 continue;
             }
             if (player.distanceToSqr(camera) > MAX_DISTANCE_SQ) {

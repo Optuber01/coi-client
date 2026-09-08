@@ -52,7 +52,7 @@ public class AppearanceTraitLayer extends RenderLayer<AvatarRenderState, PlayerM
             }
             renderer.submit(poseStack, collector, state, model);
         }
-        if (AppearanceConfig.get().enableUniquenessEffects) {
+        if (AppearanceConfig.shouldRenderUniqueness(playerUuid)) {
             String pathway = UniquenessParticleManager.resolvePathway(playerUuid, activeTraits);
             if (pathway != null) {
                 UniquenessAdornmentRenderer.submit(pathway, poseStack, collector, state, model);

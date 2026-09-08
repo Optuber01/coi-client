@@ -27,12 +27,12 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
         this.traitId = traitId;
         this.style = style;
         this.primary = switch (style) {
-            case DEVIL_ARMOR -> new TraitGeometry.Tint(0.08f, 0.025f, 0.09f, 0.38f);
-            case WOOD -> new TraitGeometry.Tint(0.38f, 0.20f, 0.07f, 0.34f);
-            case STONE -> new TraitGeometry.Tint(0.48f, 0.50f, 0.54f, 0.32f);
-            case CHITIN -> new TraitGeometry.Tint(0.16f, 0.08f, 0.18f, 0.36f);
-            case ZOMBIE -> new TraitGeometry.Tint(0.24f, 0.40f, 0.25f, 0.28f);
-            case WRAITH -> new TraitGeometry.Tint(0.35f, 0.70f, 0.82f, 0.18f);
+            case DEVIL_ARMOR -> new TraitGeometry.Tint(0.08f, 0.025f, 0.09f, 0.65f);
+            case WOOD -> new TraitGeometry.Tint(0.38f, 0.20f, 0.07f, 0.60f);
+            case STONE -> new TraitGeometry.Tint(0.48f, 0.50f, 0.54f, 0.60f);
+            case CHITIN -> new TraitGeometry.Tint(0.16f, 0.08f, 0.18f, 0.65f);
+            case ZOMBIE -> new TraitGeometry.Tint(0.24f, 0.40f, 0.25f, 0.55f);
+            case WRAITH -> new TraitGeometry.Tint(0.35f, 0.70f, 0.82f, 0.35f);
         };
         this.detail = switch (style) {
             case DEVIL_ARMOR -> new TraitGeometry.Tint(0.70f, 0.06f, 0.10f, 0.58f);
@@ -52,18 +52,19 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
     @Override
     public void submit(PoseStack stack, SubmitNodeCollector collector, AvatarRenderState state, PlayerModel model) {
         boolean slim = state.skin.model() == PlayerModelType.SLIM;
-        submitPart(stack, collector, state, model.head, Part.HEAD, slim);
-        submitPart(stack, collector, state, model.body, Part.BODY, slim);
-        submitPart(stack, collector, state, model.leftArm, Part.ARM, slim);
-        submitPart(stack, collector, state, model.rightArm, Part.ARM, slim);
-        submitPart(stack, collector, state, model.leftLeg, Part.LEG, slim);
-        submitPart(stack, collector, state, model.rightLeg, Part.LEG, slim);
+        submitPart(stack, collector, state, model.head, Part.HEAD, slim, 0);
+        submitPart(stack, collector, state, model.body, Part.BODY, slim, 0);
+        submitPart(stack, collector, state, model.leftArm, Part.ARM, slim, slim ? 0.5f : 1.0f);
+        submitPart(stack, collector, state, model.rightArm, Part.ARM, slim, slim ? -0.5f : -1.0f);
+        submitPart(stack, collector, state, model.leftLeg, Part.LEG, slim, 0);
+        submitPart(stack, collector, state, model.rightLeg, Part.LEG, slim, 0);
     }
 
     private void submitPart(PoseStack stack, SubmitNodeCollector collector, AvatarRenderState state, ModelPart part,
-                            Part partType, boolean slim) {
+                            Part partType, boolean slim, float offsetX) {
         stack.pushPose();
         part.translateAndRotate(stack);
+        stack.translate(offsetX / 16.0f, 0, 0);
         collector.order(1).submitCustomGeometry(
                 stack,
                 TraitRenderSupport.TRANSLUCENT,
@@ -89,7 +90,7 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
             case ARM -> {
                 float halfWidth = slim ? 1.5f : 2.0f;
                 g.boxPixels(pose, consumer, -halfWidth - inflate, -2 - inflate, -2 - inflate,
-                        halfWidth + inflate, 12 + inflate, 2 + inflate, primary, light);
+                        halfWidth + inflate, 10 + inflate, 2 + inflate, primary, light);
             }
             case LEG -> g.boxPixels(pose, consumer, -2 - inflate, -inflate, -2 - inflate,
                     2 + inflate, 12 + inflate, 2 + inflate, primary, light);
@@ -107,7 +108,7 @@ public final class SkinTraitRenderer implements AppearanceTraitRenderer {
                 g.boxPixels(pose, consumer, -2.2f, 9.2f, -2.48f, 1.25f, 10.15f, -2.16f, detail, light);
             }
             case ARM, LEG -> {
-                float edge = part == Part.ARM && slim ? 1.92f : 2.42f;
+                float edge = part == Part.ARM && slim ? 1.35f : 1.85f;
                 g.boxPixels(pose, consumer, -edge, 1.1f, -2.48f, 0.55f, 2.0f, -2.16f, detail, light);
                 g.boxPixels(pose, consumer, -0.55f, 7.1f, -2.48f, edge, 8.0f, -2.16f, detail, light);
             }

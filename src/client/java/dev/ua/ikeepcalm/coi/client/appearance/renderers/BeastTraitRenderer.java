@@ -3,6 +3,7 @@ package dev.ua.ikeepcalm.coi.client.appearance.renderers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ua.ikeepcalm.coi.client.appearance.AppearanceTraitRenderer;
 import dev.ua.ikeepcalm.coi.client.appearance.TraitGeometry;
+import dev.ua.ikeepcalm.coi.client.config.AppearanceConfig;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -44,13 +45,14 @@ public final class BeastTraitRenderer implements AppearanceTraitRenderer {
                 (pose, consumer) -> drawBody(pose, consumer, state.lightCoords));
         stack.popPose();
 
-        submitArm(stack, collector, state, model.leftArm, slim);
-        submitArm(stack, collector, state, model.rightArm, slim);
+        submitArm(stack, collector, state, model.leftArm, slim, true);
+        submitArm(stack, collector, state, model.rightArm, slim, false);
     }
 
-    private void submitArm(PoseStack stack, SubmitNodeCollector collector, AvatarRenderState state, ModelPart arm, boolean slim) {
+    private void submitArm(PoseStack stack, SubmitNodeCollector collector, AvatarRenderState state, ModelPart arm, boolean slim, boolean left) {
         stack.pushPose();
         arm.translateAndRotate(stack);
+        stack.translate((left ? 1.0f : -1.0f) * (slim ? 0.5f : 1.0f) / 16.0f, 0.0f, 0.0f);
         collector.order(3).submitCustomGeometry(stack, TraitRenderSupport.TRANSLUCENT,
                 (pose, consumer) -> drawArm(pose, consumer, state.lightCoords, slim));
         stack.popPose();
@@ -58,9 +60,9 @@ public final class BeastTraitRenderer implements AppearanceTraitRenderer {
 
     private void drawHead(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light) {
         TraitGeometry g = TraitGeometry.INSTANCE;
-        g.boxPixels(pose, consumer, -4.28f, -8.28f, -4.28f, 4.28f, 0.28f, 4.28f, FUR, light);
-        g.boxPixels(pose, consumer, -2.65f, -2.6f, -6.3f, 2.65f, 0.15f, -4.0f, FUR_LIGHT, light);
-        g.boxPixels(pose, consumer, -1.25f, -1.8f, -6.55f, 1.25f, -0.45f, -6.25f, NOSE, light);
+        g.boxPixels(pose, consumer, -4.28f, -8.28f, -4.28f, 4.28f, 0.28f, 4.28f, withOpacity(FUR), light);
+        g.boxPixels(pose, consumer, -2.65f, -2.6f, -6.3f, 2.65f, 0.15f, -4.0f, withOpacity(FUR_LIGHT), light);
+        g.boxPixels(pose, consumer, -1.25f, -1.8f, -6.55f, 1.25f, -0.45f, -6.25f, withOpacity(NOSE), light);
         drawEar(g, pose, consumer, light, -1.0f);
         drawEar(g, pose, consumer, light, 1.0f);
     }
@@ -69,19 +71,23 @@ public final class BeastTraitRenderer implements AppearanceTraitRenderer {
         TraitGeometry.Point a = g.pointPixels(side * 1.4f, -8.1f, 0.8f);
         TraitGeometry.Point b = g.pointPixels(side * 4.0f, -8.0f, 1.6f);
         TraitGeometry.Point c = g.pointPixels(side * 3.1f, -12.0f, 1.7f);
-        g.triangle(pose, consumer, a, b, c, FUR, light);
-        g.triangle(pose, consumer, c, b, a, FUR, light);
+        g.triangle(pose, consumer, a, b, c, withOpacity(FUR), light);
+        g.triangle(pose, consumer, c, b, a, withOpacity(FUR), light);
     }
 
     private void drawBody(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light) {
         TraitGeometry g = TraitGeometry.INSTANCE;
-        g.boxPixels(pose, consumer, -4.25f, -0.15f, -2.25f, 4.25f, 12.2f, 2.25f, FUR, light);
-        g.boxPixels(pose, consumer, -2.8f, 1.1f, -2.48f, 2.8f, 8.9f, -2.18f, FUR_LIGHT, light);
+        g.boxPixels(pose, consumer, -4.25f, -0.15f, -2.25f, 4.25f, 12.2f, 2.25f, withOpacity(FUR), light);
+        g.boxPixels(pose, consumer, -2.8f, 1.1f, -2.48f, 2.8f, 8.9f, -2.18f, withOpacity(FUR_LIGHT), light);
+    }
+
+    private static TraitGeometry.Tint withOpacity(TraitGeometry.Tint tint) {
+        return new TraitGeometry.Tint(tint.r(), tint.g(), tint.b(), tint.a() * AppearanceConfig.get().overlayOpacity);
     }
 
     private void drawArm(PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer consumer, int light, boolean slim) {
         TraitGeometry g = TraitGeometry.INSTANCE;
         float half = slim ? 1.68f : 2.18f;
-        g.boxPixels(pose, consumer, -half, -2.15f, -2.18f, half, 12.18f, 2.18f, FUR, light);
+        g.boxPixels(pose, consumer, -half, -2.15f, -2.18f, half, 10.18f, 2.18f, withOpacity(FUR), light);
     }
 }

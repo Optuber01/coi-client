@@ -19,7 +19,7 @@ import java.nio.file.Path;
  */
 public final class AppearanceConfig {
 
-    private static final int CONFIG_VERSION = 5;
+    private static final int CONFIG_VERSION = 6;
     private static final Logger LOGGER = LoggerFactory.getLogger(AppearanceConfig.class);
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir()
@@ -77,8 +77,16 @@ public final class AppearanceConfig {
         return self ? settings.showSelf : settings.showOthers;
     }
 
+    public static boolean shouldRenderUniqueness(String playerUuid) {
+        if (!shouldRender(playerUuid) || !settings.enableUniquenessEffects) return false;
+        var player = Minecraft.getInstance().player;
+        boolean self = player != null && playerUuid.equals(player.getUUID().toString());
+        return self ? settings.uniquenessShowSelf : settings.uniquenessShowOthers;
+    }
+
     private static void sanitize() {
         if (settings.configVersion < CONFIG_VERSION) {
+            if (settings.overlayOpacity == 0.55f) settings.overlayOpacity = 0.8f;
             settings.configVersion = CONFIG_VERSION;
         }
         settings.chestScale = Math.clamp(settings.chestScale, 0.80f, 1.50f);
@@ -90,6 +98,10 @@ public final class AppearanceConfig {
         settings.wingScale = Math.clamp(settings.wingScale, 0.60f, 1.50f);
         settings.wingFlapSpeed = Math.clamp(settings.wingFlapSpeed, 0.20f, 3.0f);
         settings.overlayOpacity = Math.clamp(settings.overlayOpacity, 0.20f, 1.0f);
+        settings.clawLength = Math.clamp(settings.clawLength, 0.5f, 1.5f);
+        settings.clawSpread = Math.clamp(settings.clawSpread, 0.7f, 1.3f);
+        settings.clawYOffsetPixels = Math.clamp(settings.clawYOffsetPixels, -1.0f, 1.0f);
+        settings.clawZOffsetPixels = Math.clamp(settings.clawZOffsetPixels, -1.0f, 1.0f);
         settings.uniquenessParticleIntensity = Math.clamp(settings.uniquenessParticleIntensity, 0.15f, 1.0f);
     }
 
@@ -113,8 +125,12 @@ public final class AppearanceConfig {
         public float wingFlapSpeed = 1.0f;
         public float wingScale = 1.0f;
         // Skin overlay blending
-        /** Restrained default so material traits accent the base skin instead of obscuring it. */
-        public float overlayOpacity = 0.55f;
+        /** Readable material color while retaining the base skin's features. */
+        public float overlayOpacity = 0.8f;
+        public float clawLength = 1.0f;
+        public float clawSpread = 1.0f;
+        public float clawYOffsetPixels = 0.0f;
+        public float clawZOffsetPixels = 0.0f;
         // Uniqueness particles
         public boolean enableUniquenessEffects = true;
         public boolean uniquenessShowSelf = true;

@@ -103,7 +103,7 @@ public final class AppearanceSettingsScreen extends Screen {
             int rowTop = y;
             int rowBottom = y + element.height();
             y = rowBottom;
-            if (rowBottom < listTop || rowTop > listBottom || element.isHeader()) {
+            if (rowTop < listTop || rowBottom > listBottom || element.isHeader()) {
                 continue;
             }
             Button button = Button.builder(element.label().get(), clicked -> {
@@ -146,6 +146,7 @@ public final class AppearanceSettingsScreen extends Screen {
         addGeneralElements(elements, settings);
         addBodyElements(elements, settings, families);
         addHairElements(elements, settings, families);
+        addClawElements(elements, settings, families);
         addWingElements(elements, settings, families);
         addSkinElements(elements, settings, families);
         if (active.isEmpty()) {
@@ -207,6 +208,22 @@ public final class AppearanceSettingsScreen extends Screen {
                 () -> settings.wingScale, value -> settings.wingScale = value, SCALE));
         elements.add(cycleControl("screen.coi.appearance.flap_speed",
                 () -> settings.wingFlapSpeed, value -> settings.wingFlapSpeed = value, FLAP_SPEED));
+    }
+
+    private static void addClawElements(List<Element> elements, AppearanceConfig.Settings settings,
+                                        Set<String> families) {
+        if (!families.contains("claws")) return;
+        elements.add(Element.header("screen.coi.appearance.section.claws"));
+        elements.add(cycleControl("screen.coi.appearance.length",
+                () -> settings.clawLength, value -> settings.clawLength = value,
+                new float[]{0.5f, 0.75f, 1.0f, 1.25f, 1.5f}));
+        elements.add(cycleControl("screen.coi.appearance.spread",
+                () -> settings.clawSpread, value -> settings.clawSpread = value,
+                new float[]{0.7f, 0.85f, 1.0f, 1.15f, 1.3f}));
+        elements.add(pixelControl("screen.coi.appearance.vertical_position",
+                () -> settings.clawYOffsetPixels, value -> settings.clawYOffsetPixels = value, HALF_PX));
+        elements.add(pixelControl("screen.coi.appearance.depth",
+                () -> settings.clawZOffsetPixels, value -> settings.clawZOffsetPixels = value, HALF_PX));
     }
 
     private static void addSkinElements(List<Element> elements, AppearanceConfig.Settings settings,
@@ -303,7 +320,7 @@ public final class AppearanceSettingsScreen extends Screen {
         graphics.centeredText(font,
                 Component.translatable("screen.coi.appearance_settings.hint")
                         .withStyle(ChatFormatting.GRAY),
-                contentX + contentW / 2, panelY + 28, 0xFFAAAAAA);
+                width / 2, panelY + 28, 0xFFAAAAAA);
 
         // Section headers behind the buttons (buttons are widgets and draw on top)
         List<Element> elements = buildElements();
@@ -312,7 +329,7 @@ public final class AppearanceSettingsScreen extends Screen {
         for (Element element : elements) {
             int rowTop = y;
             y += element.height();
-            if (element.isHeader() && rowTop >= listTop - HEADER_H && rowTop <= panelY + panelH - 34) {
+            if (element.isHeader() && rowTop >= listTop && rowTop + HEADER_H <= panelY + panelH - 34) {
                 graphics.text(font, element.label().get().copy().withStyle(ChatFormatting.GOLD),
                         contentX + 2, rowTop + 3, 0xFFFFFFFF);
             }

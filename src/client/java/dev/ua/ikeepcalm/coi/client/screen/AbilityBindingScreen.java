@@ -220,6 +220,7 @@ public class AbilityBindingScreen extends Screen {
 
         int buttonY = Math.min(this.height - (compact() ? 24 : 30), listBottom + 10);
         hudSettingsButton.setY(buttonY);
+        appearanceSettingsButton.setY(buttonY);
         clearAllButton.setY(buttonY);
         doneButton.setY(buttonY);
 
