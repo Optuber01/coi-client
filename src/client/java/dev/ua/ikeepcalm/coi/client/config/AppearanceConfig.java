@@ -58,6 +58,15 @@ public final class AppearanceConfig {
         return settings;
     }
 
+    public static Settings copySettings() {
+        return GSON.fromJson(GSON.toJson(settings), Settings.class);
+    }
+
+    /** Changes the local preview; persistence remains an explicit save operation. */
+    public static void setSettings(Settings value) {
+        settings = value;
+    }
+
     public static void reset() {
         settings = new Settings();
         save();
