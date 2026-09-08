@@ -192,6 +192,7 @@ public final class AppearanceSettingsScreen extends Screen {
         Component hint = Component.translatable("screen.coi.appearance.number_hint", format(min * (percent ? 100 : 1)),
                 format(max * (percent ? 100 : 1)), percent ? "%" : "px");
         if (key.equals("vertical_position") || key.equals("depth")) hint = hint.copy().append("\n").append(text(key + "_hint"));
+        if (key.equals("uniqueness_intensity")) hint = hint.copy().append("\n").append(text("particles_hint"));
         slider.setTooltip(Tooltip.create(hint)); field.setTooltip(Tooltip.create(hint));
         field.setResponder(slider::typed);
         numbers.add(slider); row(slider, rowY, labelHeight); row(field, rowY, labelHeight); rowY += ROW;
