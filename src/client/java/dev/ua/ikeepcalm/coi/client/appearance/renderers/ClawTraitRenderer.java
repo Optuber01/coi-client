@@ -27,11 +27,11 @@ public final class ClawTraitRenderer implements AppearanceTraitRenderer {
         this.traitId = traitId;
         this.style = style;
         this.claw = switch (style) {
-            case CORROSIVE -> new TraitGeometry.Tint(0.19f, 0.015f, 0.23f, 0.98f);
+            case CORROSIVE -> new TraitGeometry.Tint(0.14f, 0.18f, 0.16f, 0.98f);
             case WEREWOLF -> new TraitGeometry.Tint(0.08f, 0.07f, 0.065f, 0.99f);
         };
         this.symbol = switch (style) {
-            case CORROSIVE -> new TraitGeometry.Tint(0.75f, 0.08f, 0.88f, 0.95f);
+            case CORROSIVE -> new TraitGeometry.Tint(0.36f, 0.58f, 0.29f, 0.95f);
             case WEREWOLF -> new TraitGeometry.Tint(0.55f, 0.09f, 0.08f, 0.9f);
         };
     }
