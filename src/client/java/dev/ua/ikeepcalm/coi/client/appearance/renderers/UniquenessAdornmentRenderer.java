@@ -24,355 +24,280 @@ public final class UniquenessAdornmentRenderer {
         stack.popPose();
     }
 
-    /** Coordinates are body-local pixels: positive Z is behind the player, negative Y is up. */
+    /** Body-local pixels. Signatures occupy short-lived strokes rather than complete solid emblems. */
     private record Motif(PoseStack.Pose pose, VertexConsumer consumer, float time, double spacing) {
-        private void spark(double x,double y,double z,double size,int rgb,double phase) {
+        private static final double TAU=Math.PI*2;
+        private double cycle(double speed,double phase) { return (time*speed+phase)%1; }
+        private double envelope(double t) { return Math.pow(Math.sin(Math.PI*t),2); }
+        private void spark(double x,double y,double z,double size,int rgb,double alpha) {
             float intensity=dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity;
-            float pulse=(float)((.68+.22*Math.sin(time*.06+phase))*Math.sqrt(intensity));
-            float red=((rgb>>16)&255)/255f,green=((rgb>>8)&255)/255f,blue=(rgb&255)/255f;
-            float px=(float)x/16,py=(float)y/16,pz=(float)z/16,r=(float)size/16;
-            // A small bright core with a dim additive envelope reads as light, not solid metal.
-            G.drawBox(pose,consumer,px-r,py-r,pz-r,px+r,py+r,pz+r,red,green,blue,pulse*.10f,TraitRenderSupport.FULL_BRIGHT);
-            r*=.44f;
-            G.drawBox(pose,consumer,px-r,py-r,pz-r,px+r,py+r,pz+r,red,green,blue,pulse*.7f,TraitRenderSupport.FULL_BRIGHT);
+            float opacity=(float)Math.clamp(Math.sqrt(Math.max(0,alpha))*.8*Math.sqrt(intensity),0,.85);
+            if(opacity<.018f)return;
+            float r=((rgb>>16)&255)/255f,g=((rgb>>8)&255)/255f,b=(rgb&255)/255f;
+            float px=(float)x/16,py=(float)y/16,pz=(float)z/16,half=(float)size/16;
+            G.drawBox(pose,consumer,px-half,py-half,pz-half,px+half,py+half,pz+half,r,g,b,opacity*.08f,TraitRenderSupport.FULL_BRIGHT);
+            half*=.55f;
+            G.drawBox(pose,consumer,px-half,py-half,pz-half,px+half,py+half,pz+half,r,g,b,opacity,TraitRenderSupport.FULL_BRIGHT);
         }
-        private void box(double x,double y,double z,double w,double h,double d,int rgb) {
-            int nx=Math.max(1,(int)Math.ceil(w/(spacing*1.35))),ny=Math.max(1,(int)Math.ceil(h/(spacing*1.35)));
-            for(int i=0;i<nx;i++) for(int j=0;j<ny;j++) {
-                double phase=i*2.1+j*.7+x;
-                double zz=z+Math.sin(time*.035+phase)*Math.min(.35,d*.3);
-                spark(x+(i+.5)*w/nx-w/2,y+(j+.5)*h/ny-h/2,zz,Math.min(.35,Math.max(w/nx,h/ny)*.38),rgb,phase);
+        private void line(double x,double y,double z,double xx,double yy,double zz,int rgb,double alpha) {
+            double dx=xx-x,dy=yy-y,dz=zz-z;
+            int n=Math.max(1,(int)Math.ceil(Math.sqrt(dx*dx+dy*dy+dz*dz)/spacing));
+            for(int i=0;i<=n;i++) {
+                double t=i/(double)n;
+                spark(x+dx*t,y+dy*t,z+dz*t,.32,rgb,alpha);
             }
         }
-        private void line(double x,double y,double z,double xx,double yy,double zz,double width,int rgb) {
-            double dx=xx-x,dy=yy-y,dz=zz-z,length=Math.sqrt(dx*dx+dy*dy+dz*dz);
-            int steps=Math.max(1,(int)Math.ceil(length/spacing));
-            double travel=(time*.018)%1;
-            for(int i=0;i<steps;i++) {
-                double t=(i+travel)/steps;
-                spark(x+dx*t,y+dy*t,z+dz*t,Math.max(.22,Math.min(.65,width)),rgb,x+y+i*.7);
-            }
-        }
-        private void facet(double ax,double ay,double bx,double by,double cx,double cy,double z,int rgb) {
-            line(ax,ay,z,bx,by,z,.26,rgb);line(bx,by,z,cx,cy,z+.7,.26,rgb);line(cx,cy,z+.7,ax,ay,z,.26,rgb);
-            for(int i=1;i<5;i++) {
-                double t=i/5.0;
-                line(ax+(cx-ax)*t,ay+(cy-ay)*t,z,bx+(cx-bx)*t,by+(cy-by)*t,z,.16,rgb);
-            }
-        }
-        private void blade(double x,double y,double xx,double yy,double width,double z,int dark,int light) {
-            double dx=xx-x,dy=yy-y,len=Math.sqrt(dx*dx+dy*dy);
-            if(len<.001) return;
-            double nx=-dy/len*width,ny=dx/len*width;
-            facet(x+nx,y+ny,xx,yy,x,y,z,dark);
-            facet(xx,yy,x-nx,y-ny,x,y,z,light);
-        }
-        private void ring(double x, double y, double z, double rx, double ry, double width, int rgb, double phase) {
-            for (int i=0; i<32; i++) {
-                double a=i*Math.PI/16+phase,b=(i+1)*Math.PI/16+phase;
-                line(x+Math.cos(a)*rx,y+Math.sin(a)*ry,z,x+Math.cos(b)*rx,y+Math.sin(b)*ry,z,width,rgb);
+        private void arc(double x,double y,double z,double rx,double ry,double start,double length,int rgb,double alpha) {
+            int n=Math.max(4,(int)(Math.abs(length)*Math.max(rx,ry)/spacing));
+            for(int i=0;i<=n;i++) {
+                double t=i/(double)n,a=start+t*length;
+                spark(x+Math.cos(a)*rx,y+Math.sin(a)*ry,z+Math.sin(a*2+time*.025)*.4,.34,rgb,alpha*Math.sin(Math.PI*t));
             }
         }
         private void draw(String pathway) {
             switch(pathway) {
-                case "fool" -> worms();
-                case "fortune" -> serpent();
-                case "chained" -> chains();
-                case "error" -> clock();
-                case "moon" -> moon();
-                case "mother" -> tree();
-                case "visionary" -> dragon();
-                case "sun" -> sun();
-                case "giant" -> twilight();
-                case "priest" -> war();
-                case "abyss" -> abyss();
-                case "darkness" -> night();
-                case "demoness" -> mirrors();
-                case "emperor" -> disorder();
-                case "hanged" -> sacrifice();
-                case "hermit" -> knowledge();
-                case "justiciar" -> scales();
-                case "paragon" -> gears();
-                case "tower" -> tower();
-                case "tyrant" -> storm();
-                default -> { }
+                case "fool" -> worms(); case "fortune" -> infinity(); case "chained" -> chains();
+                case "error" -> clock(); case "moon" -> moon(); case "mother" -> bloom();
+                case "visionary" -> thought(); case "sun" -> sun(); case "giant" -> twilight();
+                case "priest" -> war(); case "abyss" -> abyss(); case "darkness" -> night();
+                case "demoness" -> mirrors(); case "emperor" -> disorder(); case "hanged" -> sacrifice();
+                case "hermit" -> knowledge(); case "justiciar" -> order(); case "paragon" -> assembly();
+                case "tower" -> pages(); case "tyrant" -> storm(); default -> { }
             }
         }
         private void worms() {
-            for (int arm=0;arm<6;arm++) {
-                double angle=arm*Math.PI/3;
-                double previousX=0,previousY=0,previousZ=0;
-                for (int i=0;i<24;i++) {
-                    double u=i/23.0, a=angle+u*1.5+.32*Math.sin(time*.035+u*5+arm);
-                    double radius=3+10*u;
-                    double x=Math.cos(a)*radius,y=3+Math.sin(a)*radius*.85,z=7+Math.sin(u*5+time*.025+arm)*2;
-                    double thickness=.8*(1-u*.75);
-                    if(i>0) line(previousX,previousY,previousZ,x,y,z,thickness,i%3==0?0x727A8B:0xB6C5CC);
-                    box(x,y,z,thickness*1.5,thickness*1.35,thickness*1.6,i%3==0?0x91998D:0xD8E2DF);
-                    previousX=x;previousY=y;previousZ=z;
+            for(int worm=0;worm<5;worm++) {
+                double phase=worm*.217, life=cycle(.0035,phase), fade=envelope(life);
+                double side=worm%2==0?1:-1, root=side*(8.3+worm*.18);
+                for(int i=0;i<19;i++) {
+                    double t=i/18.0;
+                    double curl=time*(.025+worm*.003)+t*(4.5+worm*.55)+worm*2;
+                    double x=root+side*(.6+Math.sin(curl)*(.45+t*.75));
+                    double y=-3+worm*3+t*(3+worm%3)-Math.cos(curl)*t*1.4;
+                    double z=Math.cos(life*TAU+worm)*2.4+Math.sin(t*4+time*.018+worm)*t*1.3;
+                    spark(x,y,z,(.52+.12*Math.sin(i*2.2))*(1-t*.58),i%3==0?0xA9ABA2:0xCED8CF,fade*(1-t*.45));
                 }
             }
         }
-        private void serpent() {
-            double headAngle=time*.006;
-            for(int i=0;i<64;i++) {
-                double a=i*Math.PI/32+headAngle,b=(i+1)*Math.PI/32+headAngle;
-                double radius=10+.45*Math.sin(a*3+time*.02);
-                double nextRadius=10+.45*Math.sin(b*3+time*.02);
-                double thickness=.3+.65*Math.sin((i+3)/67.0*Math.PI);
-                line(Math.cos(a)*radius,2+Math.sin(a)*radius,8+Math.sin(a*2)*1.1,
-                        Math.cos(b)*nextRadius,2+Math.sin(b)*nextRadius,8+Math.sin(b*2)*1.1,
-                        thickness,i%4==0?0x78929A:0xB6CDDE);
+        private void infinity() {
+            double head=time*.035;
+            for(int i=0;i<90;i++) {
+                double trail=i/90.0,a=head-trail*TAU;
+                double x=8*Math.cos(a)/(1+Math.sin(a)*Math.sin(a));
+                double y=4+7*Math.sin(a)*Math.cos(a)/(1+Math.sin(a)*Math.sin(a));
+                spark(x,y,6.3+Math.sin(a)*.8,.38,0xC3D2D3,Math.pow(1-trail,1.6));
             }
-            double r=10+.45*Math.sin(headAngle*3+time*.02);
-            double x=Math.cos(headAngle)*r,y=2+Math.sin(headAngle)*r,z=8+Math.sin(headAngle*2)*1.1;
-            box(x,y,z,2,1.5,1.4,0xCADCE4);
-            box(x+.45,y-.45,z+.73,.3,.25,.1,0x263E40);
-            line(x-.8,y+.3,z+.75,x+.8,y+.3,z+.75,.09,0x596F70);
         }
         private void chains() {
-            for(int link=0;link<12;link++) {
-                double a=link*Math.PI/6+Math.sin(time*.025)*.07;
-                double x=Math.cos(a)*11.8,z=Math.sin(a)*8.2,y=6+Math.sin(a*2)*2;
-                for(int i=0;i<12;i++) {
-                    double t=i*Math.PI/6,u=(i+1)*Math.PI/6;
-                    double v=link%2==0?1.45:.25;
-                    line(x-Math.sin(a)*Math.cos(t)*2.8,y+Math.sin(t)*v,z+Math.cos(a)*Math.cos(t)*2.8+Math.sin(t)*(1-v),
-                            x-Math.sin(a)*Math.cos(u)*2.8,y+Math.sin(u)*v,z+Math.cos(a)*Math.cos(u)*2.8+Math.sin(u)*(1-v),.38,i<6?0xBAC5BE:0x485A56);
+            for(int link=0;link<10;link++) {
+                double a=link*TAU/10+time*.008;
+                double radius=8.2+Math.sin(time*.026+link*.5)*.6;
+                double x=Math.cos(a)*radius,z=Math.sin(a)*5.2,y=8+Math.sin(a*2+time*.04)*1.2;
+                double fade=.2+.6*envelope(cycle(.004,link*.1));
+                for(int i=0;i<14;i++) {
+                    double t=i*TAU/14,tilt=link%2==0?1:.28;
+                    spark(x-Math.sin(a)*Math.cos(t)*1.9,y+Math.sin(t)*tilt,z+Math.cos(a)*Math.cos(t)*1.9+Math.sin(t)*(1-tilt),.32,0xA7B6AE,fade);
                 }
+                double drop=cycle(.008,link*.31);
+                spark(x,y+drop*3,z,.28,0x70847C,envelope(drop)*.4);
             }
         }
         private void clock() {
+            double wobble=Math.sin(time*.02)*.3;
             for(int i=0;i<12;i++) {
-                double a=i*Math.PI/6;
-                double slip=i==2?1.1:0;
-                double x=Math.sin(a)*(10+slip),y=2-Math.cos(a)*10;
-                box(x,y,8,1.1,2.1,1.4,i==2?0xECCB85:0x998466);
-                if(i!=2 && i!=7) {
-                    double b=a+Math.PI/7;
-                    line(x,y,8,Math.sin(b)*10,2-Math.cos(b)*10,8,.6,0x8C7759);
-                }
+                double a=i*TAU/12+wobble,slip=i==2?Math.sin(time*.14)*.8:0;
+                double r=6.8+slip,fade=.25+.55*envelope(cycle(.004,i*.083));
+                line(Math.sin(a)*r,3-Math.cos(a)*r,6,Math.sin(a)*(r-.65),3-Math.cos(a)*(r-.65),6,0xBA965D,fade);
             }
-            ring(0,2,6.7,7.7,7.7,.35,0x726554,0);
-            box(0,2,8,1.8,1.8,2,0xB4A27C);
-            double a=Math.floor(time/16)*Math.PI/6;
-            if(((int)time%96)>72) a-=Math.PI/3;
-            line(0,2,8,Math.sin(a)*7,2-Math.cos(a)*7,8,.3,0xDBC385);
-            line(0,2,8,Math.sin(-a*.35)*4,2-Math.cos(-a*.35)*4,8,.4,0x9DABA0);
-            box(0,2,8,1,1,1,0xE2D4AD);
-        }
-        private void crescent(double x,double y,double z,double radius,int rgb) {
-            for(int i=0;i<28;i++) {
-                double a=(i/27.0*1.55+.225)*Math.PI;
-                double b=((i+1)/27.0*1.55+.225)*Math.PI;
-                double w=Math.sin(i/28.0*Math.PI)*radius*.16+.12;
-                line(x+Math.cos(a)*radius,y+Math.sin(a)*radius,z,x+Math.cos(b)*radius,y+Math.sin(b)*radius,z,w,rgb);
+            arc(0,3,6,6.1,6.1,-time*.012,Math.PI*.9,0x786443,.5);
+            double hand=time*.035+Math.sin(time*.11)*.9;
+            line(0,3,6,Math.sin(hand)*5,3-Math.cos(hand)*5,6,0xD8BD7A,.75);
+            line(0,3,6,Math.sin(-hand*.31)*3,3-Math.cos(-hand*.31)*3,6,0x9A8A66,.6);
+            for(int i=0;i<5;i++) {
+                double t=cycle(.009,i*.2),a=i*1.9-time*.015;
+                spark(Math.sin(a)*(7+t*2),3-Math.cos(a)*(7+t*2),6,.28,0xC1A169,envelope(t)*.65);
             }
         }
         private void moon() {
-            crescent(0,2,8,10,0xC32645);
-            crescent(.4,2,8.1,9.6,0xF07882);
-            for(int i=0;i<3;i++) {
-                double a=time*.009+i*Math.PI*2/3;
-                crescent(Math.cos(a)*12,2+Math.sin(a)*12,9+Math.sin(a)*1.5,1.5,0xCB7380);
+            double a=time*.01,x=Math.sin(a)*1.3,y=3+Math.cos(a)*.8;
+            arc(x,y,6,6.8,6.8,Math.PI*.28+Math.sin(a)*.12,Math.PI*1.4,0xCF4961,.65);
+            arc(x+.6,y,6.1,6.1,6.1,Math.PI*.3,Math.PI*1.35,0xEF9DA0,.35);
+            for(int i=0;i<9;i++) {
+                double t=cycle(.004,i/9.0),angle=t*TAU;
+                spark(Math.cos(angle)*8,3+Math.sin(angle)*5,5+Math.sin(angle)*2,.28,0xD77887,envelope(t)*.65);
             }
         }
-        private void branch(double x,double y,double dx,double dy,int rgb) {
-            double z=8+dx*.12;
-            line(x,y,8,x+dx,y+dy,z,.55,rgb);
-            line(x+dx*.55,y+dy*.55,z,x+dx*.55-dy*.28,y+dy*.55+dx*.28,z+1,.32,rgb);
-            line(x+dx*.75,y+dy*.75,z,x+dx*.75+dy*.25,y+dy*.75-dx*.25,z-1,.28,rgb);
-        }
-        private void tree() {
-            line(-.7,15,8,.2,-8,8,1.0,0x756044);
-            line(.8,13,8.2,-.3,-6,8.2,.42,0xAC9060);
-            for(int side=-1;side<=1;side+=2) {
-                for(int i=0;i<4;i++) {
-                    double y=8-i*4,dx=side*(9-i),dy=-4-i*.3,z=8+dx*.12;
-                    branch(0,y,dx,dy,0x8E8853);
-                    double bloom=.7+.3*Math.sin(time*.025+i);
-                    for(int petal=0;petal<5;petal++) {
-                        double a=petal*Math.PI*2/5;
-                        box(dx+Math.cos(a)*bloom,y+dy+Math.sin(a)*bloom,z,1.2,1.2,.65,
-                                i%2==0?0xC6C986:0xE9C29F);
-                    }
-                    box(dx,y+dy,z+.45,.7,.7,.35,0xEFCB73);
-                    line(dx-side*2,y+dy+2,z,dx-side*4,y+dy+1,z,.7,0x527B4D);
+        private void bloom() {
+            for(int plant=0;plant<4;plant++) {
+                double t=cycle(.0035,plant*.25),growth=Math.sin(Math.PI*t),side=plant%2==0?-1:1,x=side*(7.1+plant*.35),z=Math.sin(time*.012+plant*1.7)*3;
+                double top=15-growth*7,tipX=x+Math.sin(t*4)*.45;
+                line(x,15,z,tipX,top,z,0x789F65,envelope(t)*.7);
+                for(int leaf=0;leaf<2;leaf++) {
+                    double yy=14-leaf*2-growth;
+                    line(x,yy,z,x+side*1.4*growth,yy-1,z+.3,0x87B778,envelope(t)*.8);
+                    line(x+side*1.4*growth,yy-1,z+.3,x,yy-.6,z,0x789F65,envelope(t)*.65);
                 }
-                branch(0,11,side*8,5,0x806044);
-                branch(0,12,side*4,7,0x806044);
+                for(int petal=0;petal<5;petal++) {
+                    double a=petal*TAU/5+time*.008,r=growth*1.3;
+                    line(tipX,top,z,tipX+Math.cos(a)*r,top+Math.sin(a)*r,z+.3, t<.65?0xE4C3A0:0x99835B,envelope(t));
+                }
+                if(t>.55)spark(tipX+Math.sin(t*8),top+(t-.55)*9,z+.6,.3,0xBFA66C,envelope((t-.55)/.45)*.5);
             }
         }
-        private void dragon() {
-            // A coiled mind-dragon, pale gold eye and open ribbed wings; no opaque backdrop.
-            for(int i=0;i<32;i++) {
-                double a=i/31.0*Math.PI*1.55+.1,b=(i+1)/31.0*Math.PI*1.55+.1;
-                double r=10-i*.15;
-                line(Math.cos(a)*r,3+Math.sin(a)*r,8,Math.cos(b)*r,3+Math.sin(b)*r,8,.95-i*.021,i%3==0?0x929A9F:0xD2D4CE);
+        private void thought() {
+            double opening=.2+.8*envelope(cycle(.003,0));
+            // A single narrow draconic gaze, with fading thought ripples; no dragon-shaped billboard.
+            for(int i=0;i<=28;i++) {
+                double t=i/28.0,x=(t-.5)*12,y=Math.sin(t*Math.PI)*2*opening;
+                spark(x,1-y,6,.32,0xBDBDAE,opening*.65);
+                spark(x,1+y,6,.32,0xBDBDAE,opening*.65);
             }
-            box(9,-3,8,4,3,2.8,0xD8D9D0);
-            box(11.1,-2.5,8,2.5,1.6,2,0xB7C1C2);
-            box(9.6,-3.6,9.5,.55,.65,.3,0xE2C969);
-            line(8,-4,8,7,-7,8,.4,0xC0C8C9);
-            line(9,-1.5,8,10,3,8,.95,0xBFCBD0);
-            line(10,-4,7,11,-6,7,.35,0xCDD6D5);
-            line(11,-1.5,9,12.5,-2,9,.18,0x72878B);
-            for(int side=-1;side<=1;side+=2) for(int i=0;i<3;i++) {
-                double xx=side*(12-i*2),yy=-7-i*2+Math.sin(time*.025)*.6;
-                line(side*3,3,8,xx,yy,8,.4,0xC5C9C5);
-                line(xx,yy,8,side*(12-i*2),3-i,8,.3,0x849996);
-                facet(side*3,3,xx,yy,side*(10-i*2),2-i,8,0xBBC5BD);
+            line(0,1-opening*1.5,6.2,0,1+opening*1.5,6.2,0xE3CA81,opening);
+            line(-.5*opening,1,6.2,0,1-opening*1.5,6.2,0xD4BB75,opening*.8);
+            line(.5*opening,1,6.2,0,1+opening*1.5,6.2,0xD4BB75,opening*.8);
+            for(int i=0;i<2;i++) {
+                double t=cycle(.004,i*.5);
+                arc(0,1,6.3,6+t*2,2+t*2,time*.008,Math.PI*1.4,0x8E9D9E,envelope(t)*.4);
             }
-            ring(0,2,9,3,3,.13,0xE8D699,time*.01);
         }
         private void sun() {
-            ring(0,2,8,7.5,7.5,.55,0xFFE4A0,0);
-            ring(0,2,8,6.5,6.5,.2,0xC58C37,0);
-            for(int i=0;i<12;i++) {
-                double a=i*Math.PI/6+time*.002;
-                double r=10+(i%2)*2;
-                line(Math.cos(a)*8,2+Math.sin(a)*8,8,Math.cos(a)*r,2+Math.sin(a)*r,8,.38,0xF5C35E);
-                double b=a+.09;
-                line(Math.cos(b)*8,2+Math.sin(b)*8,8,Math.cos(a)*r,2+Math.sin(a)*r,8,.16,0xFFF2BF);
+            double breath=.5+.5*Math.sin(time*.035),radius=5.8+breath*.55;
+            arc(0,3,6,radius,radius,time*.008,TAU*.9,0xF4D995,.55+breath*.25);
+            for(int i=0;i<8;i++) {
+                double a=i*TAU/8+time*.004,t=cycle(.006,i*.125),r=radius+t*2;
+                line(Math.cos(a)*r,3+Math.sin(a)*r,6,Math.cos(a)*(r+.7),3+Math.sin(a)*(r+.7),6,0xE7B451,envelope(t)*.7);
             }
-            // Swept feather rays echo the pathway's sunbird without covering the player's face.
-            for(int side=-1;side<=1;side+=2) for(int i=0;i<4;i++)
-                line(side*6,6-i,8,side*(12+i*.8),1-i*2.2,8,.26,0xD79C44);
         }
         private void twilight() {
-            crescent(0,3,8,10,0xA65B36);
-            line(0,-8,9,0,14,9,.9,0x877761);
-            line(-4,-3,9,4,-3,9,.6,0xC89056);
-            line(0,14,9,-1,11,9,.35,0xE0A773);
-            for(int i=0;i<5;i++) box((i%2-.5)*.8,1+i*2,9.8,.5,.7,.2,0xC07A40);
-            line(-11,7,8,11,7,8,.15,0xDF8B52);
+            for(int side=-1;side<=1;side+=2) for(int plate=0;plate<3;plate++) {
+                double t=cycle(.003,plate*.25+(side+1)*.1),fade=envelope(t),x=side*(6.8+plate*.3),y=-1+plate*3+t;
+                line(x,y,4,x+side*2,y+1,4,0xC18B61,fade*.8);
+                line(x+side*2,y+1,4,x+side*1.5,y+3,4,0xA77550,fade*.6);
+                line(x+side*1.5,y+3,4,x,y,4,0xD4A170,fade*.7);
+                line(x+side*.7,y+1,4,x+side*1.3,y+2,4,0xC9925F,fade*.65);
+                spark(x+side*1.5,y+3+t*3,4,.3,0xB17C51,fade*.6);
+            }
+            arc(0,7,5,7,2.1,0,Math.PI,0xAF7450,.25+.2*Math.sin(time*.02));
         }
         private void war() {
-            for(int side=-1;side<=1;side+=2) {
-                line(side*8,-11,8,side*5,13,8,.55,0x6B514A);
-                for(int i=0;i<5;i++) {
-                    double flutter=Math.sin(time*.07+i*.6)*.45;
-                    box(side*(9.1+i*.6),-6+i*.3,8+flutter,1.1,7-i,.7,i%2==0?0xB92E24:0x6E1B1C);
-                }
-                line(side*8,-11,8,side*7,-8,8,.4,0xE19564);
-                line(side*8,-11,8,side*9,-8,8,.4,0xE19564);
-                for(int i=0;i<6;i++) {
-                    double y=11-((time*.12+i*2)%13);
-                    box(side*(9+Math.sin(i+time*.06)),y,7,.45,1.5,.5,i%2==0?0xFFC56E:0xEE5B2D);
-                }
+            for(int side=-1;side<=1;side+=2) for(int i=0;i<4;i++) {
+                double t=cycle(.012,i*.25),y=13-t*13,x=side*(5.5+Math.sin(t*5+time*.02)*.6);
+                line(x,y,4,x+side*Math.sin(t*4)*1.5,y+2,4+Math.sin(time*.05+i),0xC9582E,envelope(t)*.8);
+                spark(x,y-.5,4,.4,0xF0AF5E,envelope(t));
             }
         }
         private void abyss() {
-            for(int side=-1;side<=1;side+=2) for(int i=0;i<8;i++) {
-                double x=side*(8+Math.sin(i*1.8)),y=-7+i*3;
-                box(x,y,8,1.6,2.5,1.5,0x785060);
-                blade(x,y,x-side*2.7,y-2,.6,9,0x522D35,0x925254);
-                line(x,y,8.6,x-side*2,y+1,8.6,.2,i%2==0?0xA44946:0x659398);
+            for(int i=0;i<5;i++) {
+                double t=cycle(.006,i*.2),side=i%2==0?1:-1,x=side*(5.5+Math.sin(t*5+i)),y=-2+t*17;
+                arc(x,y,4,1.1,.9,time*.02+i,Math.PI*1.2,0x817D53,envelope(t)*.7);
+                spark(x,y+1.3,4,.35,0x678C91,envelope(t)*.5);
             }
-            line(-8,-7,8,0,-10,8,.5,0x663B3C);
-            line(0,-10,8,8,-7,8,.5,0x663B3C);
         }
         private void night() {
-            for(int wisp=0;wisp<5;wisp++) {
-                double side=wisp%2==0?1:-1;
-                for(int i=0;i<16;i++) {
-                    double u=i/15.0,v=(i+1)/15.0;
-                    double x=side*(4+u*6+Math.sin(u*5+time*.018+wisp));
-                    double xx=side*(4+v*6+Math.sin(v*5+time*.018+wisp));
-                    double y=-4+u*18+wisp*.6,yy=-4+v*18+wisp*.6;
-                    line(x,y,6+Math.sin(u*4+wisp)*2,xx,yy,6+Math.sin(v*4+wisp)*2,.26,0x687A9B);
-                    if(i==6 || i==13) spark(x,y,8,.45,0xD196A4,wisp);
-                }
+            for(int veil=0;veil<3;veil++) for(int i=0;i<20;i++) {
+                double t=i/19.0,a=time*.012+veil*TAU/3;
+                spark(Math.cos(a)*(7.5+Math.sin(t*5+time*.025)*.6),1+t*12,Math.sin(a)*4.5,
+                        .3,0x8191AF,Math.sin(t*Math.PI)*(.2+.3*envelope(cycle(.003,veil*.333))));
+            }
+            for(int i=0;i<7;i++) {
+                double t=cycle(.003,i/7.0),a=i*2.4+time*.004,x=Math.cos(a)*7,y=-4+t*17,z=4+Math.sin(a)*2;
+                double fade=Math.pow(envelope(t),2);
+                spark(x,y,z,.42,0xA6AEC7,fade*.65);
+                line(x-.6,y,z,x+.6,y,z,0x7887AB,fade*.45);
+                line(x,y-.6,z,x,y+.6,z,0x7887AB,fade*.45);
             }
         }
         private void mirrors() {
-            for(int side=-1;side<=1;side+=2) for(int i=0;i<3;i++) {
-                double x=side*(7+i*2),y=-5+i*5,z=7+i*.7+Math.sin(time*.015+i)*.3;
-                blade(x,y+3,x+side*.7,y-4,1.8,z,0x557A91,0xB6D6DE);
-                line(x-side*.3,y+2,z+.9,x+side*.7,y-3,z+.9,.12,0xEFF5F0);
-                blade(x,y+3,x+Math.sin(time*.04+i),y-1,.55,z+1,0x242330,0x403747);
+            for(int i=0;i<4;i++) {
+                double t=cycle(.004,i*.25),side=i%2==0?1:-1,x=side*(6+Math.sin(t*TAU)),y=-3+i*4+Math.sin(time*.025+i),z=4+Math.cos(time*.02+i);
+                double width=.7+.4*Math.sin(time*.03+i);
+                line(x,y-1.7,z,x+width,y,z,0x9EBEC5,envelope(t)*.65);
+                line(x+width,y,z,x,y+1.7,z,0x9EBEC5,envelope(t)*.65);
+                line(x,y+1.7,z,x-width,y,z,0x716F8B,envelope(t)*.45);
+                line(x-width,y,z,x,y-1.7,z,0x716F8B,envelope(t)*.45);
             }
         }
         private void disorder() {
-            for(int i=0;i<3;i++) {
-                double y=1+i*4,skew=Math.sin(time*.015+i)*1.3;
-                for(int side=-1;side<=1;side+=2) {
-                    blade(skew,y+2,side*(10-i),y-3,1.7,7+i*.6,0x645C7C,0xA99566);
-                    line(skew,y+2,7.9+i*.6,side*(10-i),y-3,7.9+i*.6,.25,0xBF9B50);
-                }
-            }
-            for(int i=0;i<5;i++) {
-                double x=-6+i*3;
-                blade(x,-5,x+(i%2==0?-1:1),-10-i%2*2,.7,8,0x8E7136,0xDDC17D);
+            for(int i=0;i<2;i++) {
+                double t=cycle(.004,i*.5),skew=Math.sin(t*TAU)*1.5,side=i==0?-1:1;
+                double x=side*7,y=4+Math.cos(time*.012+i)*2,z=Math.sin(time*.012+i*Math.PI)*4;
+                line(x-1.5,y-2,z,x+1.5+skew,y-2,z,0xBBA064,.7);
+                line(x+1.5+skew,y-2,z,x+1.5,y+2,z,0x8B7795,.6);
+                line(x+1.5,y+2,z,x-1.5-skew,y+2,z,0xBBA064,.7);
+                line(x-1.5-skew,y+2,z,x-1.5,y-.5,z,0x8B7795,envelope(t)*.7);
             }
         }
         private void sacrifice() {
-            line(0,-10,8,0,14,8,.7,0x81776F);
-            line(-6,6,8,6,6,8,.65,0x81776F);
-            for(int i=0;i<28;i++) {
-                double y=-8+i*.75,a=i*.65+time*.025;
-                box(Math.sin(a)*1.3,y,8+Math.cos(a),.6,.8,.6,i%3==0?0x6C272F:0xA34448);
+            for(int i=0;i<4;i++) {
+                double t=cycle(.004,i*.25),side=i%2==0?1:-1,fade=envelope(t);
+                for(int j=0;j<20;j++) {
+                    double u=j/19.0,x=side*(6+u)+Math.sin(u*8+time*.025+i)*.45;
+                    spark(x,1+u*19,3+Math.sin(u*5+i+time*.01)*1.5,.36, j%3==0?0xC26868:0xA24853,fade*(1-u*.4));
+                    if(j%6==0)line(x-.6,1+u*19,4,x+.6,1+u*19+.4,4,0xB46065,fade*.6);
+                }
             }
         }
         private void knowledge() {
-            ring(0,1,8,6,3,.45,0xBEA1DA,0);
-            line(0,-1,8,0,3,8,.65,0xD6B76C);
-            for(int i=0;i<5;i++) {
-                double a=i*Math.PI*.4+time*.004,x=Math.cos(a)*10,y=2+Math.sin(a)*10;
-                box(x,y,8,3,4.5,.45,0x81749B);
-                for(int j=0;j<3;j++) line(x-.8,y-1+j,8.3,x+.5-(j%2)*.5,y-1+j,8.3,.12,0xDBBCEB);
+            for(int rune=0;rune<4;rune++) {
+                double t=cycle(.005,rune*.25),x=Math.cos(time*.01+rune*TAU/4)*8,y=-2+rune*3.5-t*2,z=Math.sin(time*.01+rune*TAU/4)*4;
+                double fade=envelope(t);
+                line(x,y,z,x,y+1.8,z,0xAA92BA,fade*.8);
+                line(x,y+.6,z,x+1.2,y+.1,z,0xAA92BA,fade*.8);
+                if(t>.2)line(x,y+1.4,z,x-.8,y+2,z,0xC2AA8C,fade*.6);
             }
         }
-        private void scales() {
-            ring(0,2,8,10,10,.2,0xBB9850,0);
-            line(0,-6,8,0,12,8,.65,0xE0C87F);
-            box(0,-3,8,15,1.1,1.1,0xCBA85A);
+        private void order() {
+            double t=cycle(.004,0),tilt=Math.sin(t*TAU)*Math.pow(1-t,2)*1.4,z=3+Math.sin(time*.014)*1.2;
             for(int side=-1;side<=1;side+=2) {
-                line(side*6,-3,8,side*6,4,8,.14,0xF0DFA6);
-                line(side*6,1,8,side*9,5,8,.17,0xC9AA63);
-                line(side*6,1,8,side*3,5,8,.17,0xC9AA63);
-                line(side*9,5,8,side*3,5,8,.35,0xE0C87F);
-                facet(side*9,5,side*3,5,side*6,6.5,8,0xB99A55);
-                box(side*6,5.2,8,6,.35,2,0xE0C87F);
+                double x=side*8,y=9+side*tilt;
+                line(x-1.6,y,z,x+1.6,y,z,0xE0C27B,.85);
+                line(x,y-3,z,x-1.6,y,z,0xC3A46B,.65);
+                line(x,y-3,z,x+1.6,y,z,0xC3A46B,.65);
+                line(x,y-5,z,x,y-3,z,0xD6BC78,.6);
+                spark(x,y+.4,z,.4,0xD6BC78,.6);
+            }
+            line(-8,4-tilt,z,8,4+tilt,z,0xAD9B6D,.18+.15*envelope(t));
+        }
+        private void assembly() {
+            for(int gear=0;gear<2;gear++) {
+                double a=time*.012+gear*Math.PI,x=Math.cos(a)*7.8,y=4+Math.sin(a*2)*2,z=Math.sin(a)*4.5;
+                double r=gear==0?2.5:2,turn=time*.028*(gear==0?1:-1);
+                arc(x,y,z,r,r,turn,TAU*.98,0xC9A369,.75);
+                for(int tooth=0;tooth<8;tooth++) {
+                    double b=turn+tooth*TAU/8,fade=.3+.5*envelope(cycle(.006,tooth*.125));
+                    line(x+Math.cos(b)*r,y+Math.sin(b)*r,z,x+Math.cos(b)*(r+.6),y+Math.sin(b)*(r+.6),z,0xD5B879,fade);
+                    if(tooth%2==0)line(x,y,z,x+Math.cos(b)*(r-.4),y+Math.sin(b)*(r-.4),z,0x729FAA,.5);
+                }
+                spark(x,y,z,.45,0x9CC2C9,.8);
             }
         }
-        private void gear(double x,double y,double radius,double angle) {
-            ring(x,y,8,radius,radius,.75,0xAB8753,angle);
-            ring(x,y,9,radius,radius,.65,0xD4B375,angle);
-            box(x,y,8.5,2,2,2,0x799AA2);
-            for(int i=0;i<12;i++) {
-                double a=i*Math.PI/6+angle;
-                line(x+Math.cos(a)*(radius-.4),y+Math.sin(a)*(radius-.4),8,
-                        x+Math.cos(a)*(radius+1),y+Math.sin(a)*(radius+1),8.5,.65,0xD1B075);
-            }
+        private void pages() {
             for(int i=0;i<3;i++) {
-                double a=i*Math.PI*2/3+angle;
-                line(x,y,8,x+Math.cos(a)*radius,y+Math.sin(a)*radius,8,.2,0x547E91);
-            }
-        }
-        private void gears() { gear(-4,-2,5,time*.015); gear(4,6,5,-time*.015); }
-        private void tower() {
-            for(int i=0;i<5;i++) {
-                double y=12-i*5,w=7-i;
-                box(0,y,7+i*.5,w,3.7,3.2,i<3?0xD2CFC2:0x88858D);
-                line(-w/2,y-1.3,8.7,w/2,y-1.3,8.7,.12,0xAA925D);
-                box(0,y,8.8,.5,.65,.15,0xCDB773);
-            }
-            for(int side=-1;side<=1;side+=2) for(int i=0;i<3;i++) {
-                line(side*5,10-i*5,8,side*(9-i),8-i*5,8,.2,0xD8D6CC);
-                line(side*(9-i),8-i*5,8,side*(9-i),4-i*5,8,.2,0xD8D6CC);
-                facet(side*5,10-i*5,side*(9-i),8-i*5,side*(9-i),4-i*5,8.5,0xB9B7AB);
+                double t=cycle(.0035,i*.333),a=time*.007+i*TAU/3,x=Math.cos(a)*8,y=4+Math.sin(a*2)*2,z=Math.sin(a)*4.5;
+                double fold=Math.sin(time*.035+i)*1.2,fade=envelope(t);
+                line(x-1.5,y-1.3,z+fold,x,y-1.6,z,0xC9C9BC,fade*.7);
+                line(x,y-1.6,z,x+1.5,y-1.3,z-fold,0xC9C9BC,fade*.7);
+                line(x,y-1.6,z,x,y+1.6,z,0xACB6B1,fade*.6);
+                line(x-1.5,y+1.3,z+fold,x,y+1.6,z,0xC9C9BC,fade*.7);
+                line(x,y+1.6,z,x+1.5,y+1.3,z-fold,0xC9C9BC,fade*.7);
+                line(x-1.5,y-1.3,z+fold,x-1.5,y+1.3,z+fold,0xC9C9BC,fade*.65);
+                line(x+1.5,y-1.3,z-fold,x+1.5,y+1.3,z-fold,0xC9C9BC,fade*.65);
             }
         }
         private void storm() {
-            for(int i=0;i<48;i++) {
-                double a=i*.25+time*.02,b=a+.25,r=4+i*.14;
-                line(Math.cos(a)*r,4+Math.sin(a)*r*.7,8,Math.cos(b)*r,4+Math.sin(b)*r*.7,8,.22,i%3==0?0x77C8D8:0x448CAE);
+            for(int band=0;band<2;band++) {
+                double head=time*.04+band*Math.PI;
+                for(int i=0;i<30;i++) {
+                    double t=i/30.0,a=head-t*Math.PI*1.3;
+                    spark(Math.cos(a)*7,9+Math.sin(a*2)*1.4,Math.sin(a)*4.5,.35,0x6EA9BC,(1-t)*.7);
+                }
             }
-            for(int side=-1;side<=1;side+=2) {
-                line(side*6,-9,9,side*3,-2,9,.28,0xBBE3EE);
-                line(side*3,-2,9,side*7,-3,9,.28,0xBBE3EE);
-                line(side*7,-3,9,side*4,5,9,.28,0xBBE3EE);
+            double t=cycle(.008,0);
+            if(t<.18) {
+                double fade=envelope(t/.18)*.6;
+                line(6,0,5,4,3,5,0xBAD5DE,fade);
+                line(4,3,5,6,3,5,0xBAD5DE,fade);
+                line(6,3,5,5,6,5,0xBAD5DE,fade);
             }
         }
     }

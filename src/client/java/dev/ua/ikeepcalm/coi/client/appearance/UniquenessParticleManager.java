@@ -191,7 +191,7 @@ public final class UniquenessParticleManager {
         double backX = x + Math.sin(yawRad) * 0.35;
         double backZ = z - Math.cos(yawRad) * 0.35;
         if (shouldEmit(uuid, emissionTick, intensity)) {
-            level.addParticle(new DustParticleOptions(rgb, 0.7f),
+            level.addParticle(new DustParticleOptions(rgb, legacyParticles(pathway) ? 0.7f : 0.45f),
                     backX, y + 0.12, backZ, -dx * 0.4, 0.015, -dz * 0.4);
             emitPathwayTrail(level, player, pathway, backX, backZ, dx, dz);
         }
@@ -385,22 +385,22 @@ public final class UniquenessParticleManager {
             Map.entry("door", 0x5B7FE6),
             Map.entry("sun", 0xFFE55C),
             Map.entry("tyrant", 0x4AA3FF),
-            Map.entry("demoness", 0xB22222),
+            Map.entry("demoness", 0x9EBEC5),
             Map.entry("priest", 0xFF6B35),
             Map.entry("error", 0xDBC385),
             Map.entry("tower", 0x99AABB),
             Map.entry("visionary", 0xD2D4CE),
             Map.entry("hanged", 0xA34448),
-            Map.entry("darkness", 0x4A1A6E),
+            Map.entry("darkness", 0x7887AB),
             Map.entry("death", 0xC8D0E8),
             Map.entry("giant", 0xE88B2A),
-            Map.entry("paragon", 0xE8E8FF),
+            Map.entry("paragon", 0x79A7B6),
             Map.entry("hermit", 0x8855CC),
-            Map.entry("fortune", 0xFFD700),
+            Map.entry("fortune", 0xC3D2D3),
             Map.entry("chained", 0x888899),
-            Map.entry("abyss", 0x8A2B5A),
+            Map.entry("abyss", 0x678C91),
             Map.entry("justiciar", 0xEEDD88),
             Map.entry("emperor", 0xDD9922),
-            Map.entry("moon", 0xC9D4E8),
+            Map.entry("moon", 0xCF4961),
             Map.entry("mother", 0x7FC96B));
 }

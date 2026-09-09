@@ -25,7 +25,7 @@ import java.util.Set;
  * <ul>
  *     <li>Body: mother → moon → chaos primogenitor → demoness</li>
  *     <li>Hair: long brown → long black → silver → red → blue → black</li>
- *     <li>Chained: wraith → zombie → werewolf; Claws: corrosive → werewolf</li>
+ *     <li>Chained: wraith → werewolf → zombie physique; Claws: corrosive → werewolf</li>
  *     <li>Skin: devil → stone → wood</li>
  * </ul>
  *
@@ -49,7 +49,7 @@ public final class AppearanceTraits {
     public static final Family HAIR = new Family("hair",
             List.of("long_brown_hair", "long_black_hair", "silver_hair", "red_hair", "blue_hair", "black_hair"));
     public static final Family CHAINED = new Family("chained",
-            List.of("wraith_traits", "zombie_traits", "werewolf_traits"));
+            List.of("wraith_traits", "werewolf_traits", "zombie_traits"));
     public static final Family CLAWS = new Family("claws",
             List.of("corrosive_claws", "werewolf_claws"));
     public static final Family SKIN = new Family("skin",
@@ -80,17 +80,17 @@ public final class AppearanceTraits {
             new TraitInfo("Chaos Figure", BODY, new FemaleTraitsRenderer("chaos_traits", 1.18f)),
             new TraitInfo("Cat Ears", null, new DemonessEarsRenderer()),
             new TraitInfo("Long Brown Hair", HAIR,
-                    new HairTraitRenderer("long_brown_hair", HairTraitRenderer.Style.LONG, 0.25f, 0.11f, 0.045f)),
+                    new HairTraitRenderer("long_brown_hair", HairTraitRenderer.Style.LAYERED, 0.42f, 0.22f, 0.11f)),
             new TraitInfo("Long Black Hair", HAIR,
-                    new HairTraitRenderer("long_black_hair", HairTraitRenderer.Style.LONG, 0.025f, 0.018f, 0.03f)),
+                    new HairTraitRenderer("long_black_hair", HairTraitRenderer.Style.TIED, 0.025f, 0.018f, 0.03f)),
             new TraitInfo("Silver Hair", HAIR,
-                    new HairTraitRenderer("silver_hair", HairTraitRenderer.Style.SHORT, 0.72f, 0.76f, 0.82f)),
+                    new HairTraitRenderer("silver_hair", HairTraitRenderer.Style.SWEPT, 0.72f, 0.76f, 0.82f)),
             new TraitInfo("Red Hair", HAIR,
-                    new HairTraitRenderer("red_hair", HairTraitRenderer.Style.SHORT, 0.58f, 0.025f, 0.025f)),
+                    new HairTraitRenderer("red_hair", HairTraitRenderer.Style.TOUSLED, 0.58f, 0.025f, 0.025f)),
             new TraitInfo("Blue Hair", HAIR,
-                    new HairTraitRenderer("blue_hair", HairTraitRenderer.Style.SHORT, 0.035f, 0.23f, 0.62f)),
+                    new HairTraitRenderer("blue_hair", HairTraitRenderer.Style.WAVY, 0.035f, 0.23f, 0.62f)),
             new TraitInfo("Black Hair", HAIR,
-                    new HairTraitRenderer("black_hair", HairTraitRenderer.Style.SHORT, 0.018f, 0.014f, 0.025f)),
+                    new HairTraitRenderer("black_hair", HairTraitRenderer.Style.CROPPED, 0.018f, 0.014f, 0.025f)),
             new TraitInfo("Werewolf Traits", CHAINED, new BeastTraitRenderer("werewolf_traits")),
             new TraitInfo("Werewolf Claws", CLAWS,
                     new ClawTraitRenderer("werewolf_claws", ClawTraitRenderer.Style.WEREWOLF)),
