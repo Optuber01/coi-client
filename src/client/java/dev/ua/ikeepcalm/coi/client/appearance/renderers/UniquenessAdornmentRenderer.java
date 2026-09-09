@@ -181,7 +181,7 @@ public final class UniquenessAdornmentRenderer {
         }
         private void moon() {
             // Vanilla order: full, waning gibbous/quarter/crescent, new, then waxing.
-            double light=Math.cos(moonPhase*Math.PI/4), direction=moonPhase<4?-1:1;
+            double light=Math.cos(moonPhase*Math.PI/4), direction=moonPhase<4?1:-1;
             double radius=4.6, y=2+Math.sin(time*.01)*.3;
             for(double yy=-radius+.2;yy<radius;yy+=.4) {
                 double edge=Math.sqrt(Math.max(0,radius*radius-yy*yy));
