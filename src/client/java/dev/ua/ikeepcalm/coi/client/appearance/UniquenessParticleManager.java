@@ -40,6 +40,10 @@ public final class UniquenessParticleManager {
     private UniquenessParticleManager() {
     }
 
+    public static int idleTicks(String uuid) {
+        return stationaryTicks.getOrDefault(uuid, 0) * 2;
+    }
+
     // ------------------------------------------------------------------
     // Pathway resolution (debug assignment wins, then form, then traits)
     // ------------------------------------------------------------------
@@ -153,6 +157,7 @@ public final class UniquenessParticleManager {
             long emissionTick = tickCounter / 2;
             boolean moving = emitTrail(level, player, uuid, pathway, settings.uniquenessParticleIntensity, emissionTick);
             int stillFor = moving ? 0 : stationaryTicks.merge(uuid, 1, Integer::sum);
+            if (moving) stationaryTicks.put(uuid, 0);
             if (legacyParticles(pathway) && stillFor >= STATIONARY_SIGIL_TICKS && stillFor % 2 == 0) {
                 emitStationarySigil(level, player, pathway, stillFor - STATIONARY_SIGIL_TICKS);
             }
@@ -182,6 +187,7 @@ public final class UniquenessParticleManager {
         last[0] = x;
         last[1] = y;
         last[2] = z;
+        if (dx * dx + dz * dz > 16) return false; // A teleport is not a sprint or a footstep.
         if (dx * dx + dz * dz < 0.0004) {
             return false; // trails require movement
         }
@@ -191,7 +197,7 @@ public final class UniquenessParticleManager {
         double backX = x + Math.sin(yawRad) * 0.35;
         double backZ = z - Math.cos(yawRad) * 0.35;
         if (shouldEmit(uuid, emissionTick, intensity)) {
-            level.addParticle(new DustParticleOptions(rgb, legacyParticles(pathway) ? 0.7f : 0.45f),
+            if (!pathway.equals("tyrant")) level.addParticle(new DustParticleOptions(rgb, legacyParticles(pathway) ? 0.7f : 0.45f),
                     backX, y + 0.12, backZ, -dx * 0.4, 0.015, -dz * 0.4);
             emitPathwayTrail(level, player, pathway, backX, backZ, dx, dz);
         }
@@ -203,8 +209,26 @@ public final class UniquenessParticleManager {
                                          double backX, double backZ, double dx, double dz) {
         double y = player.getY();
         switch (pathway) {
-            case "door" -> level.addParticle(ParticleTypes.GLOW_SQUID_INK, backX, y + 1.15, backZ,
+            case "door" -> level.addParticle(new DustParticleOptions(0x6F81BC, .3f), backX, y + .12, backZ,
                     -dx * 0.3, 0.012, -dz * 0.3);
+            case "tyrant" -> {
+                level.addParticle(ParticleTypes.SPLASH, backX, y + .06, backZ, 0, .025, 0);
+                if (player.isSprinting()) {
+                    // Small outward crest perpendicular to travel, never a wall around the body.
+                    double length = Math.max(.001, Math.hypot(dx, dz));
+                    for (int i = -3; i <= 3; i++) {
+                        double side = i * .13;
+                        level.addParticle(ParticleTypes.SPLASH, backX - dz / length * side,
+                                y + .08 + (1 - Math.abs(i) / 3.0) * .12, backZ + dx / length * side,
+                                -dz / length * side * .05, .025, dx / length * side * .05);
+                    }
+                }
+            }
+            case "tower", "hermit" -> level.addParticle(ParticleTypes.ENCHANT,
+                    backX, y + .1, backZ, (player.getRandom().nextDouble() - .5) * .15, .12,
+                    (player.getRandom().nextDouble() - .5) * .15);
+            case "priest" -> level.addParticle(ParticleTypes.SMALL_FLAME, backX, y + .08, backZ, 0, .018, 0);
+            case "mother" -> level.addParticle(ParticleTypes.HAPPY_VILLAGER, backX, y + .08, backZ, 0, .01, 0);
             case "death" -> {
                 level.addParticle(ParticleTypes.SOUL, backX, y + 0.25, backZ, -dx * 0.2, 0.02, -dz * 0.2);
                 level.addParticle(ParticleTypes.SCULK_SOUL, backX, y + 0.55, backZ, 0.0, 0.015, 0.0);
@@ -243,13 +267,14 @@ public final class UniquenessParticleManager {
     }
 
     private static void emitDoor(Emission e) {
-        double angle = e.tick() * 0.21 + e.phase() * Math.PI * 2;
+        if (e.tick() % 3 != 0) return;
+        double angle = e.tick() * .045 + e.phase() * Math.PI * 2;
         for (int index = 0; index < 2; index++) {
             double a = angle + index * Math.PI * 0.9;
-            double radius = index == 0 ? 0.75 : 0.45;
-            e.level().addParticle(ParticleTypes.END_ROD,
-                    e.x() + Math.cos(a) * radius, e.y() + 2.45 + Math.sin(a * 2.0) * 0.18,
-                    e.z() + Math.sin(a) * radius, 0.0, 0.0, 0.0);
+            double radius = .48 + .18 * Math.sin(angle * .37 + index);
+            e.level().addParticle(new DustParticleOptions(index == 0 ? 0xC1B5DA : 0x568D96, .38f),
+                    e.x() + Math.cos(a) * radius, e.y() + 1.2 + Math.sin(a * .67) * .85,
+                    e.z() + Math.sin(a) * radius, Math.cos(a + Math.PI / 2) * .009, .004, Math.sin(a + Math.PI / 2) * .009);
         }
     }
 
@@ -271,16 +296,24 @@ public final class UniquenessParticleManager {
     }
 
     private static void emitAccent(Emission e) {
-        if (e.tick() % 3 != 0) return;
-        double angle = e.tick() * .08 + e.phase() * Math.PI * 2;
-        double yaw = Math.toRadians(e.player().getYRot());
-        double horizontal = Math.cos(angle) * .65;
-        double x = e.x() + Math.sin(yaw) * .5 + Math.cos(yaw) * horizontal;
-        double z = e.z() - Math.cos(yaw) * .5 + Math.sin(yaw) * horizontal;
-        e.level().addParticle(new DustParticleOptions(e.rgb(), .35f), x,
-                e.y() + 1.25 + Math.sin(angle) * .6, z, 0, .008, 0);
-        if ("priest".equals(resolvePathway(e.player()))) {
-            e.level().addParticle(ParticleTypes.SMALL_FLAME, x, e.y() + .6, z, 0, .035, 0);
+        String pathway = resolvePathway(e.player());
+        boolean moving = idleTicks(e.player().getUUID().toString()) < 4;
+        if (e.tick() % (moving ? (e.player().isSprinting() ? 1 : 2) : 9) != 0) return;
+        double angle = e.tick() * .7 + e.phase() * Math.PI * 2;
+        double x = e.x() + Math.cos(angle) * .23, z = e.z() + Math.sin(angle) * .23;
+        if ("tyrant".equals(pathway)) return; // Water comes only from actual footsteps.
+        if ("priest".equals(pathway)) {
+            e.level().addParticle(ParticleTypes.SMALL_FLAME, x, e.y() + .06, z, 0, .018, 0);
+        }
+        int points = switch (pathway) {
+            case "hanged", "fool", "darkness", "emperor" -> 4;
+            default -> 1;
+        };
+        for (int i = 0; i < points; i++) {
+            double u = i / 4.0;
+            e.level().addParticle(new DustParticleOptions(e.rgb(), .28f),
+                    x + Math.sin(angle + u * 2) * u * .18, e.y() + .06 + u * .14,
+                    z + Math.cos(angle + u * 2) * u * .18, 0, .009, 0);
         }
     }
 
