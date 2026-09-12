@@ -2,6 +2,10 @@ package dev.ua.ikeepcalm.coi.client.appearance;
 
 import dev.ua.ikeepcalm.coi.client.ClientAppearanceState;
 import dev.ua.ikeepcalm.coi.client.config.AppearanceConfig;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -36,6 +40,38 @@ public final class UniquenessParticleManager {
     private static int tickCounter = 0;
     private static ClientLevel lastLevel;
     private static long lastGameTick = Long.MIN_VALUE;
+    private static boolean worldRendererRegistered;
+
+    private record Lightning(Vec3 origin, TraitGeometry.Point[][] strokes, long born) { }
+
+    public static void initializeWorldRenderer() {
+        if(worldRendererRegistered)return;
+        worldRendererRegistered=true;
+        LevelRenderEvents.COLLECT_SUBMITS.register(context -> {
+            if(Minecraft.getInstance().level!=lastLevel)return;
+            var camera=context.levelState().cameraRenderState.pos;
+            var stack=context.poseStack();
+            var texture=Identifier.fromNamespaceAndPath("coi-client","textures/entity/white.png");
+            for(var entry:motions.entrySet()) {
+                Lightning bolt=entry.getValue().lightning;
+                if(bolt==null || !visualPathways(entry.getKey()).contains("tyrant") || !AppearanceConfig.shouldRender(entry.getKey()))continue;
+                long age=lastGameTick-bolt.born();
+                if(age<0 || age>5 || bolt.origin().distanceToSqr(camera)>MAX_DISTANCE_SQ)continue;
+                float flash=age==2?.22f:age<4?.9f:.45f;
+                float alpha=flash*(float)Math.sqrt(AppearanceConfig.get().uniquenessParticleIntensity);
+                stack.pushPose();stack.translate(bolt.origin().x-camera.x,bolt.origin().y-camera.y,bolt.origin().z-camera.z);
+                context.submitNodeCollector().order(900).submitCustomGeometry(stack,RenderTypes.entityTranslucentEmissive(texture),(pose,consumer) -> {
+                    for(int branch=0;branch<bolt.strokes().length;branch++) {
+                        var points=bolt.strokes()[branch];float[] core=new float[points.length],glow=new float[points.length];
+                        for(int i=0;i<points.length;i++) {core[i]=(branch==0?.55f:.30f)*(1-i/(float)points.length*.5f);glow[i]=core[i]*3.5f;}
+                        TraitGeometry.INSTANCE.drawTube(pose,consumer,points,glow,4,new TraitGeometry.Tint[]{new TraitGeometry.Tint(.32f,.58f,1,alpha*.16f)},0x00F000F0);
+                        TraitGeometry.INSTANCE.drawTube(pose,consumer,points,core,4,new TraitGeometry.Tint[]{new TraitGeometry.Tint(.90f,.95f,1,alpha)},0x00F000F0);
+                    }
+                });
+                stack.popPose();
+            }
+        });
+    }
 
     private UniquenessParticleManager() {
     }
@@ -44,7 +80,7 @@ public final class UniquenessParticleManager {
         return stationaryTicks.getOrDefault(uuid, 0) * 2;
     }
 
-    private static final Set<String> ABILITY_PATHWAYS = Set.of("tyrant", "sun", "giant", "priest", "darkness", "emperor");
+    private static final Set<String> ABILITY_PATHWAYS = Set.of("tyrant", "sun", "giant", "priest", "darkness", "emperor", "fool", "door", "visionary", "mother", "moon", "chained", "abyss", "hanged", "demoness", "hermit", "paragon", "fortune");
 
     public static Set<String> visualPathways(String uuid) {
         Set<String> paths = new java.util.LinkedHashSet<>();
@@ -72,9 +108,8 @@ public final class UniquenessParticleManager {
 
     /** Tick-owned damped motion, bounded to visible players and cleared with ownership/world changes. */
     private static final class Motion {
-        double x, y, z, dx, dz, spin, oldSpin, boltX, boltY, boltZ;
-        long strike = Long.MIN_VALUE;
-        int strikePeriod;
+        double x, y, z, dx, dz, spin, oldSpin;
+        Lightning lightning;
         net.minecraft.world.phys.Vec3 waterTarget;
         float yaw, sway, lag, swayVelocity, lagVelocity, oldSway, oldLag, activity, proximity, bloom=.15f, wilt, groundGap=5;
         boolean initialized, water, nearby;
@@ -86,7 +121,7 @@ public final class UniquenessParticleManager {
             float turn = reset ? 0 : net.minecraft.util.Mth.wrapDegrees(player.yBodyRot-yaw)/2;
             if (reset) {
                 dx=dz=0; dy=0; sway=lag=swayVelocity=lagVelocity=activity=0;
-                initialized=true;
+                initialized=true;lightning=null;
             }
             int flower=0;
             for(String trait:ClientAppearanceState.getTraits(player.getUUID().toString()))
@@ -237,9 +272,6 @@ public final class UniquenessParticleManager {
                 continue;
             }
             boolean self = player == client.player;
-            if (self && firstPerson && camera == player) {
-                continue; // suppress for the local first-person camera
-            }
             if (!AppearanceConfig.shouldRender(uuid)) {
                 continue;
             }
@@ -248,6 +280,8 @@ public final class UniquenessParticleManager {
             }
             Set<String> pathways = visualPathways(uuid);
             if (pathways.isEmpty()) continue;
+            boolean hiddenSelf=self && firstPerson && camera==player;
+            if(hiddenSelf && !pathways.contains("tyrant"))continue;
             tracked.add(uuid);
             Motion motion = motions.computeIfAbsent(uuid, ignored -> new Motion());
             motion.update(player, pathways);
@@ -256,6 +290,7 @@ public final class UniquenessParticleManager {
             int stillFor = moving ? 0 : stationaryTicks.merge(uuid, 1, Integer::sum);
             if (moving) stationaryTicks.put(uuid, 0);
             for (String pathway : pathways) {
+            if(hiddenSelf) {if(pathway.equals("tyrant"))emit(level,player,pathway,emissionTick);continue;}
             emitTrail(level, player, uuid, pathway, settings.uniquenessParticleIntensity, emissionTick);
             if (legacyParticles(pathway) && stillFor >= STATIONARY_SIGIL_TICKS && stillFor % 2 == 0) {
                 emitStationarySigil(level, player, pathway, stillFor - STATIONARY_SIGIL_TICKS);
@@ -350,7 +385,7 @@ public final class UniquenessParticleManager {
 
         if (!shouldEmit(player.getUUID().toString(), emissionTick, AppearanceConfig.get().uniquenessParticleIntensity)) return;
         switch (pathway) {
-            case "door" -> { }
+            case "door" -> emitAccent(emission);
             case "death" -> emitDeath(emission);
             case "tyrant" -> { emitAccent(emission); emitLightning(emission); }
             default -> emitAccent(emission);
@@ -360,40 +395,28 @@ public final class UniquenessParticleManager {
     private static void emitLightning(Emission e) {
         Motion motion=motions.get(e.player().getUUID().toString());
         boolean active=ClientAppearanceState.hasTrait(e.player().getUUID().toString(),"ability:tyrant");
-        int period=active?30:motion.water?65:130;
-        if(e.tick()%period>1)return;
-        if(motion.strike!=e.tick()/period || motion.strikePeriod!=period) {
-            motion.strike=e.tick()/period;motion.strikePeriod=period;
-            var target=motion.water && motion.waterTarget!=null?motion.waterTarget:e.player().position();
-            motion.boltX=target.x;motion.boltY=target.y;motion.boltZ=target.z;
+        if(!active && !motion.water)return;
+        int period=active?30:65;
+        if(Math.floorMod(e.tick()+e.player().getUUID().hashCode(),period)!=0)return;
+        var random=new java.util.Random(e.player().getUUID().getLeastSignificantBits()+e.tick()/period);
+        Vec3 origin=motion.water && motion.waterTarget!=null?motion.waterTarget:e.player().position().add((random.nextDouble()-.5)*1.4,0,(random.nextDouble()-.5)*1.4);
+        float height=e.level().canSeeSky(e.player().blockPosition().above())?(active?4.5f:3.4f):1.2f;
+        TraitGeometry.Point[][] strokes=new TraitGeometry.Point[3][];
+        strokes[0]=new TraitGeometry.Point[10];
+        for(int i=0;i<10;i++) {
+            float x=i==9?0:(float)(random.nextDouble()-.5)*.5f;
+            float z=i==9?0:(float)(random.nextDouble()-.5)*.5f;
+            strokes[0][i]=new TraitGeometry.Point(x,height*(1-i/9f),z);
         }
-        long seed=e.player().getUUID().getLeastSignificantBits()+e.tick()/period;
-        var random=new java.util.Random(seed);
-        double angle=random.nextDouble()*Math.PI*2,radius=.5+random.nextDouble()*.3;
-        double bx=motion.water?0:Math.cos(angle)*radius,bz=motion.water?0:Math.sin(angle)*radius;
-        double height=e.level().canSeeSky(e.player().blockPosition().above())?3.5:1.2;
-        double x=motion.boltX+bx,y=motion.boltY+height,z=motion.boltZ+bz;
-        for(int segment=0;segment<9;segment++) {
-            double nx=motion.boltX+bx+(random.nextDouble()-.5)*.55;
-            double ny=motion.boltY+height*(1-(segment+1)/9.0);
-            double nz=motion.boltZ+bz+(random.nextDouble()-.5)*.55;
-            lightningStroke(e,x,y,z,nx,ny,nz);
-            if(segment==3 || segment==6)
-                lightningStroke(e,nx,ny,nz,nx+(random.nextDouble()-.5)*1.1,ny-.35,nz+(random.nextDouble()-.5));
-            x=nx;y=ny;z=nz;
+        for(int branch=1;branch<3;branch++) {
+            var start=strokes[0][branch*3];strokes[branch]=new TraitGeometry.Point[4];
+            float dx=(float)(random.nextDouble()-.5)*1.6f,dz=(float)(random.nextDouble()-.5)*1.6f;
+            for(int i=0;i<4;i++)strokes[branch][i]=new TraitGeometry.Point(start.x()+dx*i/3+((i==0||i==3)?0:.12f),start.y()-i*.18f,start.z()+dz*i/3);
         }
-        if(motion.water)for(int i=0;i<8;i++) {
-            double a=i*Math.PI/4;
-            e.level().addParticle(ParticleTypes.SPLASH,x+Math.cos(a)*.65,y+.08,
-                    z+Math.sin(a)*.65,Math.cos(a)*.04,.03,Math.sin(a)*.04);
-        }
-    }
-
-    private static void lightningStroke(Emission e,double x,double y,double z,double xx,double yy,double zz) {
-        int count=Math.max(2,(int)(Math.sqrt((xx-x)*(xx-x)+(yy-y)*(yy-y)+(zz-z)*(zz-z))*14));
-        for(int i=0;i<=count;i++) {
-            double t=i/(double)count;
-            e.level().addParticle(ParticleTypes.ELECTRIC_SPARK,x+(xx-x)*t,y+(yy-y)*t,z+(zz-z)*t,0,0,0);
+        motion.lightning=new Lightning(origin,strokes,lastGameTick);
+        if(motion.water)for(int i=0;i<12;i++) {
+            double a=i*Math.PI/6;
+            e.level().addParticle(ParticleTypes.SPLASH,origin.x+Math.cos(a)*.55,origin.y+.08,origin.z+Math.sin(a)*.55,Math.cos(a)*.035,.025,Math.sin(a)*.035);
         }
     }
 
@@ -420,20 +443,45 @@ public final class UniquenessParticleManager {
         if (e.tick() % (moving ? (e.player().isSprinting() ? 1 : 2) : 9) != 0) return;
         double angle = e.tick() * .7 + e.phase() * Math.PI * 2;
         double x = e.x() + Math.cos(angle) * .23, z = e.z() + Math.sin(angle) * .23;
-        if ("tyrant".equals(pathway)) return; // Water comes only from actual footsteps.
+        if ("tyrant".equals(pathway)) {
+            if(!moving)e.level().addParticle(ParticleTypes.SPLASH,x,e.y()+.04,z,0,.008,0);
+            return;
+        }
         if ("priest".equals(pathway)) {
             e.level().addParticle(ParticleTypes.SMALL_FLAME, x, e.y() + .06, z, 0, .018, 0);
         }
-        int points = switch (pathway) {
-            case "hanged", "fool", "darkness", "emperor" -> 4;
-            default -> 1;
+        // Small pathway-specific strokes remain at foot level and fade naturally in world space.
+        int count=switch(pathway) {
+            case "hanged", "fool", "fortune", "moon", "emperor", "justiciar", "demoness", "darkness", "chained" -> 7;
+            default -> 2;
         };
-        for (int i = 0; i < points; i++) {
-            double u = i / 4.0;
-            e.level().addParticle(new DustParticleOptions(pathway.equals("demoness") && e.tick()%2==0 ? 0xB84160 : e.rgb(), .28f),
-                    x + Math.sin(angle + u * 2) * u * .18, e.y() + .06 + u * .14,
-                    z + Math.cos(angle + u * 2) * u * .18, 0, .009, 0);
+        for(int i=0;i<count;i++) {
+            double u=i/(double)Math.max(1,count-1),a=u*Math.PI*2;
+            double xx=0,zz=0,yy=.045;int color=e.rgb();
+            switch(pathway) {
+                case "hanged" -> {xx=Math.sin(u*5+angle)*.06;zz=(u-.5)*.38;yy+=u*.045;}
+                case "fool" -> {xx=Math.cos(a+angle*.12)*(.04+u*.10);zz=Math.sin(a+angle*.12)*(.04+u*.10);}
+                case "fortune" -> {xx=Math.cos(a)*.14/(1+Math.sin(a)*Math.sin(a));zz=Math.sin(a)*Math.cos(a)*.20/(1+Math.sin(a)*Math.sin(a));}
+                case "moon" -> {a=.4+u*4.5;xx=Math.cos(a)*.10;zz=Math.sin(a)*.10;color=i%2==0?0xD98296:0x8D3D58;}
+                case "emperor" -> {xx=(i%3-1)*.08;zz=(i/3-1)*.08+(i%2==0?.035:0);color=i%2==0?0xAE823D:0x373039;}
+                case "justiciar" -> {a=Math.floor(u*4)*Math.PI/2;xx=Math.cos(a)*.10;zz=Math.sin(a)*.10;}
+                case "demoness" -> {xx=Math.sin(u*5+angle*.2)*.07;zz=(u-.5)*.3;color=i%2==0?0xA63C55:0xD88EAC;}
+                case "darkness" -> {a=i*Math.PI/2;double r=i<4?.075:.025;xx=Math.cos(a)*r;zz=Math.sin(a)*r;color=i<4?0x929EBF:0xD2D4DF;}
+                case "chained" -> {xx=Math.cos(a)*.10;zz=Math.sin(a)*.055;}
+                case "error" -> {xx=i*.075;zz=i==0?-.04:.055;color=i==0?0xA1A2AA:0xC4A561;}
+                case "giant" -> {xx=(u-.5)*.18;zz=(u-.5)*.08;color=i==0?0xBAC5D2:0xD99D65;}
+                case "mother" -> {xx=(u-.5)*.08;color=i==0?0x7E9959:0xDBCBA4;}
+                case "paragon" -> {xx=(u-.5)*.07;yy+=u*.055;color=i==0?0xB1935E:0x7A858F;}
+                default -> {xx=(u-.5)*.07;}
+            }
+            e.level().addParticle(new DustParticleOptions(color,.20f),x+xx,e.y()+yy,z+zz,0,.006,0);
         }
+        if(!moving && (pathway.equals("tower") || pathway.equals("hermit")))
+            e.level().addParticle(ParticleTypes.ENCHANT,x,e.y()+.10,z,0,.08,0);
+        if(pathway.equals("mother") && e.tick()%6==0)
+            e.level().addParticle(ParticleTypes.SPORE_BLOSSOM_AIR,x,e.y()+.1,z,0,.015,0);
+        if(pathway.equals("paragon") && moving && e.tick()%6==0)
+            e.level().addParticle(ParticleTypes.ELECTRIC_SPARK,x,e.y()+.08,z,0,.02,0);
     }
 
     private record Emission(ClientLevel level, AbstractClientPlayer player, long tick, int rgb,
@@ -546,11 +594,11 @@ public final class UniquenessParticleManager {
             Map.entry("darkness", 0x7887AB),
             Map.entry("death", 0xC8D0E8),
             Map.entry("giant", 0xE88B2A),
-            Map.entry("paragon", 0x79A7B6),
+            Map.entry("paragon", 0xB69A69),
             Map.entry("hermit", 0x8855CC),
             Map.entry("fortune", 0xC3D2D3),
             Map.entry("chained", 0x888899),
-            Map.entry("abyss", 0x678C91),
+            Map.entry("abyss", 0x3F3348),
             Map.entry("justiciar", 0xEEDD88),
             Map.entry("emperor", 0xDD9922),
             Map.entry("moon", 0xCF4961),

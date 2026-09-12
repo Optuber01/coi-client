@@ -507,6 +507,7 @@ public class CircleOfImaginationClient implements ClientModInitializer {
     }
 
     private void registerTickHandler() {
+        UniquenessParticleManager.initializeWorldRenderer();
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             HallucinationManager.tick(client);
             UniquenessParticleManager.tick(client);
