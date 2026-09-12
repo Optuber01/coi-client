@@ -34,24 +34,25 @@ public final class UniquenessAdornmentRenderer {
         boolean holder = pathway.equals(UniquenessParticleManager.resolvePathway(uuid, ClientAppearanceState.getTraits(uuid)))
                 && dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.shouldRenderUniqueness(uuid);
         var movement = UniquenessParticleManager.movement(uuid, time-(float)Math.floor(time));
+        float leftArmPitch=model.leftArm.xRot-model.body.xRot,rightArmPitch=model.rightArm.xRot-model.body.xRot;
         double spacing = .48 * Math.clamp(Math.sqrt(state.distanceToCameraSq) / 8, 1, 3);
         stack.pushPose();
         if(pathway.equals("emperor") && holder) model.head.translateAndRotate(stack);
         else if(!pathway.equals("abyss") && !pathway.equals("door") && !pathway.equals("emperor")) model.body.translateAndRotate(stack);
         collector.order(4).submitCustomGeometry(stack, RenderTypes.entityTranslucent(TraitRenderSupport.WHITE_TEXTURE),
-                (pose, consumer) -> new Motif(pose, consumer, time, spacing, idle, rule, phase, movement, holder).draw(pathway));
+                (pose, consumer) -> new Motif(pose, consumer, time, spacing, idle, rule, phase, movement, holder, leftArmPitch, rightArmPitch).draw(pathway));
         stack.popPose();
         if(holder && ClientAppearanceState.hasTrait(uuid,"ability:"+pathway)) {
             stack.pushPose();
             if(!pathway.equals("emperor"))model.body.translateAndRotate(stack);
             collector.order(4).submitCustomGeometry(stack, RenderTypes.entityTranslucent(TraitRenderSupport.WHITE_TEXTURE),
-                    (pose,consumer) -> new Motif(pose,consumer,time,spacing,idle,rule,phase,movement,false).draw(pathway));
+                    (pose,consumer) -> new Motif(pose,consumer,time,spacing,idle,rule,phase,movement,false,leftArmPitch,rightArmPitch).draw(pathway));
             stack.popPose();
         }
     }
 
     /** Body-local pixels. Signatures occupy short-lived strokes rather than complete solid emblems. */
-    private record Motif(PoseStack.Pose pose, VertexConsumer consumer, float time, double spacing, int idle, String authority, int moonPhase, UniquenessParticleManager.Movement movement, boolean holder) {
+    private record Motif(PoseStack.Pose pose, VertexConsumer consumer, float time, double spacing, int idle, String authority, int moonPhase, UniquenessParticleManager.Movement movement, boolean holder, float leftArmPitch, float rightArmPitch) {
         private static final double TAU=Math.PI*2;
         private double cycle(double speed,double phase) { return (time*speed+phase)%1; }
         private double envelope(double t) { return Math.pow(Math.sin(Math.PI*t),2); }
@@ -123,35 +124,38 @@ public final class UniquenessAdornmentRenderer {
             }
         }
 
-        private static final double[][] WORM_CURVES = {
-                {3,3.2,2.3, 3,4,12, -4,-8,11, -10,-9,5},
-                {2.5,3,2.3, -2,5,7, -7,-1,12, -10,4,6.5},
-                {1.5,6,2.3, -7,13,12, -10,13,11, -7,16,5},
-                {2,9,2.3, -5,9,5, -5,14,6, 8,14,4},
-                {2.3,5,2.3, 3,0,11.5, 10,-2,9, 8,-11,4},
-                {2.5,8,2.3, 3,20,13, 17,1,9, 15,-7,4}
-        };
+        private static final double[] WORM_LENGTHS={12,14,10,11,8};
 
         private void worms() {
-            int segments=Math.max(20,(int)(44*.48/spacing));
-            float opacity=.78f*(float)Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity);
-            for(int worm=0;worm<WORM_CURVES.length;worm++) {
-                double[] curve=WORM_CURVES[worm];
+            int segments=Math.max(28,(int)(48*.48/spacing));
+            float opacity=.9f*(float)Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity);
+            for(int worm=0;worm<5;worm++) {
+                double side=worm%2==0?-1:1,rootX=side*(worm==4?0:worm<2?1.6:.6);
+                double rootY=3+worm*.65,length=WORM_LENGTHS[worm];
                 var points=new TraitGeometry.Point[segments+1];
                 var radii=new float[segments+1];
+                var colors=new TraitGeometry.Tint[segments+1];
                 for(int i=0;i<=segments;i++) {
-                    double u=i/(double)segments,v=1-u,drift=u*u;
-                    double x=v*v*v*curve[0]+3*v*v*u*curve[3]+3*v*u*u*curve[6]+u*u*u*curve[9];
-                    double y=v*v*v*curve[1]+3*v*v*u*curve[4]+3*v*u*u*curve[7]+u*u*u*curve[10];
-                    double z=v*v*v*curve[2]+3*v*v*u*curve[5]+3*v*u*u*curve[8]+u*u*u*curve[11];
-                    x+=(Math.sin(time*.006+worm*.9+u*2.4)*.55+movement.sway()*.2)*drift;
-                    y+=(Math.sin(time*.004+worm+u*3)*.45+movement.lag()*.12)*drift;
-                    z+=Math.sin(time*.005+worm*1.3+u*3)*.6*drift;
+                    double u=i/(double)segments,spread=u*u,reach=1-Math.pow(1-u,5);
+                    // Positive model Y descends. A slow helical wave travels toward the hanging tips.
+                    double angle=u*TAU*1.25-time*.007+worm*1.7;
+                    double coil=(3+worm*.25)*Math.sin(u*Math.PI*.85)*reach*Math.clamp((u-.2)/.4,0,1);
+                    double y=rootY+length*u+Math.sin(angle)*.5*spread;
+                    double x=rootX+side*3.8*spread+Math.cos(angle)*coil+movement.sway()*.12*spread;
+                    // Lower curls pass beside the leg envelope, keeping the idle effect close to the body.
+                    double flank=Math.clamp((y-6.3)/3,0,1);flank=4.7*flank*flank*(3-2*flank);
+                    x=side*Math.sqrt(x*x+flank*flank);
+                    // Bend away during the nearby arm swing without pushing the idle shape away from the back.
+                    double blend=Math.clamp((x+2.5)/5,0,1);blend=blend*blend*(3-2*blend);
+                    double arm=(1-blend)*Math.max(0,Math.sin(rightArmPitch))+blend*Math.max(0,Math.sin(leftArmPitch));
+                    double z=2.35+2.8*reach+Math.sin(angle)*coil*.55+arm*9.5*Math.sin(Math.PI*u)+movement.lag()*.08*spread;
                     points[i]=G.pointPixels((float)x,(float)y,(float)z);
-                    radii[i]=(float)(.37*(1+Math.sin(Math.PI*u)*.25)*(1-u*.88));
+                    radii[i]=(float)((.60+worm%2*.035)*(1-.9*u*u));
+                    float shade=(float)(1-.055*Math.pow(Math.sin(u*Math.PI*12),2));
+                    colors[i]=new TraitGeometry.Tint(.94f*shade,.90f*shade,.76f*shade,opacity);
                 }
-                G.drawTube(pose,consumer,points,radii,5,
-                        new TraitGeometry.Tint[]{new TraitGeometry.Tint(.91f,.90f,.80f,opacity)},TraitRenderSupport.FULL_BRIGHT);
+                G.drawTube(pose,consumer,points,radii,7,
+                        colors,TraitRenderSupport.FULL_BRIGHT);
             }
         }
 
@@ -167,15 +171,18 @@ public final class UniquenessAdornmentRenderer {
         private void chains() {
             for(int link=0;link<12;link++) {
                 double a=link*TAU/12+time*.004;
-                double radius=8.2+Math.sin(time*.013+link*.5)*.35;
-                double x=Math.cos(a)*radius,z=Math.sin(a)*5.6;
+                double radius=11.3+Math.sin(time*.009+link*.5)*.35;
+                double x=Math.cos(a)*radius,z=Math.sin(a)*8.2;
                 double y=8+Math.sin(a*2+time*.015)*1.1+movement.sway()*Math.sin(a)*.45+movement.lag()*Math.cos(a)*.25;
-                for(int i=0;i<18;i++) {
-                    double t=i*TAU/18,tilt=link%2==0?1:.25;
-                    spark(x-Math.sin(a)*Math.cos(t)*2.1,y+Math.sin(t)*tilt,
-                            z+Math.cos(a)*Math.cos(t)*2.1+Math.sin(t)*(1-tilt),.31,
-                            i%3==0?0xC1C9C0:0x91A79C,.32+.12*Math.sin(time*.012+link));
+                var points=new TraitGeometry.Point[25];var radii=new float[25];
+                for(int i=0;i<25;i++) {
+                    double t=i*TAU/24,tilt=link%2==0?1:.25;
+                    points[i]=G.pointPixels((float)(x-Math.sin(a)*Math.cos(t)*2.65),(float)(y+Math.sin(t)*tilt),
+                            (float)(z+Math.cos(a)*Math.cos(t)*2.65+Math.sin(t)*(1-tilt)));
+                    radii[i]=.17f;
                 }
+                G.drawTube(pose,consumer,points,radii,5,new TraitGeometry.Tint[]{new TraitGeometry.Tint(.56f,.65f,.60f,
+                        .75f*(float)Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity))},TraitRenderSupport.FULL_BRIGHT);
             }
         }
 
@@ -203,11 +210,11 @@ public final class UniquenessAdornmentRenderer {
                 double edge=Math.sqrt(Math.max(0,radius*radius-yy*yy));
                 double boundary=-edge*light*direction;
                 if(direction>0) {
-                    panel(-edge,y+yy-.2,boundary,y+yy+.2,5.3,5.3,0x503A50,.05);
-                    if(moonPhase!=4)panel(boundary,y+yy-.2,edge,y+yy+.2,5.3,5.3,0xD98491,.18);
+                    panel(-edge,y+yy-.2,boundary,y+yy+.2,5.3,5.3,0x463548,.13);
+                    if(moonPhase!=4)panel(boundary,y+yy-.2,edge,y+yy+.2,5.3,5.3,0xD49AA4,.60);
                 } else {
-                    panel(-edge,y+yy-.2,boundary,y+yy+.2,5.3,5.3,0xD98491,.18);
-                    panel(boundary,y+yy-.2,edge,y+yy+.2,5.3,5.3,0x503A50,.05);
+                    panel(-edge,y+yy-.2,boundary,y+yy+.2,5.3,5.3,0xD49AA4,.60);
+                    panel(boundary,y+yy-.2,edge,y+yy+.2,5.3,5.3,0x463548,.13);
                 }
             }
             for(int i=0;i<=64;i++) {
@@ -218,6 +225,18 @@ public final class UniquenessAdornmentRenderer {
             if(moonPhase!=0 && moonPhase!=4)for(int i=0;i<=32;i++) {
                 double yy=-radius+i*radius*2/32,edge=Math.sqrt(Math.max(0,radius*radius-yy*yy));
                 spark(-edge*light*direction,y+yy,5.6,.27,0xBC5C76,.35);
+            }
+            // Stable surface markings follow the illuminated portion of each phase.
+            for(int crater=0;crater<7;crater++) {
+                double cx=Math.sin(crater*2.7)*radius*.62,cy=Math.cos(crater*1.9)*radius*.64;
+                double r=.35+(crater%3)*.18;
+                for(int row=-3;row<=3;row++) {
+                    double yy=cy+row*r/4,edge=Math.sqrt(Math.max(0,radius*radius-yy*yy));
+                    double half=r*Math.sqrt(Math.max(0,1-row*row/16.0));
+                    double left=Math.max(-edge,cx-half),right=Math.min(edge,cx+half),boundary=-edge*light*direction;
+                    if(direction>0)left=Math.max(left,boundary);else right=Math.min(right,boundary);
+                    if(moonPhase!=4)panel(left,y+yy-.1,right,y+yy+.1,5.4,5.4,0x805268,.30);
+                }
             }
             if(moonPhase==0) eye(0,y,5.7,3.1,0xF4CCD1,cycle(.0015,0));
         }
@@ -244,11 +263,11 @@ public final class UniquenessAdornmentRenderer {
                 int petal=mix(0xDED5AE,0x98815A,movement.wilt());
                 var tint=new TraitGeometry.Tint(((petal>>16)&255)/255f,((petal>>8)&255)/255f,(petal&255)/255f,opacity);
                 for(int leaf=0;leaf<6;leaf++) {
-                    double b=leaf*TAU/6+movement.sway()*.04,r=1.45*bloom,droop=(1-bloom)*.7;
+                    double b=leaf*TAU/6+movement.sway()*.04,r=1.7*bloom,droop=(1-bloom)*1.1;
                     G.quad(pose,consumer,G.pointPixels((float)x,(float)y,(float)(z+.3)),
-                            G.pointPixels((float)(x+Math.cos(b-.35)*r*.65),(float)(y+Math.sin(b-.35)*r*.65+droop*.5),(float)(z+.5)),
-                            G.pointPixels((float)(x+Math.cos(b)*r),(float)(y+Math.sin(b)*r+droop),(float)(z+.6)),
-                            G.pointPixels((float)(x+Math.cos(b+.35)*r*.65),(float)(y+Math.sin(b+.35)*r*.65+droop*.5),(float)(z+.5)),
+                            G.pointPixels((float)(x+Math.cos(b-.35)*r*.65),(float)(y+Math.sin(b-.35)*r*.65+droop*.5),(float)(z+1)),
+                            G.pointPixels((float)(x+Math.cos(b)*r),(float)(y+Math.sin(b)*r+droop),(float)(z+.6+Math.sin(time*.012+leaf)*.16)),
+                            G.pointPixels((float)(x+Math.cos(b+.35)*r*.65),(float)(y+Math.sin(b+.35)*r*.65+droop*.5),(float)(z+1)),
                             tint,TraitRenderSupport.FULL_BRIGHT);
                 }
                 spark(x,y,z+.65,.4,0xCDA657,.65);
@@ -278,11 +297,21 @@ public final class UniquenessAdornmentRenderer {
             double look=Math.sin(time*.012)*radius*.3;
             double aperture=Math.sin((look/radius+1)*Math.PI/2)*radius*.36*opening;
             double up=Math.sin(time*.008)*aperture*.16,half=aperture*.58;
-            line(x+look,y+up-half,z+.4,x+look,y+up+half,z+.4,rgb,fade*.8);
-            line(x+look-.22*opening,y+up,z+.4,x+look,y+up-half,z+.4,rgb,fade*.55);
-            line(x+look+.22*opening,y+up,z+.4,x+look,y+up+half,z+.4,rgb,fade*.55);
-            line(x+look-.22*opening,y+up,z+.4,x+look,y+up+half,z+.4,rgb,fade*.55);
-            line(x+look+.22*opening,y+up,z+.4,x+look,y+up-half,z+.4,rgb,fade*.55);
+            float alpha=(float)(fade*.55*Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity));
+            for(int i=0;i<24;i++) {
+                double a=i*TAU/24,b=(i+1)*TAU/24,wide=Math.min(radius*.17,half*.6);
+                G.addTriangle(pose,consumer,(float)(x+look)/16,(float)(y+up)/16,(float)(z+.25)/16,
+                        (float)(x+look+Math.cos(a)*wide)/16,(float)(y+up+Math.sin(a)*half)/16,(float)(z+.25)/16,
+                        (float)(x+look+Math.cos(b)*wide)/16,(float)(y+up+Math.sin(b)*half)/16,(float)(z+.25)/16,
+                        ((rgb>>16)&255)/255f,((rgb>>8)&255)/255f,(rgb&255)/255f,alpha,TraitRenderSupport.FULL_BRIGHT);
+            }
+            double slit=half*.2;
+            var pupil=new TraitGeometry.Tint(.06f,.035f,.07f,alpha*1.5f);
+            G.quad(pose,consumer,G.pointPixels((float)(x+look),(float)(y+up-half),(float)(z+.45)),
+                    G.pointPixels((float)(x+look+slit),(float)(y+up),(float)(z+.45)),
+                    G.pointPixels((float)(x+look),(float)(y+up+half),(float)(z+.45)),
+                    G.pointPixels((float)(x+look-slit),(float)(y+up),(float)(z+.45)),pupil,TraitRenderSupport.FULL_BRIGHT);
+            spark(x+look+half*.27,y+up-half*.35,z+.47,.12,0xF4E8D5,fade*.3);
         }
 
         private void sun() {
@@ -296,21 +325,28 @@ public final class UniquenessAdornmentRenderer {
                 line(Math.cos(a)*(radius+.3),4+Math.sin(a)*(radius+.3),7,
                         Math.cos(a)*(radius+length),4+Math.sin(a)*(radius+length),7,0xE7C779,.4);
             }
-            for(int arm=0;arm<3;arm++)for(int i=0;i<32;i++) {
-                double u=i/31.0,a=arm*TAU/3+turn+u*2.4,r=radius+.5+u*(1.5+movement.activity());
-                spark(Math.cos(a)*r,4+Math.sin(a)*r,7.2,.26,0xCEAA65,(1-u)*.25);
+            for(int arm=0;arm<3;arm++) {
+                var points=new TraitGeometry.Point[33];var radii=new float[33];
+                for(int i=0;i<33;i++) {
+                    double u=i/32.0,a=arm*TAU/3+turn+u*2.8,r=radius+.3+u*(1.5+movement.activity());
+                    points[i]=G.pointPixels((float)(Math.cos(a)*r),(float)(4+Math.sin(a)*r),7.2f);
+                    radii[i]=(float)(.15*(1-u*.85));
+                }
+                G.drawTube(pose,consumer,points,radii,4,new TraitGeometry.Tint[]{new TraitGeometry.Tint(.88f,.73f,.39f,.6f*
+                        (float)Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity))},TraitRenderSupport.FULL_BRIGHT);
             }
         }
 
         private void twilight() {
             double x=movement.sway()*.12,z=5.8+movement.lag()*.08;
             // Silver shield, with the sword's grip and guard projecting above its rim.
-            box(x+1,-4,4.8,x+1.65,0,5.5,0x665348,.8);
+            box(x+1,-4,4.8,x+1.65,0,5.5,0x665348,.9);
+            for(int wrap=0;wrap<5;wrap++)line(x+1,-3.7+wrap*.65,5.6,x+1.65,-3.45+wrap*.65,5.6,0xC1B19B,.5);
             box(x-.3,-.7,4.6,x+3,-.25,5.7,0xB8BDC1,.8);
             spark(x+1.3,-4.2,5.2,.48,0xD1BD8E,.7);
             for(double y=0;y<11;y+=.4) {
                 double w=y<7?3.7:3.7*(11-y)/4;
-                panel(x-w,y,x+w,y+.4,z,z,0x8896A0,.6);
+                panel(x-w,y,x+w,y+.4,z,z,0xBAC3CD,.83);
             }
             line(x-3.7,0,z+.1,x+3.7,0,z+.1,0xD2D9D8,.65);
             line(x-3.7,0,z+.1,x-3.7,7,z+.1,0xD2D9D8,.65);
@@ -325,23 +361,24 @@ public final class UniquenessAdornmentRenderer {
 
         private void war() {
             for(int side=-1;side<=1;side+=2) {
-                double x=side*4.3,z=4.5;
+                double x=side*2.7,z=9;
                 line(x,-2,z,x,12,z,0x9B7860,.45);
                 for(int i=0;i<14;i++) {
-                    double u=i/14.0,v=(i+1)/14.0,x0=x+side*(.2+u*3.6),x1=x+side*(.2+v*3.6);
+                    double u=i/14.0,v=(i+1)/14.0,x0=x+side*(.2+u*3.8),x1=x+side*(.2+v*3.8);
                     double z0=z+Math.sin(time*.018-u*3+side)*(.12+movement.activity()*.35)*u+movement.lag()*u*.4;
                     double z1=z+Math.sin(time*.018-v*3+side)*(.12+movement.activity()*.35)*v+movement.lag()*v*.4;
-                    panel(Math.min(x0,x1),-1+(u+v)*.45,Math.max(x0,x1),3.3+(u+v)*.35,
-                            side<0?z1:z0,side<0?z0:z1,0x8C2630,.48);
+                    panel(Math.min(x0,x1),-1+(u+v)*.45,Math.max(x0,x1),7.8+(u+v)*.6,
+                            side<0?z1:z0,side<0?z0:z1,0x872332,.76);
                 }
-                line(x,-.5,z+.1,x+side*2.4,2,z+.2,0xCB9D5B,.35);
+                line(x,-.5,z+.1,x+side*2.4,2,z+.2,0xCB9D5B,.55);
+                line(x+side*1.2,2,z+.35,x+side*2.6,5,z+.35,0xCF9B63,.45);
             }
         }
 
         private void abyss() {
             if(movement.groundGap()<.14) {
                 float y=23.8f+movement.groundGap()*16;
-                float alpha=.25f*(float)Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity);
+                float alpha=.32f*(float)Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity);
                 for(int i=0;i<28;i++) {
                     double a=i*TAU/28,b=(i+1)*TAU/28;
                     G.addTriangle(pose,consumer,0,y/16,0,(float)Math.cos(a)*5.5f/16,y/16,(float)Math.sin(a)*3.8f/16,
@@ -349,14 +386,18 @@ public final class UniquenessAdornmentRenderer {
                 }
             }
             for(int limb=0;limb<4;limb++) {
-                double life=cycle(.0018,limb*.25),grow=envelope(life)*(.3+movement.proximity()*.7);
-                for(int i=0;i<=25;i++) {
+                double life=cycle(.0018,limb*.25),grow=envelope(life)*(.55+movement.proximity()*.45);
+                if(grow<.03)continue;
+                var points=new TraitGeometry.Point[26];var radii=new float[26];
+                for(int i=0;i<26;i++) {
                     double u=i/25.0,a=limb*TAU/4+Math.sin(time*.005+u*3)*.35;
                     double r=3+u*(2+movement.proximity()*4)*grow;
-                    double y=23.2-u*(3+movement.proximity()*8)*grow;
-                    spark(Math.cos(a)*r+movement.sway()*u*.12,y,Math.sin(a)*r,
-                            .7*(1-u*.8),i%4==0?0x40344E:0x17131E,.65*grow);
+                    double y=23.2-u*(7+movement.proximity()*7)*grow;
+                    points[i]=G.pointPixels((float)(Math.cos(a)*r+movement.sway()*u*.12),(float)y,(float)(Math.sin(a)*r));
+                    radii[i]=(float)(.5*grow*(1-u*.9));
                 }
+                G.drawTube(pose,consumer,points,radii,5,
+                        new TraitGeometry.Tint[]{new TraitGeometry.Tint(.065f,.045f,.085f,(float)(.65*grow))},TraitRenderSupport.FULL_BRIGHT);
             }
         }
 
@@ -364,13 +405,13 @@ public final class UniquenessAdornmentRenderer {
             for(int veil=0;veil<3;veil++)for(int i=0;i<27;i++) {
                 double u=i/26.0,a=time*.003+veil*TAU/3;
                 // Keep the ribbons outside the full arm/torso envelope.
-                double x=Math.cos(a)*(10+Math.sin(u*4+time*.01)*.3);
-                double z=Math.sin(a)*6.5;
+                double x=Math.cos(a)*(11.3+Math.sin(u*4+time*.01)*.3);
+                double z=Math.sin(a)*9.5;
                 spark(x+movement.sway()*u*.12,-2+u*17,z,.23,0xA4B1C7,Math.sin(u*Math.PI)*.22);
             }
             for(int star=0;star<6;star++) {
                 double a=star*TAU/6+time*.002,t=cycle(.0018,star/6.0);
-                double x=Math.cos(a)*10,y=-2+Math.sin(a*2)*7,z=Math.sin(a)*6.6,fade=.15+envelope(t)*.35;
+                double x=Math.cos(a)*11.3,y=-2+Math.sin(a*2)*7,z=Math.sin(a)*9.5,fade=.15+envelope(t)*.35;
                 spark(x,y,z,.36,0xD4D5E0,fade);
                 line(x-.7,y,z,x+.7,y,z,0xA4B2D1,fade);
                 line(x,y-.9,z,x,y+.9,z,0xA4B2D1,fade);
@@ -419,37 +460,45 @@ public final class UniquenessAdornmentRenderer {
         }
 
         private void mirrors() {
-            double spread=.25+movement.activity()*.6;
-            for(int side=-1;side<=1;side+=2) {
-                double x=side*(2+spread),z=6+Math.sin(time*.012+side)*.18;
-                panel(x-1.8,1,x+1.8,8,z,z+.2,0xB3BBC4,.16);
-                line(x-1.8,1,z,x+1.8,1,z,0xB191A9,.45);
-                line(x+1.8,1,z,x+1.8,8,z+.2,0xB191A9,.45);
-                line(x-1.8,8,z+.2,x+1.8,8,z+.2,0xB191A9,.45);
-                line(x-1.8,1,z,x-1.8,8,z+.2,0xB191A9,.45);
-                line(x-1.8,2,z+.3,x+.4,4.3,z+.3,0xDECAD1,.5);
-                line(x+.4,4.3,z+.3,x-.9,8,z+.3,0xDECAD1,.5);
-                line(x+.4,4.3,z+.3,x+1.8,5.8,z+.3,0xD57591,.45);
+            // A fractured mirror separates into suspended glass shards rather than paired rectangular frames.
+            double separation=.2+movement.activity()*.3;
+            float alpha=.35f*(float)Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity);
+            for(int shard=0;shard<8;shard++) {
+                double a=shard*TAU/8+.04,b=(shard+1)*TAU/8-.04,mid=(a+b)/2;
+                double drift=separation+Math.sin(time*.009+shard)*.06,x=Math.cos(mid)*drift,y=5+Math.sin(mid)*drift;
+                double z=7+Math.sin(time*.012+shard)*.2,radius=4.5+Math.sin(shard*2)*.25;
+                double ax=x+Math.cos(a)*radius,ay=y+Math.sin(a)*radius,bx=x+Math.cos(b)*radius,by=y+Math.sin(b)*radius;
+                G.addTriangle(pose,consumer,(float)x/16,(float)y/16,(float)(z+.2)/16,
+                        (float)ax/16,(float)ay/16,(float)z/16,(float)bx/16,(float)by/16,(float)z/16,
+                        .68f,.66f+shard%2*.06f,.76f,alpha,TraitRenderSupport.FULL_BRIGHT);
+                line(ax,ay,z,bx,by,z,0xC5ACBD,.5);
+                line(x,y,z+.2,ax,ay,z+.1,0xB77993,.3);
+                double t=cycle(.002,shard/8.0);
+                spark(x+Math.cos(mid)*(radius+t),y+Math.sin(mid)*(radius+t),z,.24,0xD99CB3,envelope(t)*.2);
             }
         }
 
         private void disorder() {
             for(int i=0;i<32;i++) {
                 double a=i*TAU/32,b=(i+1)*TAU/32,x=Math.cos(a)*5,z=Math.sin(a)*5;
-                box(x-.43,-10,z-.43,x+.43,-8.6,z+.43,0x17151A,.85);
-                line(x,-8.6,z,Math.cos(b)*5,-8.6,Math.sin(b)*5,0xCEAC55,.7);
-                line(x,-10,z,Math.cos(b)*5,-10,Math.sin(b)*5,0xCEAC55,.65);
+                box(x-.43,-10,z-.43,x+.43,-8.6,z+.43,0x17151A,.92);
+                line(x,-8.6,z,Math.cos(b)*5,-8.6,Math.sin(b)*5,0xCEAC55,.85);
+                line(x,-10,z,Math.cos(b)*5,-10,Math.sin(b)*5,0xCEAC55,.85);
                 if(i%4==0) {
-                    line(x,-10,z,x,-12,z,0xD7B865,.65);
-                    spark(x,-12,z,.4,0x7F2434,.85);
-                    spark(x*1.02,-9.3,z*1.02,.44,0xA53742,.8);
+                    double height=i%8==0?3:2;
+                    for(int step=0;step<12;step++) {
+                        double u=step/11.0,angle=a+u*TAU/8,y=-10-Math.sin(u*Math.PI)*height;
+                        spark(Math.cos(angle)*5,y,Math.sin(angle)*5,.35,0xD7B865,.65);
+                    }
+                    spark(x*1.03,-9.3,z*1.03,.46,0xA53742,.85);
+                    if(i%8==0)spark(Math.cos(a+TAU/16)*5,-13,Math.sin(a+TAU/16)*5,.48,0x952939,.85);
                 }
             }
         }
 
         private void sacrifice() {
             // Inverted cross, thorn knots and a crimson grazing eye.
-            box(-.45,-5,5.3,.45,18,6,0x33272A,.8);
+            box(-.55,-5,5.3,.55,18,6,0x33272A,.9);
             box(-6,9.3,5.3,6,10.1,6,0x33272A,.8);
             line(-.5,-5,6.1,-.5,18,6.1,0x9D7B54,.5);
             line(.5,-5,6.1,.5,18,6.1,0x9D7B54,.5);
@@ -458,6 +507,8 @@ public final class UniquenessAdornmentRenderer {
                 double y=-2+knot*5;
                 line(-1,y-.5,6.2,1,y+.5,6.2,0x9E5960,.5);
                 line(-1,y+.5,6.2,1,y-.5,6.2,0x9E5960,.5);
+                line(-.5,y,6.1,-1.7,y-1,6.5,0x80604B,.55);
+                line(.5,y+.5,6.1,1.7,y-.3,6.5,0x80604B,.55);
             }
             eye(0,9.7,6.6,1.4,0xA44850,.25);
             for(int thread=0;thread<3;thread++)for(int i=0;i<30;i++) {
@@ -501,6 +552,10 @@ public final class UniquenessAdornmentRenderer {
                 line(x,y,z,px-1.8,py,z,0xC4A365,.5);
                 line(x,y,z,px+1.8,py,z,0xC4A365,.5);
                 arc(px,py,z,1.8,.8,0,Math.PI,0xE0C47B,.65);
+                for(int row=0;row<4;row++) {
+                    double depth=row*.18,width=1.8*Math.sqrt(Math.max(0,1-depth*depth/.64));
+                    panel(px-width,py+depth,px+width,py+depth+.18,z+.1,z+.1,0xB89A54,.5);
+                }
                 if(authority.equals("confinement")||authority.equals("no_teleportation")) {
                     line(px-1.8,py-.8,z,px+1.8,py-.8,z,0xE0C47B,.65);
                     for(int bar=-1;bar<=1;bar++)line(px+bar,py-.8,z,px+bar,py+.5,z,0xD4AB61,.45);
@@ -516,7 +571,16 @@ public final class UniquenessAdornmentRenderer {
                 double x=Math.cos(a)*distance+movement.sway()*.3;
                 double y=5+Math.sin(a)*distance+movement.lag()*.25,z=6.5;
                 double turn=movement.spin()*(gear%2==0?1:-1)+movement.sway()*.025;
-                arc(x,y,z,r,r,turn,TAU,0xBC995F,.42);
+                for(int tooth=0;tooth<32;tooth++) {
+                    double a0=turn+tooth*TAU/32,a1=turn+(tooth+1)*TAU/32;
+                    double outer=r+(tooth%4==1||tooth%4==2?.5:0);
+                    var tint=new TraitGeometry.Tint(.64f+gear*.04f,.48f+gear*.025f,.27f,.72f*
+                            (float)Math.sqrt(dev.ua.ikeepcalm.coi.client.config.AppearanceConfig.get().uniquenessParticleIntensity));
+                    G.quad(pose,consumer,G.pointPixels((float)(x+Math.cos(a0)*r*.63),(float)(y+Math.sin(a0)*r*.63),(float)z),
+                            G.pointPixels((float)(x+Math.cos(a0)*outer),(float)(y+Math.sin(a0)*outer),(float)z),
+                            G.pointPixels((float)(x+Math.cos(a1)*outer),(float)(y+Math.sin(a1)*outer),(float)z),
+                            G.pointPixels((float)(x+Math.cos(a1)*r*.63),(float)(y+Math.sin(a1)*r*.63),(float)z),tint,TraitRenderSupport.FULL_BRIGHT);
+                }
                 for(int tooth=0;tooth<8;tooth++) {
                     double b=turn+tooth*TAU/8;
                     line(x+Math.cos(b)*r,y+Math.sin(b)*r,z,
@@ -528,22 +592,24 @@ public final class UniquenessAdornmentRenderer {
 
         private void pages() {
             double open=Math.clamp((idle-12)/30.0,0,1),width=2+2.4*open;
-            double z=4.2+movement.lag()*.1;
+            double z=5+movement.lag()*.1;
             for(int side=-1;side<=1;side+=2) {
                 double edge=z+1.5-open*.5;
-                if(side<0)panel(-width,1,0,9,edge,z,0xBEB49B,.5);
-                else panel(0,1,width,9,z,edge,0xC8BEA5,.5);
+                if(side<0)panel(-width,1,0,9,edge,z,0xD5C9AB,.82);
+                else panel(0,1,width,9,z,edge,0xE0D4B9,.82);
                 line(side*width,1,edge,side*width,9,edge,0x8E6C49,.6);
                 for(int row=0;row<3;row++)
                     line(side*.5,2+row*2,z+.1,side*(width-.5),2+row*2,edge+.1,0x77685B,.25);
             }
-            line(0,.7,z,0,9.3,z,0xA68B59,.65);
+            box(-.28,.5,z-.3,.28,9.5,z+.15,0x6B4B36,.9);
+            line(0,.7,z+.2,0,9.3,z+.2,0xBCA16A,.7);
+            for(int clasp=0;clasp<2;clasp++)line(-.55,2+clasp*5,z+.3,.55,2+clasp*5,z+.3,0xD2B97B,.55);
             double turn=Math.sin(time*.014);
             // Every turning leaf remains behind the independent eye plane.
             double leafZ=z+1.5+Math.cos(time*.014)*.35;
-            if(turn<0)panel(turn*width,1,0,9,leafZ,z,0xDED5BE,.25*open);
-            else panel(0,1,turn*width,9,z,leafZ,0xDED5BE,.25*open);
-            if(open>.85)eye(0,5,8.5,2.3,0xC9B775,.10+Math.floorMod(idle-12,200)/200.0*.32);
+            if(turn<0)panel(turn*width,1,0,9,leafZ,z,0xF0E5C9,.65*open);
+            else panel(0,1,turn*width,9,z,leafZ,0xF0E5C9,.65*open);
+            if(open>.85)eye(0,5,8.2,2.3,0xC9B775,.10+Math.floorMod(idle-12,200)/200.0*.32);
         }
 
     }

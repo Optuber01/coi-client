@@ -55,6 +55,7 @@ public final class TraitGeometry implements Coi3dPrimitives {
             int light
     ) {
         Point[][] rings = new Point[path.length][sides];
+        Vec previousAxisV = null;
         for (int index = 0; index < path.length; index++) {
             Vec tangent;
             if (index == 0) {
@@ -66,8 +67,11 @@ public final class TraitGeometry implements Coi3dPrimitives {
             }
 
             Vec reference = Math.abs(tangent.y()) > 0.82f ? new Vec(0, 0, 1) : new Vec(0, 1, 0);
-            Vec axisU = tangent.cross(reference).normalize();
+            // Carry the previous frame along the curve instead of flipping at a tangent threshold.
+            Vec axisU = previousAxisV == null ? tangent.cross(reference).normalize()
+                    : previousAxisV.cross(tangent).normalize();
             Vec axisV = tangent.cross(axisU).normalize();
+            previousAxisV = axisV;
             float radius = radiiPixels[index] * PIXEL;
             for (int side = 0; side < sides; side++) {
                 float angle = TAU * side / sides;
