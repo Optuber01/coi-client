@@ -1,9 +1,5 @@
 package dev.ua.ikeepcalm.coi.client.screen.sheet;
 
-import dev.ua.ikeepcalm.coi.client.hud.HudScale;
-import dev.ua.ikeepcalm.coi.client.hud.render.PlateSymbols;
-import dev.ua.ikeepcalm.coi.client.ui.CoiIcons;
-
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
@@ -162,6 +158,38 @@ public class SheetGlyphs {
             "XXXXXXXX",
             "XX....XX",
             "XX....XX"
+    };
+
+    /**
+     * Crossed blades: the seat war, which is a contest and not a chair. It is
+     * deliberately nothing like {@link #THRONE} — the seat a Sequence is
+     * fought over and the Sequence 0 throne are the two most expensive
+     * decisions on the sheet and must not read as the same door.
+     */
+    public static final String[] BLADES = {
+            "X......X",
+            "XX....XX",
+            ".XX..XX.",
+            "..XXXX..",
+            "...XX...",
+            "..XXXX..",
+            ".XX..XX.",
+            "XX....XX"
+    };
+
+    /**
+     * A pediment over columns: the assembly of the twenty-two thrones, read as
+     * the building that houses them rather than as any one seat in it.
+     */
+    public static final String[] PILLARS = {
+            "...XX...",
+            "..XXXX..",
+            ".XXXXXX.",
+            "XXXXXXXX",
+            "XX.XX.XX",
+            "XX.XX.XX",
+            "XX.XX.XX",
+            "XXXXXXXX"
     };
 
     public static final String[] BLOCKS = {

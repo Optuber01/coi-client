@@ -76,6 +76,47 @@ public class MenuArchiveLeaf {
                 line(g, cx + r / 4, cy - r * 2 / 3, cx + r * 2 / 3, cy - r, bright);
                 line(g, cx + r * 2 / 3, cy - r, cx + r / 2, cy - r / 3, bright);
             }
+            case "throne" -> {
+                // An empty seat framed by high-backed pillars: authority waiting to be claimed.
+                int seatY = cy + r / 3;
+                line(g, cx - r * 2 / 3, cy - r, cx - r * 2 / 3, cy + r / 2, dim);
+                line(g, cx + r * 2 / 3, cy - r, cx + r * 2 / 3, cy + r / 2, dim);
+                line(g, cx - r * 2 / 3, cy - r, cx, cy - r * 4 / 5, bright);
+                line(g, cx, cy - r * 4 / 5, cx + r * 2 / 3, cy - r, bright);
+                line(g, cx - r / 2, seatY, cx + r / 2, seatY, bright);
+                line(g, cx - r / 2, seatY, cx - r / 2, cy + r * 3 / 4, dim);
+                line(g, cx + r / 2, seatY, cx + r / 2, cy + r * 3 / 4, dim);
+                line(g, cx - r * 3 / 4, cy + r * 3 / 4, cx + r * 3 / 4, cy + r * 3 / 4, bright);
+                line(g, cx - r * 3 / 4, cy + r * 3 / 4, cx - r * 3 / 4, cy + r, dim);
+                line(g, cx + r * 3 / 4, cy + r * 3 / 4, cx + r * 3 / 4, cy + r, dim);
+            }
+            case "pantheon" -> {
+                // Twenty-two stars around one quiet centre: a constellation rather than a list.
+                ArchivePaint.seal(g, cx, cy, r, dim);
+                ArchivePaint.seal(g, cx, cy, Math.max(8, r / 3), bright);
+                for (int i = 0; i < 22; i++) {
+                    double a = -Math.PI / 2 + i * Math.PI * 2 / 22;
+                    int px = cx + (int) (Math.cos(a) * r * .82);
+                    int py = cy + (int) (Math.sin(a) * r * .82);
+                    g.fill(px - 1, py - 1, px + 2, py + 2, bright);
+                    line(g, cx, cy, px, py, MenuTheme.withAlpha(accent, .16f));
+                }
+            }
+            case "ascension" -> {
+                // A narrow stair rising through a halo, giving progression a clear direction.
+                for (int i = 0; i < 6; i++) {
+                    int yy = cy + r - i * r / 3;
+                    int half = Math.max(4, r - i * r / 6);
+                    line(g, cx - half, yy, cx + half, yy, i == 5 ? bright : dim);
+                    if (i < 5) {
+                        line(g, cx - half, yy, cx - half, yy - r / 3, dim);
+                        line(g, cx + half, yy, cx + half, yy - r / 3, dim);
+                    }
+                }
+                line(g, cx, cy - r, cx, cy - r / 2, bright);
+                line(g, cx, cy - r, cx - r / 4, cy - r * 3 / 4, bright);
+                line(g, cx, cy - r, cx + r / 4, cy - r * 3 / 4, bright);
+            }
             default -> {
                 // Bound church register: paired columns, ribs and a circular seal.
                 for (int side : new int[]{-1, 1}) {

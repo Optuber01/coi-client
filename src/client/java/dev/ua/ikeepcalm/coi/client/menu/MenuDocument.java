@@ -25,7 +25,8 @@ public record MenuDocument(String session, int version, String screen,
 
         public boolean archive() {
             return switch (template) {
-                case "ledger", "relic", "inscription", "atlas", "challenge", "ability_manual" -> true;
+                case "ledger", "relic", "inscription", "atlas", "challenge",
+                     "throne", "pantheon", "ascension", "ability_manual" -> true;
                 default -> false;
             };
         }

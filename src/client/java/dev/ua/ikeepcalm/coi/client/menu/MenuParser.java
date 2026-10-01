@@ -65,7 +65,8 @@ public class MenuParser {
         if (element == null || !element.isJsonObject()) return MenuDocument.Presentation.NONE;
         JsonObject node = element.getAsJsonObject();
         String template = MenuJson.string(node, "template", MenuLimits.MAX_ID);
-        if (!Set.of("specimen", "ability_manual", "ledger", "relic", "inscription", "atlas", "challenge")
+        if (!Set.of("specimen", "ability_manual", "ledger", "relic", "inscription", "atlas", "challenge",
+                        "throne", "pantheon", "ascension")
                 .contains(template)) return MenuDocument.Presentation.NONE;
         return new MenuDocument.Presentation(template,
                 MenuJson.string(node, "subject", MenuLimits.MAX_ID),

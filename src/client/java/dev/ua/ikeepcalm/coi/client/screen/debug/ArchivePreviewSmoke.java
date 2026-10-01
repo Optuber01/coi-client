@@ -72,7 +72,7 @@ public class ArchivePreviewSmoke {
                 {"pathway":"%s","pathwayName":"%s","sequence":%d,"sequenceName":"%s",
                  "health":40,"maxHealth":40,"spirituality":1200,"maxSpirituality":1600,
                  "actions":{"church":true,"abilities":true,"mythical":true,"uniqueness":true,
-                 "honorific":true,"map":true,"seat":true}}
+                 "honorific":true,"map":true,"seat":true,"throne":true,"pantheon":true}}
                 """.formatted(pathway, Pathways.formatPathwayName(pathway), sequence, name));
         client.gui.setScreen(new CharacterSheetScreen(null));
     }
@@ -105,6 +105,33 @@ public class ArchivePreviewSmoke {
                      "desc":"Show your location to other players."},
                     {"type":"kv","rows":[{"label":"Current state","value":"Visible"}]},
                     {"type":"note","style":"warn","text":"Hiding your marker does not conceal you from divination."}
+                    """;
+            case "throne" -> """
+                    {"type":"hero","icon":{"kind":"pathway","value":"fool"},"title":"The Empty Throne",
+                     "subtitle":"Sequence 0 claim","badge":"UNCLAIMED"},
+                    {"type":"stat","label":"Claim strength","value":"72%","fraction":0.72,
+                     "hint":"Your standing against the current claimants."},
+                    {"type":"steps","items":[{"title":"Reach Sequence 1","done":true},
+                     {"title":"Gather the required uniquenesses","done":false},
+                     {"title":"Declare a claim","text":"The server will resolve the challenge."}]}
+                    """;
+            case "pantheon" -> """
+                    {"type":"hero","icon":{"kind":"glyph","value":"authority"},"title":"The Pantheon",
+                     "subtitle":"Twenty-two pathways","badge":"22"},
+                    {"type":"grid","columns":4,"size":"small","cells":[
+                     {"title":"Fool","subtitle":"Open","action":"view-fool"},
+                     {"title":"Door","subtitle":"Open","action":"view-door"},
+                     {"title":"Sun","subtitle":"Sealed","enabled":false},
+                     {"title":"Moon","subtitle":"Sealed","enabled":false},
+                     {"title":"Tyrant","subtitle":"Open","action":"view-tyrant"},
+                     {"title":"Error","subtitle":"Sealed","enabled":false}]}
+                    """;
+            case "ascension" -> """
+                    {"type":"steps","items":[{"title":"Stabilise the pathway","done":true},
+                     {"title":"Complete the ascension rite","text":"3 of 5 stages complete","done":false},
+                     {"title":"Survive the sequence change","text":"The rite cannot be interrupted."}]},
+                    {"type":"stat","label":"Rite progress","value":"60%","fraction":0.60,"style":"warn"},
+                    {"type":"button","id":"begin","label":"Begin ascension","style":"primary"}
                     """;
             default -> """
                     {"type":"steps","items":[{"title":"Hold the sequence bracket","done":true},
@@ -367,21 +394,27 @@ public class ArchivePreviewSmoke {
             case 1000 -> capture(client, "33-challenge-compact");
             case 1010 -> client.gui.screen().keyPressed(new KeyEvent(GLFW.GLFW_KEY_END, 0, 0));
             case 1030 -> capture(client, "34-challenge-compact-end");
+            case 1035 -> {
+                client.options.guiScale().set(2);
+                client.resizeGui();
+                archive(client, "throne", "The Empty Throne");
+            }
+            case 1038 -> capture(client, "35-throne");
             case 1040 -> portrait(client, "priest", 9, "Hunter");
-            case 1060 -> capture(client, "35-priest-nine");
+            case 1060 -> capture(client, "36-priest-nine");
             case 1070 -> portrait(client, "priest", 0, "Red Priest");
-            case 1090 -> capture(client, "36-priest-zero");
+            case 1090 -> capture(client, "37-priest-zero");
             case 1100 -> portrait(client, "fool", 0, "The Fool");
-            case 1120 -> capture(client, "37-fool-zero");
+            case 1120 -> capture(client, "38-fool-zero");
             case 1130 -> portrait(client, "door", 0, "Door");
-            case 1150 -> capture(client, "38-door-zero");
+            case 1150 -> capture(client, "39-door-zero");
             case 1160 -> HudConfig.getSettings().epilepsyMode = false;
-            case 1180 -> capture(client, "39-door-animated");
+            case 1180 -> capture(client, "40-door-animated");
             case 1190 -> {
                 client.options.guiScale().set(4);
                 client.resizeGui();
             }
-            case 1210 -> capture(client, "40-door-compact");
+            case 1210 -> capture(client, "41-door-compact");
             case 1220 -> {
                 client.gui.setScreen(null);
                 var renderer = client.getEntityRenderDispatcher().getRenderer(client.player);

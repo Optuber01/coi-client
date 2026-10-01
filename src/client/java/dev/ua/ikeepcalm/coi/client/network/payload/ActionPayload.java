@@ -2,7 +2,6 @@ package dev.ua.ikeepcalm.coi.client.network.payload;
 
 import com.google.gson.JsonObject;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
-import dev.ua.ikeepcalm.coi.client.network.ServerCapabilities;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -28,19 +27,22 @@ public record ActionPayload(String json) implements CustomPacketPayload {
 
     /**
      * {@code {"action":"open","target":…,"ui":"client"|"server"}} - the sheet's
-     * sub-menu buttons. Archive servers use the native replacement; older servers
-     * follow {@code useServerMenus}: {@code client} asks for a
-     * {@code coi-client:menu} document, {@code server} for the original InvUI
-     * chest GUI. A server that predates the menu protocol ignores the field and
-     * opens its chest GUI either way.
+     * sub-menu buttons. The field simply reports {@code useServerMenus}:
+     * {@code client} asks for a {@code coi-client:menu} document,
+     * {@code server} for the original InvUI chest GUI. A server that predates
+     * the menu protocol ignores the field and opens its chest GUI either way.
+     * <p>
+     * It is a request, not a decision. The field used to be suppressed on any
+     * server advertising {@code menu_archive} — which is every live one — so
+     * the checkbox behind it did nothing at all. The server owns the final say
+     * through its own per-player preference; this only tells it what the player
+     * asked for, which is the one thing the client actually knows.
      */
     public static ActionPayload ofOpen(String target) {
         JsonObject json = new JsonObject();
         json.addProperty("action", "open");
         json.addProperty("target", target);
-        json.addProperty("ui", HudConfig.getSettings().useServerMenus
-                && !ServerCapabilities.has("menu_archive")
-                ? "server" : "client");
+        json.addProperty("ui", HudConfig.getSettings().useServerMenus ? "server" : "client");
         return new ActionPayload(json.toString());
     }
 

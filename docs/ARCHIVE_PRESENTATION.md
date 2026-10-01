@@ -65,15 +65,18 @@ For repeatable runtime screenshots, put a disposable singleplayer world at
 .\gradlew.bat runClient -ParchivePreview --offline
 ```
 
-This uses a separate game directory, opens forty views at three GUI scales (including partial
+This uses a separate game directory, opens forty-one views at three GUI scales (including partial
 and unknown forms, spacious Status, and the compact tabs at their scroll limits), writes screenshots under
 `build/archive-preview/screenshots`, and exits. The capture hook requires both development mode
 and the explicit `coi.archivePreview` JVM property; it also refuses multiplayer worlds.
 
 The presentation covers the dossier, fixed mythical forms, the [ability field manual](ABILITY_MANUAL.md),
-church ledgers, uniqueness reliquaries, honorific inscriptions, map visibility and seat challenges.
-`menu_archive` negotiates the five additional templates: `ledger`, `relic`, `inscription`, `atlas`,
-and `challenge`. A wide folio includes a section index; narrow windows use a compact index strip.
+church ledgers, uniqueness reliquaries, honorific inscriptions, map visibility, seat challenges,
+throne claims, the pantheon, and ascension rites.
+`menu_archive` negotiates the eight additional templates: `ledger`, `relic`, `inscription`, `atlas`,
+`challenge`, `throne`, `pantheon`, and `ascension`. A wide folio includes a section index; narrow
+windows use a compact index strip. Throne, Pantheon, and Ascension use dedicated archive ornaments;
+their sections and actions remain server-authored like every other template.
 Section labels and offsets come from the actual document. Page Up/Down and Home/End navigate
 the reading area while a text field is not focused. Server sections, gates and confirmations stay
 authoritative. The native pathway chooser preserves access to secondary pathways. Visionary's
@@ -103,7 +106,7 @@ Sequences 9 and 0, compact layouts and frozen/animated modes are included in the
 ## Verification performed
 
 The client offline build and 13 protocol/localization/projection tests passed. The Minecraft 26.2
-development run captured all 40 views, including the five additional menu families and Priest,
+development run captured all 41 views, including the additional menu families and Priest,
 Fool and Door portraits. Binding persistence, passive state confirmation and normal render-state
 extraction after closing a portrait were asserted in game. These captures use sample data in a
 copied singleplayer world; a live plugin connection has not been exercised by this smoke run.

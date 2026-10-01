@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MenuPresentationTest {
     @Test
     void archiveFamiliesKeepAuthorityAndUnknownTemplatesFallBack() {
-        for (String template : new String[]{"ledger", "relic", "inscription", "atlas", "challenge"}) {
+        for (String template : new String[]{"ledger", "relic", "inscription", "atlas", "challenge",
+                "throne", "pantheon", "ascension"}) {
             MenuDocument doc = document("{\"template\":\"" + template + "\"}");
             assertTrue(doc.presentation().archive(), template);
             assertEquals(template, doc.presentation().template());

@@ -102,7 +102,7 @@ The plugin rendered every player-facing menu as an InvUI chest GUI: items whose 
 whose lore is the body text, dyes as buttons, glass panes as borders, paged selectors for lists, and
 click-twice-in-ten-seconds for confirmation. A vanilla client cannot be told to draw anything else.
 
-The character sheet (`M`) was already native, but its seven buttons handed the player straight back
+The character sheet (`M`) was already native, but its nine buttons hand the player straight back
 to those chest screens — which is the complaint that started this work.
 
 **The rejected design** was a bespoke payload and a bespoke `Screen` per menu. `ChurchGUI` alone is
@@ -133,7 +133,8 @@ is what negotiates this, not the version number. (Decided explicitly; do not bum
 
 `ui` carries the player's own preference (`useServerMenus`). `client` — which is also what an absent
 field means — asks for a document; `server` asks for the original chest GUI. A server that predates
-this ignores the field and opens its chest GUI either way.
+this ignores the field and opens its chest GUI either way. It is a request, not a decision: the
+server's own per-player preference (`/coi menu native`) has the final say.
 
 ### 2.2 The document
 
@@ -379,7 +380,7 @@ tryOpen(player, target, pathway, clientUi))return;
         switch(target){ /* the original InvUI chain, unchanged */ }
 ```
 
-All seven sheet targets are registered: `map`, `mythical`, `seat`, `uniqueness`, `honorific`,
+All nine sheet targets are registered: `map`, `mythical`, `seat`, `throne`, `pantheon`, `uniqueness`, `honorific`,
 `abilities`, `church`.
 
 ---
@@ -431,7 +432,9 @@ The sheet's destination cards send `ActionPayload.ofOpen(target)`, which stamps 
 `HudConfig.HudSettings.useServerMenus`, persisted in `config/coi_hud.json`, surfaced as a checkbox on
 the **General** tab of HUD Settings (`screen.coi.menu_use_server` and `_hint`). Default **false**:
 the point of the system is that a modded player never sees a chest again. When true, every sheet
-button opens the plugin's original screen, byte-identical.
+button *asks* for the plugin's original screen. The client no longer suppresses that ask on
+`menu_archive` servers — it did, which made the checkbox do nothing on every live server — so the
+server now hears the preference and resolves it against its own `/coi menu native` setting.
 
 ### 4.3 Testing without a server
 
@@ -444,7 +447,8 @@ redesign.
 
 ## 5. What was ported
 
-All seven sheet destinations. Adapters live in `menu/adapter/`, plus `menu/adapter/church/`.
+The original seven sheet destinations, listed below. Adapters live in `menu/adapter/`, plus
+`menu/adapter/church/`. `throne` and `pantheon` were added later and are registered the same way.
 
 | Target       | Adapter                                                                                                              | What the native screen does that the chest could not                                                                                                                                                                                                                                                                                                                              |
 |--------------|----------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -504,7 +508,7 @@ either porting it or adding a public entry point.
 5. Leave the InvUI screen untouched; it is still what unmodded players get.
 6. `./gradlew build --offline`.
 
-For a brand-new **entry point** rather than one of the seven sheet targets, the caller reads
+For a brand-new **entry point** rather than one of the nine sheet targets, the caller reads
 `if (router.tryOpen(...)) return;` followed by the chest GUI it always had.
 
 ---

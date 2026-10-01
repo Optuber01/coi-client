@@ -6,7 +6,6 @@ import dev.ua.ikeepcalm.coi.client.config.HudConfig;
 import dev.ua.ikeepcalm.coi.client.hud.layout.HudElements;
 import dev.ua.ikeepcalm.coi.client.hud.overlay.BeyonderHealthOverlay;
 import dev.ua.ikeepcalm.coi.client.hud.render.HealthStyle;
-import dev.ua.ikeepcalm.coi.client.network.ServerCapabilities;
 import dev.ua.ikeepcalm.coi.client.screen.TourScreen;
 
 import net.minecraft.client.Minecraft;
@@ -156,11 +155,9 @@ public class SettingsTabs {
         rows.checkboxRow(SettingsRows.INDENT, Component.translatable("screen.coi.hud_enabled"), settings.enabled,
                 checked -> settings.enabled = checked);
 
-        if (!ServerCapabilities.has("menu_archive")) {
-            rows.checkboxRow(SettingsRows.INDENT, Component.translatable("screen.coi.menu_use_server"), settings.useServerMenus,
-                    checked -> settings.useServerMenus = checked);
-            rows.hintRow(Component.translatable("screen.coi.menu_use_server_hint"));
-        }
+        rows.checkboxRow(SettingsRows.INDENT, Component.translatable("screen.coi.menu_use_server"), settings.useServerMenus,
+                checked -> settings.useServerMenus = checked);
+        rows.hintRow(Component.translatable("screen.coi.menu_use_server_hint"));
 
         rows.checkboxRow(SettingsRows.INDENT, Component.translatable("screen.coi.coi_title_screen"), settings.coiTitleScreen,
                 checked -> settings.coiTitleScreen = checked);

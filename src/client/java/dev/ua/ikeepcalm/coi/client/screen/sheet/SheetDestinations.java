@@ -1,25 +1,20 @@
 package dev.ua.ikeepcalm.coi.client.screen.sheet;
 
-import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetGlyphs.GLYPH_DEFENSE;
-import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetGlyphs.GLYPH_DIVINATION;
-import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetMetrics.GAP;
-import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetMetrics.HOVER_MS;
-import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetMetrics.NAV_CARD_H;
-import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetMetrics.THREE_COLUMN_MIN;
-import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetMetrics.TWO_COLUMN_MIN;
-import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetPalette.accent;
-
 import dev.ua.ikeepcalm.coi.client.network.payload.ActionPayload;
 import dev.ua.ikeepcalm.coi.client.screen.menu.MenuTheme;
 import dev.ua.ikeepcalm.coi.client.state.SheetState;
 import dev.ua.ikeepcalm.coi.client.ui.CoiStyle;
-
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 
+import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetGlyphs.GLYPH_DEFENSE;
+import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetGlyphs.GLYPH_DIVINATION;
+import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetMetrics.*;
+import static dev.ua.ikeepcalm.coi.client.screen.sheet.SheetPalette.accent;
+
 /**
- * The seven doorways, and the one row that is not a doorway.
+ * The nine doorways, and the one row that is not a doorway.
  * <p>
  * Terrain damage is drawn as the same card as a destination on purpose — the
  * column reads as one list — but it carries a switch rather than a glyph and a
@@ -44,7 +39,9 @@ final class SheetDestinations {
             new Nav("uniqueness", SheetGlyphs.GEM),
             new Nav("honorific", SheetGlyphs.CROWN),
             new Nav("map", SheetGlyphs.PIN),
-            new Nav("seat", SheetGlyphs.THRONE)
+            new Nav("seat", SheetGlyphs.BLADES),
+            new Nav("throne", SheetGlyphs.THRONE),
+            new Nav("pantheon", SheetGlyphs.PILLARS)
     };
 
     private final SheetContext ctx;
@@ -58,8 +55,8 @@ final class SheetDestinations {
 
     int draw(GuiGraphicsExtractor graphics, int x, int y, int w, int mouseX, int mouseY, int bottom) {
         int ry = ctx.section(graphics, x, y, w, "screen.coi.sheet_sec_nav", GLYPH_DIVINATION) + 4;
-        // Seven destinations. At the sheet's old 440 these could only ever be two abreast, which
-        // was four rows of card; with the shared width a third column fits and it becomes three.
+        // Nine destinations. At the sheet's old 440 these could only ever be two abreast, which
+        // was five rows of card; with the shared width a third column fits and it becomes three.
         int cols = w >= THREE_COLUMN_MIN ? 3 : w >= TWO_COLUMN_MIN ? 2 : 1;
         int tileW = (w - GAP * (cols - 1)) / cols;
         boolean[] gates = gates();

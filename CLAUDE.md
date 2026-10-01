@@ -265,7 +265,7 @@ dev.ua.ikeepcalm.coi
           │   ├── SheetHero, SheetVitals, SheetActing, SheetConditions, SheetDestinations,
           │   │   SheetFooter, SheetRows, SheetChips — one section each, in draw order
           │   └── SheetGlyphs   — the sheet's 8×8 drawn marks (heart/flask/hourglass, the
-          │                       seven destination glyphs, lock)
+          │                       nine destination glyphs, lock)
           ├── ability/
           │   ├── AbilityBindingScreen — bind abilities to slots (opened with K); tabbed
           │   │                       (hotkeys/wheel/gestures) with a per-tab how-to banner
@@ -727,11 +727,11 @@ the menus use 16 — stepping from it into a menu read as stepping into another 
 
 | Section     | What it is                                                                                                                                                                                      |
 |-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| hero        | 32px player head, the pathway emblem + name in `SheetState.pathwayArgb()`, `Sequence N — <title>`, and the sequence again as a 2×-scaled numeral in a badge                               |
+| hero        | 32px player head, the pathway emblem + name in `SheetState.pathwayArgb()`, `Sequence N — <title>`, and the sequence again as a 2×-scaled numeral in a badge                                     |
 | vitals      | four 32px rows — health, spirituality, madness, tiredness — each with its **own symbol**, its own colour, the number first and the bar second, and a plain-language line for the stage          |
 | acting      | the mask gauge + `mm:ss` method cooldown, then the **whole** source ledger (label · bar · `n / cap`, `∞` when unlimited, red when capped), with chips for limited / overflow / foreign throttle |
 | conditions  | Line of Life and Death, Frenzied Mage's Presence, the anomaly — chips, **only when present**                                                                                                    |
-| where to go | the seven sub-menus as cards: glyph, name, one line of what is on the other side                                                                                                                |
+| where to go | the nine sub-menus as cards: glyph, name, one line of what is on the other side                                                                                                                 |
 | preferences | terrain damage as a switch row, so a preference cannot be mistaken for a doorway                                                                                                                |
 | footer      | *Server menu* · *Done*, inside the card under a hairline, in `MenuTheme.button` chrome                                                                                                          |
 
@@ -1115,10 +1115,11 @@ new one.
   server's own `{"closed":true}`. Every send is guarded by `canSend`, like the character sheet's.
 - Text fields outlive a rebuild (`fields` is keyed by component id): the search box re-lays out the
   whole card on every keystroke, and recreating the `EditBox` would drop the caret mid-word.
-- **`useServerMenus`** remains a compatibility preference for older servers. When the server
-  advertises `menu_archive`, the checkbox is hidden and registered native replacements take
-  precedence. The sheet's Pathways button opens the native multi-pathway chooser; unsupported
-  flows still retain their server fallback.
+- **`useServerMenus`** is always offered and always sent. It used to be suppressed — checkbox hidden,
+  `ui` forced to `client` — whenever the server advertised `menu_archive`, i.e. always, so the
+  control did nothing. Now the ask reaches the server, which resolves it against its own per-player
+  preference (`/coi menu native`). The sheet's Pathways button opens the native multi-pathway
+  chooser; unsupported flows still retain their server fallback.
 - **Archive templates** (`ledger`, `relic`, `inscription`, `atlas`, `challenge`) keep all document
   sections and actions, adding a section index and adaptive folio layout. `ability_manual` moves
   represented ability rows into its details; Other actions preserves every remaining control.
@@ -1183,16 +1184,16 @@ v2 ability list (`active`, `cooldownRemainingTicks`) or live on `coi-client:stat
 
 ## Keybindings
 
-| Key             | Action                                                                                                                   |
-|-----------------|--------------------------------------------------------------------------------------------------------------------------|
-| Z–N (6 keys)    | Ability slots 1–6 (each slot is placed on its own in the layout editor)                                                  |
-| *(unbound)*     | Ability slots 7–10 — assign in vanilla Controls, activate via `activeAbilitySlots`                                       |
-| G (hold)        | Ability wheel — radial picker, open while the key is held, `wheelSlots` slots                                             |
-| K               | Open Ability Binding screen                                                                                              |
-| M               | With `useServerMenus`, the plugin's chest GUI straight away (`menu_action`); else the character sheet (`character_sheet`), else the server Beyonder menu, else an unsupported message. The preference only *reorders* the first two — a server without `menu_action` still gets the sheet |
-| *(unbound × 7)* | Open one of the sheet's destinations directly (`church`, `abilities`, `mythical`, `uniqueness`, `honorific`, `map`, `seat`) — `ActionPayload.ofOpen`, no sheet behind it, so the menu's back arrow means "close" |
-| Left Alt (hold) | Gesture casting — draw a shape, release to cast (only when a gesture is bound)                                           |
-| F8 *(dev only)* | Open Effect Debug screen                                                                                                 |
+| Key             | Action                                                                                                                                                                                                                                                                                                                                  |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Z–N (6 keys)    | Ability slots 1–6 (each slot is placed on its own in the layout editor)                                                                                                                                                                                                                                                                 |
+| *(unbound)*     | Ability slots 7–10 — assign in vanilla Controls, activate via `activeAbilitySlots`                                                                                                                                                                                                                                                      |
+| G (hold)        | Ability wheel — radial picker, open while the key is held, `wheelSlots` slots                                                                                                                                                                                                                                                           |
+| K               | Open Ability Binding screen                                                                                                                                                                                                                                                                                                             |
+| M               | With `useServerMenus`, the plugin's chest GUI straight away (`menu_action`, no longer excluded on `menu_archive` servers); else the character sheet (`character_sheet`), else the server Beyonder menu, else an unsupported message. The preference only *reorders* the first two — a server without `menu_action` still gets the sheet |
+| *(unbound × 9)* | Open one of the sheet's destinations directly (`church`, `abilities`, `mythical`, `uniqueness`, `honorific`, `map`, `seat`, `throne`, `pantheon`) — `ActionPayload.ofOpen`, no sheet behind it, so the menu's back arrow means "close"                                                                                                  |
+| Left Alt (hold) | Gesture casting — draw a shape, release to cast (only when a gesture is bound)                                                                                                                                                                                                                                                          |
+| F8 *(dev only)* | Open Effect Debug screen                                                                                                                                                                                                                                                                                                                |
 
 ## Ability Pathway Colors
 

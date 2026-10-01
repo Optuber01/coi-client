@@ -1,12 +1,12 @@
 package dev.ua.ikeepcalm.coi.client.state;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.ua.ikeepcalm.coi.CoiLog;
 import dev.ua.ikeepcalm.coi.client.ability.Pathways;
 import dev.ua.ikeepcalm.coi.client.json.JsonRead;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,28 +127,6 @@ final class SheetParser {
                 JsonRead.intOf(node, "cap"));
     }
 
-    private static SheetState.Actions actions(JsonObject node) {
-        if (node == null) return SheetState.Actions.NONE;
-        return new SheetState.Actions(JsonRead.bool(node, "church"), JsonRead.bool(node, "abilities"),
-                JsonRead.bool(node, "mythical"), JsonRead.bool(node, "uniqueness"),
-                JsonRead.bool(node, "honorific"), JsonRead.bool(node, "map"),
-                JsonRead.bool(node, "seat"), JsonRead.bool(node, "terrainDamage"));
-    }
-
-    /**
-     * Six hex characters ("B347CC") to 0xRRGGBB, or 0 when unusable.
-     */
-    private static int hexColor(String hex) {
-        if (hex == null) return 0;
-        String clean = hex.startsWith("#") ? hex.substring(1) : hex;
-        if (clean.length() != 6) return 0;
-        try {
-            return Integer.parseInt(clean, 16);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
     /**
      * A fully populated sheet for the F8 debug screen. It goes through
      * {@link #parse} rather than building records directly, so the offline
@@ -171,5 +149,28 @@ final class SheetParser {
             "pressure":{"present":true,"stacks":3,"cap":10},\
             "anomaly":true,\
             "actions":{"church":true,"abilities":true,"mythical":false,"uniqueness":true,\
-            "honorific":false,"map":true,"seat":true,"terrainDamage":true}}""";
+            "honorific":false,"map":true,"seat":true,"throne":true,"pantheon":true,            "terrainDamage":true}}""";
+
+    /**
+     * Six hex characters ("B347CC") to 0xRRGGBB, or 0 when unusable.
+     */
+    private static int hexColor(String hex) {
+        if (hex == null) return 0;
+        String clean = hex.startsWith("#") ? hex.substring(1) : hex;
+        if (clean.length() != 6) return 0;
+        try {
+            return Integer.parseInt(clean, 16);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static SheetState.Actions actions(JsonObject node) {
+        if (node == null) return SheetState.Actions.NONE;
+        return new SheetState.Actions(JsonRead.bool(node, "church"), JsonRead.bool(node, "abilities"),
+                JsonRead.bool(node, "mythical"), JsonRead.bool(node, "uniqueness"),
+                JsonRead.bool(node, "honorific"), JsonRead.bool(node, "map"),
+                JsonRead.bool(node, "seat"), JsonRead.bool(node, "throne"),
+                JsonRead.bool(node, "pantheon"), JsonRead.bool(node, "terrainDamage"));
+    }
 }

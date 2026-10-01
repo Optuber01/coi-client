@@ -43,12 +43,13 @@ import org.lwjgl.glfw.GLFW;
 public class CoiKeyBindings {
 
     /**
-     * The character sheet's seven destinations, in its own order — the same
+     * The character sheet's nine destinations, in its own order — the same
      * wire targets {@code SheetDestinations} lays out as cards, and the stem of
      * every lang key that describes one.
      */
     private static final String[] MENU_TARGETS = {
-            "church", "abilities", "mythical", "uniqueness", "honorific", "map", "seat"
+            "church", "abilities", "mythical", "uniqueness", "honorific", "map", "seat",
+            "throne", "pantheon"
     };
 
     /**
@@ -110,7 +111,7 @@ public class CoiKeyBindings {
         gestureCast = register("key.coi.gesture", GLFW.GLFW_KEY_LEFT_ALT, category);
 
         // Straight into one of the sheet's destinations. All unbound by
-        // default: seven more keys claimed up front would collide with
+        // default: nine more keys claimed up front would collide with
         // whatever the player already uses.
         for (int i = 0; i < MENU_TARGETS.length; i++) {
             menuTargetKeys[i] = register("key.coi.open_" + MENU_TARGETS[i], GLFW.GLFW_KEY_UNKNOWN, category);
@@ -204,16 +205,17 @@ public class CoiKeyBindings {
      * A server that advertised neither has nothing listening, so say so instead
      * of sending into the void.
      * <p>
-     * On older servers, {@code useServerMenus} takes the chest GUI first, because a player who
+     * {@code useServerMenus} takes the chest GUI first, because a player who
      * asked for the plugin's own UI should not have to open the sheet and click
      * its footer to reach it. It only <em>reorders</em> the two, though: on a
      * server without {@code menu_action} the sheet still opens, since the
-     * preference says "prefer the server's own UI", not "show nothing".
+     * preference says "prefer the server's own UI", not "show nothing". The
+     * {@code menu_archive} exclusion that used to sit here made the preference
+     * dead on every live server, so it is gone.
      */
     private static void openServerMenu(Minecraft client) {
         if (client.player == null) return;
-        if (HudConfig.getSettings().useServerMenus && !ServerCapabilities.has("menu_archive")
-                && ServerCapabilities.has("menu_action")) {
+        if (HudConfig.getSettings().useServerMenus && ServerCapabilities.has("menu_action")) {
             ClientPlayNetworking.send(ActionPayload.of("open_menu"));
         } else if (ServerCapabilities.has("character_sheet")) {
             client.gui.setScreen(new CharacterSheetScreen(null));

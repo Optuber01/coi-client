@@ -157,19 +157,21 @@ The server responds with `coi-client:abilities`, and usually an immediate `coi-c
 One JSON string, always with an `action` key. Servers should rate-limit per player — except the
 two sheet lifecycle actions, which must be exempt or the sheet can get stuck open.
 
-| Body | Sent when | Server does |
-|------|-----------|-------------|
-| `{"action":"open_menu"}` | the `M` key on a `menu_action` server without `character_sheet`, or the sheet's *Server Menu* button | opens the InvUI Beyonder menu |
-| `{"action":"sheet_open"}` | `CharacterSheetScreen.init()` | marks the sheet open (5-minute TTL) and pushes `coi-client:sheet` |
-| `{"action":"sheet_close"}` | `CharacterSheetScreen.onClose()`/`removed()`, exactly once | marks the sheet closed, stopping the 60-tick pushes |
-| `{"action":"open","target":"church\|abilities\|mythical\|uniqueness\|honorific\|map\|seat"}` | one of the sheet's seven sub-menu buttons (the sheet then closes itself) | re-checks the gate and opens that InvUI GUI |
-| `{"action":"toggle_terrain"}` | the sheet's terrain-damage button (the sheet stays open) | flips the flag, sends the usual chat feedback, pushes a fresh sheet |
+| Body                                                                                                           | Sent when                                                                                            | Server does                                                         |
+|----------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| `{"action":"open_menu"}`                                                                                       | the `M` key on a `menu_action` server without `character_sheet`, or the sheet's *Server Menu* button | opens the InvUI Beyonder menu                                       |
+| `{"action":"sheet_open"}`                                                                                      | `CharacterSheetScreen.init()`                                                                        | marks the sheet open (5-minute TTL) and pushes `coi-client:sheet`   |
+| `{"action":"sheet_close"}`                                                                                     | `CharacterSheetScreen.onClose()`/`removed()`, exactly once                                           | marks the sheet closed, stopping the 60-tick pushes                 |
+| `{"action":"open","target":"church\|abilities\|mythical\|uniqueness\|honorific\|map\|seat\|throne\|pantheon"}` | one of the sheet's nine sub-menu buttons (the sheet then closes itself)                              | re-checks the gate and opens that InvUI GUI                         |
+| `{"action":"toggle_terrain"}`                                                                                  | the sheet's terrain-damage button (the sheet stays open)                                             | flips the flag, sends the usual chat feedback, pushes a fresh sheet |
 
 The `open` action also carries `"ui":"client"|"server"` — the player's own `useServerMenus`
 setting (`ActionPayload.ofOpen`). `client` (the default) asks for a `coi-client:menu` document,
 `server` for the original InvUI chest GUI. A server that predates the menu protocol ignores the
-field and opens its chest GUI either way. When both peers support `menu_archive`, registered
-native menus take precedence over this legacy preference. `open_menu` opens a native pathway
+field and opens its chest GUI either way. The field is always stamped from the preference — it used
+to be suppressed on any `menu_archive` server, which made the checkbox behind it dead. The server
+owns the final say through its own per-player preference (`/coi menu native`); `ui` only reports
+what the player asked for. `open_menu` opens a native pathway
 chooser, including secondary pathways; unported flows retain their existing fallback.
 
 When neither `character_sheet` nor `menu_action` is advertised, `M` shows
@@ -478,7 +480,8 @@ every 60 ticks while the sheet is open.
  "pressure":{"present":true,"stacks":3,"cap":10},
  "anomaly":false,
  "actions":{"church":true,"abilities":true,"mythical":false,"uniqueness":true,
-   "honorific":false,"map":true,"seat":false,"terrainDamage":true}}
+   "honorific":false,"map":true,"seat":false,"throne":false,"pantheon":true,
+   "terrainDamage":true}}
 ```
 
 - `pathwayColor` is six hex characters with no `#`; the client falls back to `Pathways.pathwayRgb`
@@ -489,7 +492,7 @@ every 60 ticks while the sheet is open.
   where the ledger would be. `cooldownRemaining`/`cooldownTotal` are seconds, and the client counts
   the remaining one down locally between pushes.
 - A source with `unlimited` renders its cap as `∞`; a source at or over its cap renders red.
-- `actions.*` are availability gates for the seven sub-menu buttons — except `terrainDamage`, which
+- `actions.*` are availability gates for the nine sub-menu buttons — except `terrainDamage`, which
   is the **current toggle state** and drives the `sheet_btn_terrain_on`/`_off` label.
 - All strings arrive already resolved in the player's locale. Spirituality here uses the GUI's
   three-way fallback (Influence → Concealment → real), which can legitimately differ from the

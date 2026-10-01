@@ -63,8 +63,10 @@ public class SheetState {
      * is the odd one out: it is the current toggle state, not a gate.
      */
     public record Actions(boolean church, boolean abilities, boolean mythical, boolean uniqueness,
-                          boolean honorific, boolean map, boolean seat, boolean terrainDamage) {
-        public static final Actions NONE = new Actions(false, false, false, false, false, false, false, false);
+                          boolean honorific, boolean map, boolean seat, boolean throne, boolean pantheon,
+                          boolean terrainDamage) {
+        public static final Actions NONE = new Actions(false, false, false, false, false, false, false, false,
+                false, false);
 
         /**
          * The gate for a wire target, which is how both the sheet's cards and
@@ -80,6 +82,8 @@ public class SheetState {
                 case "honorific" -> honorific;
                 case "map" -> map;
                 case "seat" -> seat;
+                case "throne" -> throne;
+                case "pantheon" -> pantheon;
                 default -> true;
             };
         }
