@@ -2,14 +2,14 @@ package dev.ua.ikeepcalm.coi.client.screen;
 
 import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
-import dev.ua.ikeepcalm.coi.client.effects.impl.EffectPaint;
+import dev.ua.ikeepcalm.coi.client.effect.visual.EffectPaint;
+
+import java.util.Random;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.SplashRenderer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-
-import java.util.Random;
 
 /**
  * The title screen remembers. Corruption (the higher of madness / permanent
@@ -25,7 +25,7 @@ public class TitleScreenHaunt {
     private static final Identifier[] PUPIL_FRAMES = new Identifier[4];
 
     static {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < PUPIL_FRAMES.length; i++) {
             PUPIL_FRAMES[i] = Identifier.fromNamespaceAndPath("coi-client", "textures/eyes/eye4." + (i + 1) + ".png");
         }
     }
@@ -42,7 +42,11 @@ public class TitleScreenHaunt {
     private static int eyeHalfW;
     private static float eyeRotation;
     private static boolean splashDecided = false;
+    private static Component splashText = null;
     private static SplashRenderer hauntedSplash = null;
+
+    private TitleScreenHaunt() {
+    }
 
     /**
      * 0 when clean (or hallucinations disabled), creeping to 1 at corruption
@@ -50,7 +54,7 @@ public class TitleScreenHaunt {
      * when the player was last seen — debug-screen madness counts too, since
      * it is persisted at disconnect like any other.
      */
-    private static float intensity() {
+    public static float intensity() {
         if (!HudConfig.getSettings().enableHallucinations) return 0f;
         double corruption = ClientStateStore.getCorruption();
         if (corruption < 10.0) return 0f;
@@ -63,19 +67,32 @@ public class TitleScreenHaunt {
      * everyone else gets Lord of the Mysteries flavor instead of vanilla.
      */
     public static SplashRenderer hauntedSplash() {
-        if (!splashDecided) {
-            splashDecided = true;
-            float level = intensity();
-            if (level > 0 && ClientStateStore.getCorruption() >= 25.0
-                    && RANDOM.nextDouble() < 0.25 + 0.5 * level) {
-                hauntedSplash = new SplashRenderer(
-                        Component.translatable("title.coi.haunt_splash." + RANDOM.nextInt(HAUNT_SPLASH_LINES)));
-            } else {
-                hauntedSplash = new SplashRenderer(
-                        Component.translatable("title.coi.splash." + RANDOM.nextInt(LOTM_SPLASH_LINES)));
-            }
-        }
+        decideSplash();
         return hauntedSplash;
+    }
+
+    /**
+     * The same line as {@link #hauntedSplash}, unwrapped, for the title
+     * takeover — which suppresses the vanilla splash renderer (it would land on
+     * top of the mod's larger wordmark) and draws the line itself. Reading the
+     * component rather than re-rolling one is what keeps the two in step.
+     */
+    public static Component splashText() {
+        decideSplash();
+        return splashText;
+    }
+
+    private static void decideSplash() {
+        if (splashDecided) return;
+        splashDecided = true;
+        float level = intensity();
+        if (level > 0 && ClientStateStore.getCorruption() >= 25.0
+                && RANDOM.nextDouble() < 0.25 + 0.5 * level) {
+            splashText = Component.translatable("title.coi.haunt_splash." + RANDOM.nextInt(HAUNT_SPLASH_LINES));
+        } else {
+            splashText = Component.translatable("title.coi.splash." + RANDOM.nextInt(LOTM_SPLASH_LINES));
+        }
+        hauntedSplash = new SplashRenderer(splashText);
     }
 
     public static void render(GuiGraphicsExtractor ctx, int width, int height) {

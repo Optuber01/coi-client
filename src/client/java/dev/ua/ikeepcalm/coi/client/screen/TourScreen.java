@@ -1,20 +1,24 @@
 package dev.ua.ikeepcalm.coi.client.screen;
 
-import dev.ua.ikeepcalm.coi.client.CircleOfImaginationClient;
 import dev.ua.ikeepcalm.coi.client.config.ClientStateStore;
 import dev.ua.ikeepcalm.coi.client.config.HudConfig;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
-import net.minecraft.client.KeyMapping;
+import dev.ua.ikeepcalm.coi.client.hud.HudScale;
+import dev.ua.ikeepcalm.coi.client.hud.overlay.AbilityOverlay;
+import dev.ua.ikeepcalm.coi.client.hud.overlay.ActingOverlay;
+import dev.ua.ikeepcalm.coi.client.hud.overlay.MadnessOverlay;
+import dev.ua.ikeepcalm.coi.client.hud.overlay.SpiritualityOverlay;
+import dev.ua.ikeepcalm.coi.client.input.CoiKeyBindings;
+import dev.ua.ikeepcalm.coi.client.state.ActingState;
+import dev.ua.ikeepcalm.coi.client.state.BeyonderState;
+
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * First-join walkthrough: dims the screen, spotlights one UI element at a
@@ -50,10 +54,6 @@ public class TourScreen extends Screen {
         super(Component.translatable("screen.coi.tour_title"));
     }
 
-    private static Component keyName(KeyMapping key) {
-        return KeyMappingHelper.getBoundKeyOf(key).getDisplayName();
-    }
-
     private void buildSteps() {
         steps.clear();
 
@@ -61,22 +61,20 @@ public class TourScreen extends Screen {
                 Component.translatable("screen.coi.tour_step1_title"),
                 Component.translatable("screen.coi.tour_step1_body"),
                 (w, h) -> {
-                    HudConfig.HudSettings s = HudConfig.getSettings();
-                    int slots = Math.min(CircleOfImaginationClient.getActiveAbilitySlots(), 4);
-                    int x = (int) (s.hudX / s.hudScale);
-                    int y = (int) ((h - s.hudYOffset) / s.hudScale);
-                    int rw = s.slotSpacing * (slots - 1) + s.slotSize;
-                    return new int[]{x - 6, y - 6, rw + 12, s.slotSize + 26};
+                    // Slots can be scattered now, so the spotlight is the union
+                    // of wherever they actually are
+                    int[] box = AbilityOverlay.rowBounds(w, h, HudConfig.getSettings());
+                    return new int[]{box[0] - 6, box[1] - 6, box[2] + 12, box[3] + 13};
                 }));
 
         steps.add(new TourStep(
                 Component.translatable("screen.coi.tour_step2_title"),
-                Component.translatable("screen.coi.tour_step2_body", keyName(CircleOfImaginationClient.abilityMenu)),
+                Component.translatable("screen.coi.tour_step2_body", ScreenInput.keyName(CoiKeyBindings.abilityMenu)),
                 null));
 
         steps.add(new TourStep(
                 Component.translatable("screen.coi.tour_step3_title"),
-                Component.translatable("screen.coi.tour_step3_body", keyName(CircleOfImaginationClient.abilityWheel)),
+                Component.translatable("screen.coi.tour_step3_body", ScreenInput.keyName(CoiKeyBindings.abilityWheel)),
                 null));
 
         Component madnessBody = Component.translatable("screen.coi.tour_step4_body");
@@ -87,39 +85,50 @@ public class TourScreen extends Screen {
                 Component.translatable("screen.coi.tour_step4_title"),
                 madnessBody,
                 (w, h) -> {
-                    // Mirrors the anchor math in MadnessHudOverlay, plus the text line above the bar
+                    // Same anchor math the overlay uses, plus the text line above the bar
                     HudConfig.HudSettings s = HudConfig.getSettings();
-                    int barWidth = 182;
-                    int barHeight = 6;
-                    String anchor = s.madnessAnchor != null ? s.madnessAnchor.toUpperCase() : "TOP_LEFT";
-                    int barX;
-                    int barY;
-                    switch (anchor) {
-                        case "TOP_LEFT" -> {
-                            barX = 10;
-                            barY = 20;
-                        }
-                        case "TOP_CENTER" -> {
-                            barX = (w - barWidth) / 2;
-                            barY = 20;
-                        }
-                        case "BOTTOM_LEFT" -> {
-                            barX = 10;
-                            barY = h - s.madnessYOffset;
-                        }
-                        default -> { // BOTTOM_CENTER
-                            barX = (w - barWidth) / 2;
-                            barY = h - s.madnessYOffset;
-                        }
-                    }
-                    barX = Mth.clamp(barX + s.madnessXOffset, 0, Math.max(0, w - barWidth));
-                    return new int[]{barX - 5, barY - 15, barWidth + 10, barHeight + 26};
+                    int[] pos = MadnessOverlay.anchor(w, h, s);
+                    return barSpotlight(pos, HudScale.size(MadnessOverlay.BAR_WIDTH, s.madnessScale),
+                            HudScale.size(MadnessOverlay.BAR_HEIGHT, s.madnessScale));
                 }));
+
+        // Only worth a step when the server actually feeds spirituality
+        if (BeyonderState.hasSpiritualityData()) {
+            steps.add(new TourStep(
+                    Component.translatable("screen.coi.tour_step_spirit_title"),
+                    Component.translatable("screen.coi.tour_step_spirit_body"),
+                    (w, h) -> {
+                        // The bar is a sprite with its own overhang, so it reports its own box
+                        int[] box = SpiritualityOverlay.bounds(w, h, HudConfig.getSettings());
+                        return new int[]{box[0] - 4, box[1] - 4, box[2] + 8, box[3] + 8};
+                    }));
+        }
+
+        // Outer pathways never gain acting, so their bar is never drawn either
+        if (ActingState.hasData() && !ActingState.isOuter()) {
+            steps.add(new TourStep(
+                    Component.translatable("screen.coi.tour_step_acting_title"),
+                    Component.translatable("screen.coi.tour_step_acting_body"),
+                    (w, h) -> {
+                        HudConfig.HudSettings s = HudConfig.getSettings();
+                        int[] pos = ActingOverlay.anchor(w, h, s);
+                        return barSpotlight(pos, HudScale.size(ActingOverlay.BAR_WIDTH, s.actingScale),
+                                HudScale.size(ActingOverlay.BAR_HEIGHT, s.actingScale));
+                    }));
+        }
 
         steps.add(new TourStep(
                 Component.translatable("screen.coi.tour_step5_title"),
                 Component.translatable("screen.coi.tour_step5_body"),
                 null));
+    }
+
+    /**
+     * Spotlight around a bar at {@code pos}, widened to take in the label line
+     * that sits above it.
+     */
+    private static int[] barSpotlight(int[] pos, int barWidth, int barHeight) {
+        return new int[]{pos[0] - 5, pos[1] - 15, barWidth + 10, barHeight + 26};
     }
 
     @Override
@@ -159,24 +168,7 @@ public class TourScreen extends Screen {
 
     @Override
     public void tick() {
-        keepMovementKeysAlive();
-    }
-
-    /**
-     * Screens normally swallow keyboard input, freezing the player. Feed the
-     * raw key state back into the movement bindings so the player can keep
-     * moving while reading the tour.
-     */
-    private void keepMovementKeysAlive() {
-        if (this.minecraft.player == null) return;
-        var options = this.minecraft.options;
-        KeyMapping[] movementKeys = {
-                options.keyUp, options.keyDown, options.keyLeft, options.keyRight,
-                options.keyJump, options.keyShift, options.keySprint
-        };
-        for (KeyMapping key : movementKeys) {
-            key.setDown(CircleOfImaginationClient.isKeyDown(key));
-        }
+        ScreenInput.keepMovementKeysAlive(this.minecraft);
     }
 
     @Override

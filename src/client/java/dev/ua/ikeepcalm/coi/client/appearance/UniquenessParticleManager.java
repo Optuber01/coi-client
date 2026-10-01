@@ -1,6 +1,6 @@
 package dev.ua.ikeepcalm.coi.client.appearance;
 
-import dev.ua.ikeepcalm.coi.client.ClientAppearanceState;
+import dev.ua.ikeepcalm.coi.client.state.AppearanceState;
 import dev.ua.ikeepcalm.coi.client.config.AppearanceConfig;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -84,7 +84,7 @@ public final class UniquenessParticleManager {
 
     public static Set<String> visualPathways(String uuid) {
         Set<String> paths = new java.util.LinkedHashSet<>();
-        var traits = ClientAppearanceState.getTraits(uuid);
+        var traits = AppearanceState.getTraits(uuid);
         String unique = resolvePathway(uuid, traits);
         if (unique != null && AppearanceConfig.shouldRenderUniqueness(uuid)) paths.add(unique);
         for (String trait : traits) {
@@ -124,7 +124,7 @@ public final class UniquenessParticleManager {
                 initialized=true;lightning=null;
             }
             int flower=0;
-            for(String trait:ClientAppearanceState.getTraits(player.getUUID().toString()))
+            for(String trait:AppearanceState.getTraits(player.getUUID().toString()))
                 if(trait.startsWith("flower-phase:") && trait.length()==14 && trait.charAt(13)>='0' && trait.charAt(13)<='7')
                     flower=trait.charAt(13)-'0';
             float targetBloom=flower<2?.15f+flower/7f:flower<5?1:Math.max(.12f,1-(flower-4)*.28f);
@@ -207,7 +207,7 @@ public final class UniquenessParticleManager {
 
     public static String resolvePathway(AbstractClientPlayer player) {
         String uuid = player.getUUID().toString();
-        return resolvePathway(uuid, ClientAppearanceState.getTraits(uuid));
+        return resolvePathway(uuid, AppearanceState.getTraits(uuid));
     }
 
     public static String resolvePathway(String uuid, Iterable<String> traits) {
@@ -394,7 +394,7 @@ public final class UniquenessParticleManager {
 
     private static void emitLightning(Emission e) {
         Motion motion=motions.get(e.player().getUUID().toString());
-        boolean active=ClientAppearanceState.hasTrait(e.player().getUUID().toString(),"ability:tyrant");
+        boolean active=AppearanceState.hasTrait(e.player().getUUID().toString(),"ability:tyrant");
         if(!active && !motion.water)return;
         int period=active?30:65;
         if(Math.floorMod(e.tick()+e.player().getUUID().hashCode(),period)!=0)return;

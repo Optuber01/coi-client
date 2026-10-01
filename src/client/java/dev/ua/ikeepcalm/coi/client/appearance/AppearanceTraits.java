@@ -1,13 +1,13 @@
 package dev.ua.ikeepcalm.coi.client.appearance;
 
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.BeastTraitRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.ClawTraitRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.DemonessEarsRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.FemaleTraitsRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.HairTraitRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.HornsTraitRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.MushroomTraitRenderer;
-import dev.ua.ikeepcalm.coi.client.appearance.renderers.SkinTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.trait.BeastTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.trait.ClawTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.trait.DemonessEarsRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.trait.FemaleTraitsRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.trait.HairTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.trait.HornsTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.trait.MushroomTraitRenderer;
+import dev.ua.ikeepcalm.coi.client.appearance.trait.SkinTraitRenderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
