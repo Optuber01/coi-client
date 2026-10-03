@@ -1,0 +1,53 @@
+package dev.ua.ikeepcalm.coi.mixin;
+
+import dev.ua.ikeepcalm.coi.ui.PortraitPose;
+import dev.ua.ikeepcalm.coi.util.duck.AvatarRenderStateAccessor;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+
+/**
+ * Adds a player-UUID field to the vanilla render state, which carries no identity of its own.
+ */
+@Mixin(AvatarRenderState.class)
+public class AvatarRenderStateMixin implements AvatarRenderStateAccessor {
+
+    @Unique
+    private String coi$playerUuid;
+
+    @Unique
+    private String coi$previewForm;
+
+    @Unique
+    private PortraitPose coi$portraitPose;
+
+    @Override
+    public PortraitPose coi$getPortraitPose() {
+        return coi$portraitPose;
+    }
+
+    @Override
+    public void coi$setPortraitPose(PortraitPose pose) {
+        coi$portraitPose = pose;
+    }
+
+    @Override
+    public String coi$getPreviewForm() {
+        return coi$previewForm;
+    }
+
+    @Override
+    public void coi$setPreviewForm(String form) {
+        coi$previewForm = form;
+    }
+
+    @Override
+    public String coi$getPlayerUuid() {
+        return coi$playerUuid;
+    }
+
+    @Override
+    public void coi$setPlayerUuid(String uuid) {
+        this.coi$playerUuid = uuid;
+    }
+}

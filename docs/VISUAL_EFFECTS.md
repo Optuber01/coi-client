@@ -270,6 +270,56 @@ When tested from the debug screen without params, the client uses a longer `styl
 
 ---
 
+### `impact_frame`
+
+The sakuga impact frame — animation's two-to-five-frame punctuation that marks a hit as enormous. Not the `impact` spell
+VFX, which plays *at* a position in the world; this is the drawing the whole picture becomes for a sixth of a second. It
+runs on a 24 fps clock: frame 0 is the **negative** (the live world inverted, tinted toward the accent, with the splash
+on it in ink), frames 1–2 **hold one two-tone plate** (a flat black ground, a white jagged splash, the accent as the
+hairline between them, concentration lines running in from the edges), frame 3 **flips the tones** at high intensity,
+and only then does the live world come back with the drawing **releasing** over it in discrete steps — a ring of empty
+space racing outward around the target, the wedges lifting off and shrinking, the lines pulling back, shards leaving —
+plus a brief accent vignette and a camera jolt. Nothing tweens. Good for: ascensions, a god's blow landing, an
+execution, a boss's ultimate, the one hit in a fight that matters.
+
+It composes around a **focus**: the screen centre with no position, or where `x,y,z` project this frame. A point
+off-screen or behind the camera is pulled to just past the nearest edge along its direction, so the drawing comes in
+from that side and says "there, out of view" instead of drawing nothing. The plate covers the HUD too (everything but
+chat) — a hard cut is the point.
+
+**Epilepsy mode** does not suppress it; it gets a reduced frame: no negative and no plate, so the screen's luminance
+never cuts as a whole and never alternates. The drawing is held still over the live world for the same three frames and
+then releases. The camera jolt honours `enableCameraShake` and `epilepsyMode` through the ceremony's `ScreenShakeState`,
+and is skipped while a rite's rumble is already running.
+
+| Param         | Type                       | Default                     | Description                                                                                                                                    |
+|---------------|----------------------------|-----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| `x`, `y`, `z` | double                     | —                           | World anchor; omit all three for a centred frame                                                                                               |
+| `intensity`   | float 0–1                  | `0.85`                      | Size, line density, plate opacity, how many frames are held (≥ 0.45 adds the negative, ≥ 0.7 adds the flip) and the jolt                       |
+| `accent`      | hex RGB (no `#`)           | `FF7A22`                    | The hairline rim, one line in five, the negative's tint, the release vignette — use the pathway colour                                         |
+| `tone`        | `dark`, `light`            | `dark`                      | `dark` is a black plate with a white splash; `light` the reverse                                                                               |
+| `style`       | `burst`, `slash`, `pillar` | `burst`                     | `burst` radiates evenly; `slash` puts the wedges in two lobes along a cut line the width of the screen; `pillar` sends them up with dust below |
+| `angle`       | float degrees              | `35` (slash), `90` (pillar) | The slash's cut or the pillar's rise; 0 = right, 90 = up                                                                                       |
+| `duration`    | long ms                    | `600`                       | Total lifetime (200–4000); the held frames are fixed at 24 fps and the release takes the rest                                                  |
+| `scale`       | float                      | `1.0`                       | Multiplier on the drawing's radius (0.3–3)                                                                                                     |
+| `shake`       | float 0–1                  | `0.55 × intensity`          | Camera jolt amplitude; `0` disables it                                                                                                         |
+| `seed`        | long                       | random                      | Fix the drawing, e.g. so every witness of one blow sees the same frame                                                                         |
+
+**Examples:**
+
+```
+effect("impact_frame", "intensity=1.0,accent=8B00FF,style=pillar,x=120.5,y=64.0,z=-33.5")   // Fool ascension at the altar
+effect("impact_frame", "intensity=0.9,accent=00CCCC,style=slash,angle=-30,x=120.5,y=65.2,z=-33.5")  // Tyrant's blow on its victim
+effect("impact_frame", "intensity=0.95,accent=FFDD00,tone=light")                            // Sun: white-out plate, no anchor
+effect("impact_frame", "intensity=0.5,accent=FF2200,shake=0")                                // a lesser hit: one plate, no negative, no jolt
+effect("impact_frame", "intensity=1.0,accent=FF8800,duration=900,seed=4242")                 // longer release, same drawing for everyone
+```
+
+The anchor is only a composition hint: this is a screen effect, and an impact 60 blocks away is drawn as large as one at
+the crosshair. If distance should matter, scale `intensity` or `scale` server-side.
+
+---
+
 ### `hallucination`
 Fires a single madness-hallucination event and finishes immediately — no visual of its own. Phantom positional audio (footsteps sneaking up behind the player, whispers over the shoulder, cave ambience, doors/chests nobody touched) or a brief visual flicker (single eye / short glitch). These events also fire autonomously on the client once madness passes 25, scaling in frequency and boldness with the madness stages (25/50/75) — and up to ~2.5x more often in darkness or at night; this effect id lets the server force one at any time. At madness ≥ 75 the ability HUD itself occasionally lies for a few hundred ms (wrong cooldown number, glitched keybind, two slots trading places), and permanent madness persists locally to haunt the title screen (vignette, eye apparitions, whisper splash lines) until it is cured.
 
@@ -342,13 +392,13 @@ The client only processes this payload while connected (receiver is registered g
 
 ## Adding New Effects (client-side)
 
-1. Create `client/effect/visual/YourEffect.java` implementing `client/effect/VisualEffect`
+1. Create `domain/effect/visual/YourEffect.java` implementing `domain/effect/VisualEffect`
 2. Read the params with `EffectParams` (the shared `key=value,key=value` splitter) and draw with
    `EffectPaint` (the 2D helpers vanilla does not expose) — do not hand-roll either
 3. Register in `EffectManager.initialize()`: `register(YourEffect.ID, YourEffect::new)`
 4. Update this file with the new effect's params and examples
 
 An effect large enough to want collaborators gets a sub-package, the way `impact` does:
-`ImpactFrameEffect` keeps only the `VisualEffect` contract and the params, and
+`SpellImpactEffect` keeps only the `VisualEffect` contract and the params, and
 `effect/visual/impact/` holds the presets (`ImpactStyle`), the randomised shapes (`ImpactGeometry`),
 the marks (`ImpactRenderer`) and one playing impact (`WorldImpact`).

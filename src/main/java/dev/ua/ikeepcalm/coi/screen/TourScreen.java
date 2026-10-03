@@ -1,0 +1,219 @@
+package dev.ua.ikeepcalm.coi.screen;
+
+import dev.ua.ikeepcalm.coi.config.ClientStateStore;
+import dev.ua.ikeepcalm.coi.config.HudConfig;
+import dev.ua.ikeepcalm.coi.domain.beyonder.model.ActingState;
+import dev.ua.ikeepcalm.coi.domain.beyonder.model.BeyonderState;
+import dev.ua.ikeepcalm.coi.hud.HudScale;
+import dev.ua.ikeepcalm.coi.hud.overlay.AbilityOverlay;
+import dev.ua.ikeepcalm.coi.hud.overlay.ActingOverlay;
+import dev.ua.ikeepcalm.coi.hud.overlay.MadnessOverlay;
+import dev.ua.ikeepcalm.coi.hud.overlay.SpiritualityOverlay;
+import dev.ua.ikeepcalm.coi.input.CoiKeyBindings;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
+import org.jspecify.annotations.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * First-join walkthrough. Movement stays enabled, as on the ability wheel. Spotlights are
+ * computed from live {@link HudConfig} values every frame, through the same anchor math the
+ * overlays use, so they cannot drift from a custom HUD layout.
+ */
+public class TourScreen extends Screen {
+
+    private static final int CARD_WIDTH = 280;
+    private static final int DIM_COLOR = 0xB0000000;
+    private static final int ACCENT_RGB = 0xFFD870;
+
+    @FunctionalInterface
+    private interface SpotlightRect {
+        int[] get(int screenWidth, int screenHeight);
+    }
+
+    private record TourStep(Component title, Component body, SpotlightRect spotlight) {
+    }
+
+    private final List<TourStep> steps = new ArrayList<>();
+    private int currentStep = 0;
+
+    public TourScreen() {
+        super(Component.translatable("screen.coi.tour_title"));
+    }
+
+    private void buildSteps() {
+        steps.clear();
+
+        steps.add(new TourStep(
+                Component.translatable("screen.coi.tour_step1_title"),
+                Component.translatable("screen.coi.tour_step1_body"),
+                (w, h) -> {
+                    // slots can be scattered, so the spotlight is the union of where they are
+                    int[] box = AbilityOverlay.rowBounds(w, h, HudConfig.getSettings());
+                    return new int[]{box[0] - 6, box[1] - 6, box[2] + 12, box[3] + 13};
+                }));
+
+        steps.add(new TourStep(
+                Component.translatable("screen.coi.tour_step2_title"),
+                Component.translatable("screen.coi.tour_step2_body", ScreenInput.keyName(CoiKeyBindings.abilityMenu)),
+                null));
+
+        steps.add(new TourStep(
+                Component.translatable("screen.coi.tour_step3_title"),
+                Component.translatable("screen.coi.tour_step3_body", ScreenInput.keyName(CoiKeyBindings.abilityWheel)),
+                null));
+
+        Component madnessBody = Component.translatable("screen.coi.tour_step4_body");
+        if (!HudConfig.getSettings().showMadnessBar) {
+            madnessBody = madnessBody.copy().append("\n").append(Component.translatable("screen.coi.tour_step4_hidden"));
+        }
+        steps.add(new TourStep(
+                Component.translatable("screen.coi.tour_step4_title"),
+                madnessBody,
+                (w, h) -> {
+                    HudConfig.HudSettings s = HudConfig.getSettings();
+                    int[] pos = MadnessOverlay.anchor(w, h, s);
+                    return barSpotlight(pos, HudScale.size(MadnessOverlay.BAR_WIDTH, s.madnessScale),
+                            HudScale.size(MadnessOverlay.BAR_HEIGHT, s.madnessScale));
+                }));
+
+        if (BeyonderState.hasSpiritualityData()) {
+            steps.add(new TourStep(
+                    Component.translatable("screen.coi.tour_step_spirit_title"),
+                    Component.translatable("screen.coi.tour_step_spirit_body"),
+                    (w, h) -> {
+                        // the bar is a sprite with its own overhang, so it reports its own box
+                        int[] box = SpiritualityOverlay.bounds(w, h, HudConfig.getSettings());
+                        return new int[]{box[0] - 4, box[1] - 4, box[2] + 8, box[3] + 8};
+                    }));
+        }
+
+        // outer pathways never gain acting, so their bar is never drawn either
+        if (ActingState.hasData() && !ActingState.isOuter()) {
+            steps.add(new TourStep(
+                    Component.translatable("screen.coi.tour_step_acting_title"),
+                    Component.translatable("screen.coi.tour_step_acting_body"),
+                    (w, h) -> {
+                        HudConfig.HudSettings s = HudConfig.getSettings();
+                        int[] pos = ActingOverlay.anchor(w, h, s);
+                        return barSpotlight(pos, HudScale.size(ActingOverlay.BAR_WIDTH, s.actingScale),
+                                HudScale.size(ActingOverlay.BAR_HEIGHT, s.actingScale));
+                    }));
+        }
+
+        steps.add(new TourStep(
+                Component.translatable("screen.coi.tour_step5_title"),
+                Component.translatable("screen.coi.tour_step5_body"),
+                null));
+    }
+
+    private static int[] barSpotlight(int[] pos, int barWidth, int barHeight) {
+        return new int[]{pos[0] - 5, pos[1] - 15, barWidth + 10, barHeight + 26};
+    }
+
+    @Override
+    protected void init() {
+        this.clearWidgets();
+        if (steps.isEmpty()) buildSteps();
+
+        int[] card = cardRect();
+        int cardX = card[0];
+        int cardW = card[2];
+        int buttonsY = card[1] + card[3] + 8;
+        boolean last = currentStep == steps.size() - 1;
+
+        this.addRenderableWidget(Button.builder(Component.translatable("screen.coi.tour_skip"), b -> this.onClose())
+                .bounds(cardX, buttonsY, 90, 20).build());
+
+        this.addRenderableWidget(Button.builder(
+                Component.translatable(last ? "screen.coi.tour_finish" : "screen.coi.tour_next"),
+                b -> {
+                    if (currentStep >= steps.size() - 1) {
+                        this.onClose();
+                    } else {
+                        currentStep++;
+                        this.init();
+                    }
+                }).bounds(cardX + cardW - 90, buttonsY, 90, 20).build());
+    }
+
+    private int[] cardRect() {
+        TourStep step = steps.get(currentStep);
+        List<FormattedCharSequence> lines = this.font.split(step.body(), CARD_WIDTH - 24);
+        int cardH = 12 + 12 + 6 + lines.size() * 10 + 12;
+        int cardX = (this.width - CARD_WIDTH) / 2;
+        int cardY = (this.height - cardH) / 2 - 20;
+        return new int[]{cardX, cardY, CARD_WIDTH, cardH};
+    }
+
+    @Override
+    public void tick() {
+        ScreenInput.keepMovementKeysAlive(this.minecraft);
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+
+    @Override
+    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        TourStep step = steps.get(currentStep);
+
+        int[] spot = step.spotlight() != null ? step.spotlight().get(this.width, this.height) : null;
+        if (spot != null) {
+            int sx = spot[0];
+            int sy = spot[1];
+            int sw = spot[2];
+            int sh = spot[3];
+            graphics.fill(0, 0, this.width, Math.max(0, sy), DIM_COLOR);
+            graphics.fill(0, sy + sh, this.width, this.height, DIM_COLOR);
+            graphics.fill(0, sy, Math.max(0, sx), sy + sh, DIM_COLOR);
+            graphics.fill(sx + sw, sy, this.width, sy + sh, DIM_COLOR);
+
+            float pulse = 0.5f + 0.5f * (float) Math.sin(System.currentTimeMillis() * 0.006);
+            graphics.outline(sx, sy, sw, sh, ((int) (140 + 90 * pulse) << 24) | ACCENT_RGB);
+            graphics.outline(sx - 1, sy - 1, sw + 2, sh + 2, ((int) (50 + 60 * pulse) << 24) | ACCENT_RGB);
+        } else {
+            graphics.fill(0, 0, this.width, this.height, 0x98000000);
+        }
+
+        int[] card = cardRect();
+        int cardX = card[0];
+        int cardY = card[1];
+        int cardW = card[2];
+        int cardH = card[3];
+
+        graphics.fill(cardX, cardY, cardX + cardW, cardY + cardH, 0xF0121216);
+        graphics.outline(cardX, cardY, cardW, cardH, 0xFF3A3A46);
+        graphics.fill(cardX, cardY, cardX + cardW, cardY + 1, 0xFF000000 | ACCENT_RGB);
+
+        graphics.text(this.font, step.title(), cardX + 12, cardY + 12, 0xFF000000 | ACCENT_RGB);
+
+        String progress = (currentStep + 1) + " / " + steps.size();
+        graphics.text(this.font, progress, cardX + cardW - 12 - this.font.width(progress), cardY + 12, 0xFF808088, false);
+
+        List<FormattedCharSequence> lines = this.font.split(step.body(), CARD_WIDTH - 24);
+        int lineY = cardY + 12 + 12 + 6;
+        for (FormattedCharSequence line : lines) {
+            graphics.text(this.font, line, cardX + 12, lineY, 0xFFE0E0E0);
+            lineY += 10;
+        }
+
+        super.extractRenderState(graphics, mouseX, mouseY, a);
+    }
+
+    @Override
+    public void onClose() {
+        // Finish, Skip and Esc all count as done
+        ClientStateStore.setTourCompleted(true);
+        if (this.minecraft != null) {
+            this.minecraft.gui.setScreen(null);
+        }
+    }
+}

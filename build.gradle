@@ -23,12 +23,9 @@ repositories {
 }
 
 loom {
-    splitEnvironmentSourceSets()
-
     mods {
         "coi-client" {
             sourceSet sourceSets.main
-            sourceSet sourceSets.client
         }
     }
 
@@ -62,9 +59,6 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
 }
 
-// The protocol model lives in the client source set, but can be tested without a game window.
-sourceSets.test.compileClasspath += sourceSets.client.output + sourceSets.client.compileClasspath
-sourceSets.test.runtimeClasspath += sourceSets.client.output + sourceSets.client.runtimeClasspath
 test {
     useJUnitPlatform()
 }
@@ -123,7 +117,7 @@ publishing {
 
 tasks.register("generateWhiteTexture") {
     doLast {
-        def dir = file("src/client/resources/assets/coi-client/textures/entity")
+        def dir = file("src/main/resources/assets/coi-client/textures/entity")
         dir.mkdirs()
         def img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
         img.setRGB(0, 0, -1) // white
@@ -132,7 +126,7 @@ tasks.register("generateWhiteTexture") {
     }
 }
 
-tasks.named("compileClientJava").configure {
+tasks.named("compileJava").configure {
     dependsOn("generateWhiteTexture")
 }
 

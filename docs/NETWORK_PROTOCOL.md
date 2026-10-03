@@ -48,7 +48,7 @@ Names below are Mojang mappings (Mojmap), as used by the client sources.
 | S→C | `coi-client:sheet` | `SheetPayload` | `String json` (1 MiB cap) |
 | S→C | `coi-client:menu` | `MenuPayload` | `String json` (1 MiB cap) |
 
-All payload records live in `client/network/payload/`, built from the shared type/codec shapes in
+All payload records live in `network/payload/`, built from the shared type/codec shapes in
 `CoiPayloads` (the namespace, the 1 MiB / 32 KiB caps and the read/write pair are spelled out once
 there, not 22 times). They are registered — and the S→C receivers attached — in
 `CoiNetworking.registerPayloads`.
@@ -559,7 +559,7 @@ document.
   this is what replaces the plugin's two-step chest confirms.
 - `maxVisible` is **advisory**: the client scrolls the whole card, so a list is never paged.
 
-Parsed by `client/menu/MenuParser` into `MenuDocument`/`MenuComponent`, held by `MenuState`,
+Parsed by `domain/menu/service/MenuParser` into `MenuDocument`/`MenuComponent`, held by `MenuState`,
 drawn by `screen/menu/MenuScreen` (+ `MenuTheme`), reset on disconnect.
 
 ### `coi-client:appearance`
