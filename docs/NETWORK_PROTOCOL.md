@@ -604,7 +604,8 @@ One JSON string, `type` `open` or `result`. Feature `glyph_canvas`.
 
 `open` replaces whatever screen is up with `GlyphCanvasScreen`. `glyphs` is the reference sheet,
 in hundredths with y down; signs are shown as drawn at the top slot, and `flow` `out`/`in` marks
-signs that must be drawn away from or toward the ring (the sheet puts a dot at the start).
+signs that must be drawn away from or toward the ring (the sheet puts a dot at the start). Sigils
+get a dot at every stroke start, since the server wants the same number of strokes.
 `GlyphSheet` clamps every number, so a hostile or newer server cannot blow up the screen.
 
 ```json

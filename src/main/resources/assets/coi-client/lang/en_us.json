@@ -158,7 +158,7 @@
   "screen.coi.gesture_draw_hint": "Draw a gesture...",
   "screen.coi.gesture_failed": "Gesture not recognized",
   "screen.coi.glyph_title": "Spell Circle",
-  "screen.coi.glyph_hint": "Draw a closed ring in one stroke, the sigil inside it, and one-stroke signs around it.",
+  "screen.coi.glyph_hint": "Draw a closed ring in one stroke, the sigil inside (one stroke per dot), and one-stroke signs around it.",
   "screen.coi.glyph_undo": "Undo",
   "screen.coi.glyph_clear": "Clear",
   "screen.coi.glyph_name": "Spell name",

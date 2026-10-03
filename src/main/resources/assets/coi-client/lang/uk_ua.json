@@ -158,7 +158,7 @@
   "screen.coi.gesture_draw_hint": "Намалюйте жест...",
   "screen.coi.gesture_failed": "Жест не розпізнано",
   "screen.coi.glyph_title": "Коло закляття",
-  "screen.coi.glyph_hint": "Намалюйте замкнене коло одним штрихом, сигіл усередині та знаки навколо, кожен одним штрихом.",
+  "screen.coi.glyph_hint": "Намалюйте замкнене коло одним штрихом, сигіл усередині (штрих на кожну точку) і знаки навколо, кожен одним штрихом.",
   "screen.coi.glyph_undo": "Скасувати",
   "screen.coi.glyph_clear": "Очистити",
   "screen.coi.glyph_name": "Назва закляття",

@@ -120,7 +120,8 @@ final class GlyphCanvasPainter {
 
     /**
      * One template, scaled into a square of {@code size}. Directed signs get a
-     * dot where the stroke starts.
+     * dot where the stroke starts; sigils get one per stroke, because the
+     * server wants a sigil drawn with the same number of strokes.
      */
     static void glyph(GuiGraphicsExtractor g, GlyphSheet.Glyph glyph, float cx, float cy, int size) {
         float scale = size / 200f;
@@ -129,7 +130,7 @@ final class GlyphCanvasPainter {
                 EffectPaint.line(g, cx + xy[i - 2] * scale, cy + xy[i - 1] * scale,
                         cx + xy[i] * scale, cy + xy[i + 1] * scale, INK, 1);
             }
-            if (!"any".equals(glyph.flow()) && xy.length >= 2) {
+            if ((!glyph.sign() || !"any".equals(glyph.flow())) && xy.length >= 2) {
                 int sx = (int) (cx + xy[0] * scale);
                 int sy = (int) (cy + xy[1] * scale);
                 g.fill(sx - 1, sy - 1, sx + 2, sy + 2, CoiStyle.ACCENT);
