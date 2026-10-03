@@ -93,3 +93,39 @@ When optimizing the visual appearance of these forms, consider the following par
 2.  **Opacity**: Adjust the alpha channels (e.g. `0.2f` for glassmorphic elements, `0.95f` for dense core shadows) to make shapes feel dimensional and ethereal.
 3.  **Procedural Math**: Add more segments or sub-motions. You can introduce multiple sine/cosine frequencies in the `time` parameter inside individual form classes to avoid repetitive patterns.
 4.  **Density**: Adjust loops (like `maggotCount`, `particleCount`, `gear teeth`) for fuller volumes, but keep CPU calculations cheap to preserve client-side frames.
+
+## Full forms, partial forms and the carrier transform
+
+S→C `coi-client:mythical` (`MythicalFormPayload`, `targetUuid` + `pathway:<unused>:start|stop`) marks
+a player's UUID as transformed into a pathway's form. Two kinds:
+
+- **Full forms** — the vanilla player render is cancelled outright (`LivingEntityRendererMixin` at HEAD)
+  and replaced with procedural geometry drawn from `FormPrimitives`. 19 of the 20 pathways.
+- **Partial forms** — a baked Blockbench model stands in for the *lower body* while the player's own
+  head/torso/arms keep rendering. Currently Visionary only (`FormModelLayers.VISIONARY_LOWER_SPEC`).
+
+Partial forms are assembled from four pieces that all have to agree:
+
+| Piece                                 | Job                                                                               |
+|---------------------------------------|-----------------------------------------------------------------------------------|
+| `PlayerModelMixin` (`setupAnim` TAIL) | hides leg parts; must run in `setupAnim`, since submission is deferred            |
+| `HumanoidArmorLayerMixin`             | hides leggings/boots, which draw from their own model set                         |
+| `LivingEntityRendererMixin`           | `hipRaise` push (world space, at HEAD) + **carrier transform** push (model space) |
+| `PartialFormLayer`                    | draws the baked model, undoing the carrier transform it inherits                  |
+
+**The carrier transform** is what makes the halves read as one body. The rig's torso bone (its
+"carrier") both rotates and translates during the walk cycle, around a pivot that is over a block
+away from the player's waist. `FormModel#carrierDelta` hands out that bone's full rigid motion,
+`PartialForms#carrierTransform` converts it into player space, and the renderer mixin pushes it onto
+the pose stack just before the model is submitted — so the player *and* every layer above it (armor,
+held items, cape, appearance traits) ride the torso exactly. Copying the rotation angle alone is not
+enough and looks like shearing: same tilt, wrong pivot, no translation.
+
+Placement knobs live in `FormModelLayers`; read the comment there before touching one. `hipRaise` and
+the carrier push sit in different coordinate spaces on purpose — see `LivingEntityRendererMixin`.
+
+`domain/form/model/VisionaryLowerModel` and `VisionaryLowerAnimations` are **Blockbench exports**. They are
+generated files: change the rig in the modelling tool and re-export, never hand-edit the Java. A
+hand edit is invisible until the next export silently reverts it.
+
+**Dev testing** (no server needed): F8 → *Form: None (Click to cycle)* applies a form to yourself.

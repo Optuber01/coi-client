@@ -86,26 +86,32 @@ A server that never sends this leaves `ServerCapabilities.known()` false and eve
 
 Client-advertised (`ClientFeatures.SUPPORTED`):
 
-| Id | Meaning |
-|----|---------|
-| `ability_hud` | renders the ability slot HUD |
-| `hotkeys` | casts abilities from keybindings |
-| `effects` | renders `coi-client:effect` |
-| `appearance` | renders `coi-client:appearance` traits |
-| `mythical` | renders `coi-client:mythical` forms |
-| `conditions` | consumes `coi-client:conditions` |
-| `spirituality_hud` | draws spirituality itself — the server may skip its boss bars |
-| `menu_action` | can send `coi-client:action open_menu` — the server may drop the slot-9 shortcut item |
-| `ability_meta` | understands `coi-client:abilities_v2` — the server may send the rich list instead of v1 |
-| `ability_state` | renders `coi-client:state` — the server may skip the STATUS action-bar publishes |
-| `acting_hud` | draws the acting bar — the server may skip the `acting:*` action-bar entries |
-| `action_bar` | draws COI's action-bar channels itself — the server may skip `sendActionBar` |
-| `target_health` | draws the target health bar — the server may skip the 60-publish damage animation |
-| `cogitation` | draws cogitation prompts — the server may skip the titles |
-| `notify` | draws notification toasts — the server may skip the matching titles |
-| `character_sheet` | renders the Beyonder character sheet itself — `M` opens it instead of the InvUI menu |
-| `resource_bar` | draws ability resource meters itself — the server may skip the RESERVE glyph bars and per-ability reserve boss bars |
-| `menu_ui` | renders `coi-client:menu` documents — the server may send one instead of opening an InvUI chest GUI |
+| Id                   | Meaning                                                                                                                                      |
+|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `ability_hud`        | renders the ability slot HUD                                                                                                                 |
+| `hotkeys`            | casts abilities from keybindings                                                                                                             |
+| `effects`            | renders `coi-client:effect`                                                                                                                  |
+| `appearance`         | renders `coi-client:appearance` traits                                                                                                       |
+| `mythical`           | renders `coi-client:mythical` forms                                                                                                          |
+| `conditions`         | consumes `coi-client:conditions`                                                                                                             |
+| `spirituality_hud`   | draws spirituality itself — the server may skip its boss bars                                                                                |
+| `menu_action`        | can send `coi-client:action open_menu` — the server may drop the slot-9 shortcut item                                                        |
+| `ability_meta`       | understands `coi-client:abilities_v2` — the server may send the rich list instead of v1                                                      |
+| `ability_state`      | renders `coi-client:state` — the server may skip the STATUS action-bar publishes                                                             |
+| `acting_hud`         | draws the acting bar — the server may skip the `acting:*` action-bar entries                                                                 |
+| `action_bar`         | draws COI's action-bar channels itself — the server may skip `sendActionBar`                                                                 |
+| `target_health`      | draws the target health bar — the server may skip the 60-publish damage animation                                                            |
+| `cogitation`         | draws cogitation prompts — the server may skip the titles                                                                                    |
+| `notify`             | draws notification toasts — the server may skip the matching titles                                                                          |
+| `character_sheet`    | renders the Beyonder character sheet itself — `M` opens it instead of the InvUI menu                                                         |
+| `resource_bar`       | draws ability resource meters itself — the server may skip the RESERVE glyph bars and per-ability reserve boss bars                          |
+| `menu_ui`            | renders `coi-client:menu` documents — the server may send one instead of opening an InvUI chest GUI                                          |
+| `menu_specimen`      | renders the specimen portrait scenes inside a menu document                                                                                  |
+| `menu_archive`       | renders the archive presentation templates (`ledger`, `relic`, `inscription`, `atlas`, `challenge`)                                          |
+| `ability_categories` | renders and binds per-ability cast categories                                                                                                |
+| `ability_manual`     | renders the ability manual template                                                                                                          |
+| `ceremony`           | renders the six Sequence 0 set-piece effects (`postfx`, `sky_tint`, `shake`, `letterbox`, `orbit`, `bed`) — strictly additive over `effects` |
+| `impact_frame`       | renders the `impact_frame` effect — the server can fall back to a title or a particle burst without it                                       |
 
 Server-advertised:
 

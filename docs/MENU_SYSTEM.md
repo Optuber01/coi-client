@@ -546,3 +546,76 @@ Constraints worth keeping whatever the look becomes:
 - the sheet and the menus should read as one interface — they share `CoiStyle`.
 
 Judge it with F8 → *Menu*, which renders every component type without a server attached.
+
+## Client-side invariants, in brief
+
+Full reference, both repos in one place: **[docs/MENU_SYSTEM.md](docs/MENU_SYSTEM.md)** — the wire
+contract, the server's builder DSL, every ported screen, everything that still opens a chest GUI,
+how to add a menu, and the constraints the visual redesign kept.
+
+**Vocabulary v2** added five component types — `hero`, `details`, `steps`, `chips`, `panels` — plus
+an `icon` field on `kv` rows / `checklist` items / `stat` / `note` / `toggle` / section headings, a
+tri-state checklist (`ok` / `no` / **`pending`**), `stat` `style`/`cap`/`delta`, section
+`badge`/`collapsed`, list-row `fraction`/`meta`, `grid` `size`, and a labelled `divider`. Purely
+additive: **the protocol stays 2 and the feature id stays `menu_ui`** — the capability list
+negotiates this, not a version bump.
+
+The reason it exists: the renderer could attach an icon to exactly three things (document header,
+button, list/grid row), so an adapter that wanted to *explain* something had one tool — a muted grey
+paragraph. Five of the seven menu families therefore carried **zero** component-level icons and
+~28,000 characters of prose, 52 blocks of it over 140 characters. After the rewrite there are **zero standalone `text`
+components in any adapter**; every paragraph lives inside a `details`
+disclosure, collapsed by default. The information was never the problem — showing it unasked was.
+
+Two client-side rules the renderer must keep: **disclosure state (`details` open/closed, collapsed
+sections) is keyed `screenId + "/" + id` and survives a rebuild**, resetting only when the screen id
+changes — a 60-tick server refresh slamming shut what the player just opened is the bug to avoid;
+and **all easing funnels through `MenuContext.approach`**, which returns the target outright under
+`epilepsyMode`, so one chokepoint honours the setting.
+
+**The back arrow returns to the character sheet.** Every root document sets `back(true)` but is
+opened with a reset stack, so `__back` at the root used to reach `session.pop() == null` and close
+the menu outright. The server now answers that case with `{"closed":true,"back":true}`; the client
+reopens `CharacterSheetScreen` when the flag is set **and** the session came from the sheet **and**
+the server advertises `character_sheet`. Esc and the X still close outright — only the back arrow
+goes back. The flag is read off the raw JSON in `handleMenu`, deliberately not through `MenuParser`,
+because it describes the *transition* and a closed document has no screen to describe.
+
+The plugin's ~217 InvUI chest GUIs cannot each become a Java class here — `ChurchGUI` alone is
+2833 lines and ~30 screens, and every server-side menu change would need a client release. So the
+server ships a **document** describing one screen and the client renders it: `domain/menu/` parses
+it, `screen/menu/MenuScreen` draws it, and every click goes back on `coi-client:menu_action` for the
+server to answer with the next document. The plugin keeps owning navigation, gating and side
+effects — exactly where that logic already lives. A document is rendered, never interpreted: the
+`screen` id is only used to tell "the same screen refreshed" (scroll and typed text survive) from a
+new one.
+
+- **Forward compatibility is the parser's whole job.** `MenuParser` never throws: an unknown
+  component `type` is skipped, a wrong JSON type reads as absent, sizes are clamped. A newer plugin
+  must degrade to a screen missing one row, never to no screen — which is why `MenuComponent` is
+  sealed on *this* side but the wire is not.
+- **`enabled` defaults to true, and a disabled control is drawn with its `disabledReason` as a
+  tooltip.** A dead button that will not say why is the thing the chest GUIs did worst.
+- **`confirm` is client-side.** A button carrying one raises a modal and sends nothing until the
+  player agrees, replacing the plugin's two-step chest confirms.
+- **One card, one scrollbar.** A `list` flattens its rows (and its search box) into the outer scroll
+  rather than nesting one, so `maxVisible` is advisory. Rows are laid out in pixels because no two
+  component types are the same height — the same reason `AbilityPickerOverlay` works that way.
+- `__close` is sent **exactly once**, however the screen goes away, and never in answer to the
+  server's own `{"closed":true}`. Every send is guarded by `canSend`, like the character sheet's.
+- Text fields outlive a rebuild (`fields` is keyed by component id): the search box re-lays out the
+  whole card on every keystroke, and recreating the `EditBox` would drop the caret mid-word.
+- **`useServerMenus`** is always offered and always sent. It used to be suppressed — checkbox hidden,
+  `ui` forced to `client` — whenever the server advertised `menu_archive`, i.e. always, so the
+  control did nothing. Now the ask reaches the server, which resolves it against its own per-player
+  preference (`/coi menu native`). The sheet's Pathways button opens the native multi-pathway
+  chooser; unsupported flows still retain their server fallback.
+- **Archive templates** (`ledger`, `relic`, `inscription`, `atlas`, `challenge`) keep all document
+  sections and actions, adding a section index and adaptive folio layout. `ability_manual` moves
+  represented ability rows into its details; Other actions preserves every remaining control.
+  See `docs/ARCHIVE_PRESENTATION.md` and `docs/ABILITY_MANUAL.md` for the current presentation contract.
+- **Portrait scenes** use the authoritative sheet pathway and sequence. `PortraitPose` is attached
+  to an isolated avatar render state and reset during ordinary extraction; never mutate the live
+  player to pose a menu model. Reduced-effects mode freezes scene motion.
+- Dev testing: F8 → *Menu* feeds a sample document covering every component type through the real
+  parser, so the renderer can be judged with no server attached.

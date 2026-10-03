@@ -17,6 +17,17 @@ effectId = "all",   params = "stop"   → stop every active effect immediately
 
 Triggering an effect that is already active replaces it (restarts from scratch).
 
+A stop arrives in **two** shapes and both are honoured:
+
+```
+params = "stop"              → the bare stop
+params = "stop,fade=1500"    → a stop that carries parameters
+```
+
+`CeremonyParams.isStop` is the one test for both, and `VisualEffect.stop(String)` exists beside
+`stop()` so the parameters reach the effect — the ceremony audio bed takes its crossfade out of
+exactly that string. An effect that ignores them simply overrides `stop()`.
+
 ---
 
 ## Effect Reference
@@ -402,3 +413,24 @@ An effect large enough to want collaborators gets a sub-package, the way `impact
 `SpellImpactEffect` keeps only the `VisualEffect` contract and the params, and
 `effect/visual/impact/` holds the presets (`ImpactStyle`), the randomised shapes (`ImpactGeometry`),
 the marks (`ImpactRenderer`) and one playing impact (`WorldImpact`).
+
+## Client-side: madness, gaslighting and the debug screen
+
+**Madness hallucinations** — `HallucinationManager` (client tick) fires phantom positional sounds and visual flickers
+once `BeyonderState` madness ≥ 25, scaling with stages 25/50/75; darkness/night makes events up to ~2.5x more frequent.
+Server can force one via the `hallucination` pseudo-effect (`event=footsteps|whisper|cave|block|flicker|random`).
+Toggle: `enableHallucinations` HUD setting, which also gates:
+
+- **HUD gaslighting** (`hud/HudGaslight`) — at madness ≥ 75 the HUD briefly lies: wrong cooldown numbers, glitched
+  keybind glyphs, two slots trading places.
+- **Title screen haunting** (`screen/TitleScreenHaunt` + `TitleScreenMixin`) — corruption (max of madness at disconnect
+  and permanent madness, incl. debug-screen values) is persisted to `config/coi_client_state.json` (`ClientStateStore`);
+  the main menu shows a scaled vignette, occasional eye apparitions, and whisper splash lines
+  (`title.coi.haunt_splash.*`). The same figure drives the title screen takeover's corruption (docs/TITLE_SCREEN.md),
+  and the haunt still draws last, over whichever menu is underneath. Clean players always get LOTM flavor splashes
+  (`title.coi.splash.*`) — not gated by the hallucinations toggle.
+
+**Debug screen** (dev environment only, F8): lists all registered effects with Test/Stop buttons and a params input
+field. `shouldPause()` returns false so effects are visible while the screen is open. The list is **paged**,
+`EFFECTS_PER_PAGE` at a time — every protocol batch has added effects to it, and the ones past the window's bottom edge
+could not be clicked at all; paging makes the screen a constant height however long the registry grows.
