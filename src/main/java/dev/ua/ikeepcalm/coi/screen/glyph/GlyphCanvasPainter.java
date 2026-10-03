@@ -18,12 +18,14 @@ import net.minecraft.network.chat.Component;
 final class GlyphCanvasPainter {
 
     /**
-     * Where the guide ring sits, as a fraction of the canvas side. Signs reach
-     * 1.5 ring radii, which still fits inside the square.
+     * Where the guide ring sits, as a fraction of the canvas side. The server
+     * reads signs centred up to {@link #SIGN_BAND} ring radii out, which fits
+     * inside the square.
      */
     static final float RING = 0.30f;
     private static final float SIGIL_ZONE = 0.45f;
     private static final float SIGN_SLOT = 1.2f;
+    private static final float SIGN_BAND = 1.3f;
 
     private static final int PARCHMENT = 0xF01A1622;
     private static final int GUIDE = 0x50E8D8B0;
@@ -48,6 +50,7 @@ final class GlyphCanvasPainter {
         float ring = size * RING;
         circle(g, cx, cy, ring, GUIDE);
         circle(g, cx, cy, ring * SIGIL_ZONE, GUIDE_FAINT);
+        circle(g, cx, cy, ring * SIGN_BAND, GUIDE_FAINT);
         for (int k = 0; k < 4; k++) {
             double a = Math.toRadians(-90 + k * 90 + (evenLayer ? -45 : 0));
             float sx = cx + (float) Math.cos(a) * ring * SIGN_SLOT;

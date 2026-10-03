@@ -217,8 +217,10 @@ One JSON string: the drawn spell, sent by `GlyphCanvasScreen` when the player pr
 
 - `session` and `dict` are echoed from the `open` that started the canvas.
 - Canvas units are whole numbers `0..1023`, x right, y down. The ring guide sits at radius 0.30 of
-  the canvas around its centre; signs may reach 1.5 ring radii.
-- `t0`/`t1` are milliseconds since the canvas opened, per stroke.
+  the canvas around its centre; a sign's centre must stay within 1.3 ring radii (the faint outer
+  guide circle).
+- `t0`/`t1` are milliseconds since the canvas opened, per stroke. The server only checks that they
+  are sane numbers; they are not a timing rule.
 - Layers run up to the last one with ink. `GlyphDrawing` thins every stroke (12 units apart, at most
   64 points) and refuses strokes past the `limits` the server sent, so a full spell stays far
   under them; the JSON is also checked against `limits.bytes` before sending.
