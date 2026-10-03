@@ -212,32 +212,55 @@ public class GestureScreen extends Screen {
         }
     }
 
+    /**
+     * Centred entries, wrapped into as many rows as the bound shapes need and stacked upwards.
+     */
     private void renderLegend(GuiGraphicsExtractor graphics, float openP) {
         int previewSize = 12;
         int gap = 18;
+        int rowStride = 16;
+        int maxRowWidth = this.width - 40;
 
         List<GestureType> bound = new ArrayList<>();
-        int totalWidth = 0;
+        List<Integer> widths = new ArrayList<>();
         for (GestureType type : GestureType.values()) {
             String ability = AbilityBindings.getGestureAbility(type);
             if (ability == null) continue;
             bound.add(type);
-            totalWidth += previewSize + 5 + this.font.width(AbilityInfo.extractDisplayName(ability)) + gap;
+            widths.add(previewSize + 5 + this.font.width(AbilityInfo.extractDisplayName(ability)));
         }
         if (bound.isEmpty()) return;
-        totalWidth -= gap;
 
         int shapeAlpha = (int) (140 * openP);
         int textAlpha = (int) (170 * openP);
         if (textAlpha < 8) return;
 
-        int x = this.width / 2 - totalWidth / 2;
-        int y = this.height - 36;
-        for (GestureType type : bound) {
-            String name = AbilityInfo.extractDisplayName(AbilityBindings.getGestureAbility(type));
-            type.drawPreview(graphics, x, y, previewSize, EffectPaint.argb(0xFFFFFF, shapeAlpha));
-            graphics.text(this.font, name, x + previewSize + 5, y + 2, EffectPaint.argb(0xAAAAAA, textAlpha));
-            x += previewSize + 5 + this.font.width(name) + gap;
+        List<int[]> rows = new ArrayList<>();
+        int start = 0;
+        int rowWidth = 0;
+        for (int i = 0; i < bound.size(); i++) {
+            int entry = widths.get(i) + (i > start ? gap : 0);
+            if (i > start && rowWidth + entry > maxRowWidth) {
+                rows.add(new int[]{start, i, rowWidth});
+                start = i;
+                rowWidth = widths.get(i);
+            } else {
+                rowWidth += entry;
+            }
+        }
+        rows.add(new int[]{start, bound.size(), rowWidth});
+
+        int y = this.height - 36 - (rows.size() - 1) * rowStride;
+        for (int[] row : rows) {
+            int x = this.width / 2 - row[2] / 2;
+            for (int i = row[0]; i < row[1]; i++) {
+                GestureType type = bound.get(i);
+                String name = AbilityInfo.extractDisplayName(AbilityBindings.getGestureAbility(type));
+                type.drawPreview(graphics, x, y, previewSize, EffectPaint.argb(0xFFFFFF, shapeAlpha));
+                graphics.text(this.font, name, x + previewSize + 5, y + 2, EffectPaint.argb(0xAAAAAA, textAlpha));
+                x += widths.get(i) + gap;
+            }
+            y += rowStride;
         }
     }
 }

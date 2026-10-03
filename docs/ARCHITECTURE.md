@@ -163,8 +163,9 @@ dev.ua.ikeepcalm.coi
   │   │   └── trait/                  — HornsTraitRenderer, MushroomTraitRenderer,
   │   │                                 FemaleTraitsRenderer
   │   └── gesture/
-  │       ├── GestureType       — 5 shapes (circle, V, Z, line down, triangle):
-  │       │                       direction templates + preview polylines
+  │       ├── GestureType       — 9 shapes (circle, V, Z, line down, caret, triangle,
+  │       │                       square, hook, arc): direction templates + preview
+  │       │                       polylines. Declaration order breaks scoring ties
   │       ├── DirectionCodes    — resampled stroke → 8-way direction string
   │       └── GestureRecognizer — resample → DirectionCodes → Levenshtein match
   ├── hud/

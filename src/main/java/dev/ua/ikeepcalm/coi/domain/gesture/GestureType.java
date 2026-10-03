@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The five recognizable gesture shapes. Templates use 8-way codes '0'..'7' from east,
+ * The recognizable gesture shapes. Templates use 8-way codes '0'..'7' from east,
  * clockwise in screen space (y down): 0=E, 1=SE, 2=S, 3=SW, 4=W, 5=NW, 6=N, 7=NE.
  * <p>
  * Matching variants — reversed stroke order, and every starting corner for a closed shape —
@@ -29,7 +29,20 @@ public enum GestureType {
 
     LINE_DOWN("line_down", "2", false, new float[][]{{0.5f, 0f}, {0.5f, 1f}}),
 
-    TRIANGLE("triangle", "305", true, new float[][]{{0.5f, 0f}, {0f, 1f}, {1f, 1f}, {0.5f, 0f}});
+    CARET("caret", "71", false, new float[][]{{0f, 1f}, {0.5f, 0f}, {1f, 1f}}),
+
+    TRIANGLE("triangle", "305", true, new float[][]{{0.5f, 0f}, {0f, 1f}, {1f, 1f}, {0.5f, 0f}}),
+
+    SQUARE("square", "0246", true, new float[][]{
+            {0f, 0f}, {1f, 0f}, {1f, 1f}, {0f, 1f}, {0f, 0f}
+    }),
+
+    HOOK("hook", "20", false, new float[][]{{0.2f, 0f}, {0.2f, 1f}, {1f, 1f}}),
+
+    ARC("arc", "01234", false, new float[][]{
+            {0f, 0f}, {0.5f, 0.067f}, {0.866f, 0.25f}, {1f, 0.5f},
+            {0.866f, 0.75f}, {0.5f, 0.933f}, {0f, 1f}
+    });
 
     private final String id;
     private final float[][] preview;
@@ -78,7 +91,9 @@ public enum GestureType {
         return variants;
     }
 
-    /** Scaled into a size×size box. */
+    /**
+     * Scaled into a size×size box.
+     */
     public void drawPreview(GuiGraphicsExtractor graphics, int x, int y, int size, int color) {
         for (int i = 1; i < preview.length; i++) {
             EffectPaint.line(graphics,
