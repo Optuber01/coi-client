@@ -612,8 +612,8 @@ signs that must be drawn away from or toward the ring (the sheet puts a dot at t
 ```
 
 `message` is already localized. On `ok` the canvas closes after a moment; otherwise it jumps to
-`layer` (0-based, -1 for none). A result with an empty `session` (the server has none for us) is
-still shown on the open canvas.
+`layer` (0-based, -1 for none). A result is shown only on the canvas whose `session` it names
+exactly; results with any other or an empty `session` are ignored.
 
 ### `coi-client:appearance`
 

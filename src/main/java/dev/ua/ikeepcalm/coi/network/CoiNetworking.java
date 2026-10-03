@@ -143,9 +143,9 @@ public class CoiNetworking {
 
     /**
      * Drawing magic: an {@code open} replaces whatever screen is up with a
-     * fresh canvas; a {@code result} goes to the canvas it answers. A result
-     * with an empty session is the server saying it has no session for us
-     * (it restarted, say), which the open canvas still needs to hear.
+     * fresh canvas; a {@code result} goes only to the canvas whose session id
+     * it names exactly, so a late answer never lands on a newer canvas. The
+     * server echoes the submitted id even when it has no session for us.
      */
     private static void handleGlyph(String json) {
         try {
@@ -157,7 +157,7 @@ public class CoiNetworking {
                 if (sheet != null) client.gui.setScreen(new GlyphCanvasScreen(sheet));
             } else if ("result".equals(type) && client.gui.screen() instanceof GlyphCanvasScreen canvas) {
                 String session = JsonRead.string(root, "session", "");
-                if (!session.isEmpty() && !session.equals(canvas.session())) return;
+                if (session.isEmpty() || !session.equals(canvas.session())) return;
                 canvas.showResult(JsonRead.bool(root, "ok"), JsonRead.string(root, "message", ""),
                         JsonRead.intOf(root, "layer", -1));
             }
